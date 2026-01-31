@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MicroVest - Pelaburan Pintar</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js"></script>
+</head>
+<body>
+
+<div class="app-shell">
+    <section id="login-page" class="page active">
+        <div class="auth-header">
+            <div class="brand-icon">M</div>
+            <h1>Micro<span>Vest</span></h1>
+            <p>Selamat kembali! Sila log masuk.</p>
+        </div>
+        
+        <div class="form-group">
+            <div class="input-wrapper">
+                <i class="fas fa-user"></i>
+                <input type="text" id="login-username" placeholder="Username">
+            </div>
+            <div class="input-wrapper">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="login-password" placeholder="Kata Laluan">
+            </div>
+            <button class="btn-main" onclick="handleSignIn()">Log Masuk</button>
+            <p class="footer-link">Tiada akaun? <span onclick="showPage('register-page')">Daftar sekarang</span></p>
+        </div>
+    </section>
+
+    <section id="register-page" class="page">
+        <div class="auth-header">
+            <div class="brand-icon reg">M</div>
+            <h1>Sertai Kami</h1>
+            <p>Mula melabur dengan serendah RM5.</p>
+        </div>
+
+        <div class="form-group">
+            <div class="input-wrapper">
+                <i class="fas fa-user-plus"></i>
+                <input type="text" id="reg-username" placeholder="Pilih Username">
+            </div>
+            <div class="input-wrapper">
+                <i class="fas fa-key"></i>
+                <input type="password" id="reg-password" placeholder="Cipta Kata Laluan">
+            </div>
+            <button class="btn-main btn-reg" onclick="handleSignUp()">Daftar Akaun</button>
+            <p class="footer-link">Sudah ada akaun? <span onclick="showPage('login-page')">Log masuk di sini</span></p>
+        </div>
+    </section>
+
+    <section id="home-page" class="page">
+        <nav class="top-nav">
+            <div class="profile-info">
+                <div class="avatar"><i class="fas fa-user-circle"></i></div>
+                <span id="user-display-name">User</span>
+            </div>
+            <button class="btn-logout" onclick="handleLogout()"><i class="fas fa-power-off"></i></button>
+        </nav>
+
+        <div class="main-card">
+            <p>Jumlah Baki</p>
+            <h2 id="balance-amount">RM 0.00</h2>
+            <div class="card-wave"></div>
+        </div>
+
+        <div class="quick-actions">
+            <div class="action-item"><div class="icon-box"><i class="fas fa-wallet"></i></div><span>Deposit</span></div>
+            <div class="action-item"><div class="icon-box"><i class="fas fa-hand-holding-usd"></i></div><span>Keluarkan</span></div>
+            <div class="action-item"><div class="icon-box"><i class="fas fa-chart-line"></i></div><span>Rekod</span></div>
+            <div class="action-item"><div class="icon-box"><i class="fas fa-users"></i></div><span>Team</span></div>
+        </div>
+
+        <div class="investment-section">
+            <h3>Pakej Pelaburan</h3>
+            <div class="plan-item">
+                <div class="plan-details">
+                    <h4>Pakej Starter</h4>
+                    <span>Profit 10% Setiap Hari</span>
+                </div>
+                <div class="plan-price">RM 5.00</div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

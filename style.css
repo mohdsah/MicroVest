@@ -1,0 +1,48 @@
+:root { --blue: #3b82f6; --dark: #1e293b; --white: #ffffff; }
+body { background: #f1f5f9; margin: 0; font-family: sans-serif; display: flex; justify-content: center; }
+.app-container { width: 100%; max-width: 450px; background: white; min-height: 100vh; position: relative; }
+.page { display: none; padding: 25px; }
+.page.active { display: block; }
+
+/* Logo Section */
+.logo-container { text-align: center; margin-bottom: 40px; margin-top: 60px; }
+.logo-icon { width: 60px; height: 60px; background: var(--blue); color: white; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: bold; margin: 0 auto; box-shadow: 0 5px 15px rgba(59,130,246,0.3); }
+.logo-text { font-size: 24px; font-weight: 800; color: var(--dark); margin-top: 10px; }
+.logo-text span { color: var(--blue); }
+
+/* Inputs & Buttons */
+input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+.btn-primary { width: 100%; padding: 14px; background: var(--blue); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+.btn-secondary { width: 100%; padding: 12px; background: none; color: var(--dark); border: none; font-weight: 500; cursor: pointer; margin-top: 10px; text-decoration: underline; }
+
+/* Header & Balance */
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.logout-icon { background: none; border: none; color: red; font-size: 20px; }
+.balance-card { background: var(--blue); color: white; padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 10px 20px rgba(59,130,246,0.2); }
+
+/* Grid Actions */
+.action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 25px 0; }
+.action-btn { text-align: center; font-size: 11px; font-weight: bold; color: var(--dark); }
+.action-btn i { width: 45px; height: 45px; background: #eff6ff; color: var(--blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; font-size: 18px; }
+
+.plan-card { border: 1px solid #e2e8f0; padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.plan-card button { background: var(--dark); color: white; border: none; padding: 8px 15px; border-radius: 20px; font-size: 12px; }
+
+/* Tambah dalam style.css sedia ada */
+.switch-text {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.switch-text span {
+    color: var(--blue);
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.auth-box {
+    padding: 0 10px;
+}
