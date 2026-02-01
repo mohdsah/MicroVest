@@ -1,4 +1,4 @@
-/* 1. Tetapan Asas & Warna */
+/* 1. TETAPAN ASAS */
 :root {
     --primary: #2563eb;
     --primary-dark: #1e40af;
@@ -8,6 +8,7 @@
     --text-main: #1e293b;
     --text-muted: #64748b;
     --white: #ffffff;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 * {
@@ -18,125 +19,38 @@
 }
 
 body {
-    background-color: #e2e8f0;
+    background-color: #f1f5f9;
     display: flex;
     justify-content: center;
     min-height: 100vh;
+    padding-bottom: 80px; /* Ruang untuk Bottom Nav */
 }
 
-/* 2. Bekas Aplikasi (App Shell) */
+/* 2. APP SHELL (Mobile View) */
 .app-shell {
     width: 100%;
-    max-width: 450px; /* Saiz telefon pintar */
+    max-width: 450px;
     background: var(--white);
     min-height: 100vh;
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
     position: relative;
     padding: 20px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.05);
 }
 
-/* 3. Gaya Halaman & Animasi */
-.page {
-    animation: fadeIn 0.4s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* 4. Reka Bentuk Header & Logo */
-.auth-header {
-    text-align: center;
-    margin: 50px 0 30px;
-}
-
-.brand-icon {
-    width: 70px;
-    height: 70px;
-    background: linear-gradient(135deg, var(--primary), #60a5fa);
-    color: white;
-    font-size: 32px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 18px;
-    margin: 0 auto 15px;
-    box-shadow: 0 10px 15px rgba(37, 99, 235, 0.2);
-}
-
-.brand-icon.reg { background: linear-gradient(135deg, var(--success), #34d399); }
-
-h1 { font-size: 26px; color: var(--text-main); margin-bottom: 5px; }
-h1 span { color: var(--primary); }
-.auth-header p { color: var(--text-muted); font-size: 14px; }
-
-/* 5. Input & Butang */
-.form-group {
-    margin-top: 20px;
-}
-
-input {
-    width: 100%;
-    padding: 15px;
-    margin-bottom: 15px;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 12px;
-    background: #f8fafc;
-    font-size: 16px;
-    transition: 0.3s;
-}
-
-input:focus {
-    outline: none;
-    border-color: var(--primary);
-    background: white;
-}
-
-.btn-main {
-    width: 100%;
-    padding: 16px;
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 16px;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
-}
-
-.btn-main:active { transform: scale(0.98); }
-.btn-reg { background: var(--success); }
-
-.footer-link {
-    text-align: center;
-    margin-top: 25px;
-    font-size: 14px;
-    color: var(--text-muted);
-}
-
-.footer-link a {
-    color: var(--primary);
-    text-decoration: none;
-    font-weight: 700;
-}
-
-/* 6. Dashboard Styles */
+/* 3. HEADER & TOP NAV */
 .top-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #f1f5f9;
     margin-bottom: 20px;
 }
 
-#user-display-name {
+.profile-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     font-weight: 700;
     color: var(--text-main);
-    font-size: 16px;
 }
 
 .btn-logout {
@@ -144,43 +58,64 @@ input:focus {
     color: var(--danger);
     border: none;
     padding: 8px 12px;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
 }
 
+/* 4. MAIN BALANCE CARD */
 .main-card {
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    padding: 25px;
-    border-radius: 20px;
+    padding: 30px;
+    border-radius: 24px;
     color: white;
     box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
     margin-bottom: 25px;
+    position: relative;
+    overflow: hidden;
 }
 
-.main-card p { opacity: 0.8; font-size: 13px; margin-bottom: 5px; }
-.main-card h2 { font-size: 32px; letter-spacing: 1px; }
+.main-card p {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 8px;
+}
 
+.main-card h2 {
+    font-size: 36px;
+    font-weight: 800;
+}
+
+/* 5. GRID MENU (Icon Actions) */
 .quick-actions {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 15px;
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 20px;
+    margin-bottom: 25px;
 }
 
 .action-item {
-    background: #f1f5f9;
-    padding: 15px;
-    border-radius: 15px;
     text-align: center;
     cursor: pointer;
-    transition: 0.2s;
+    transition: transform 0.2s;
 }
 
-.action-item:hover { background: #e2e8f0; }
+.action-item:active { transform: scale(0.95); }
 
 .icon-box {
-    font-size: 20px;
+    width: 50px;
+    height: 50px;
+    background: white;
     color: var(--primary);
-    margin-bottom: 5px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px;
+    font-size: 20px;
+    box-shadow: var(--shadow);
 }
 
 .action-item span {
@@ -189,34 +124,91 @@ input:focus {
     color: var(--text-main);
 }
 
-/* Profile Menu Styles */
-.profile-menu {
-    margin-top: 20px;
-}
-
-.menu-item {
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    background: #f8fafc;
-    border-radius: 12px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.menu-item:hover {
-    background: #f1f5f9;
-}
-
-.menu-item i {
-    width: 30px;
-    color: var(--primary);
+/* 6. PRODUCT LIST STYLES */
+.investment-section h3 {
     font-size: 18px;
+    margin-bottom: 15px;
+    color: var(--text-main);
 }
 
-.menu-item span {
-    font-size: 14px;
-    color: var(--text-main);
-    font-weight: 500;
+.plan-item {
+    background: var(--white);
+    border: 1px solid #f1f5f9;
+    padding: 15px;
+    border-radius: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
+
+.plan-details h4 { font-size: 16px; margin-bottom: 4px; }
+.profit-tag { font-size: 12px; color: var(--success); font-weight: 700; }
+
+.plan-price-box { text-align: right; }
+.price { display: block; font-weight: 800; color: var(--primary); font-size: 16px; margin-bottom: 5px; }
+
+.plan-item button, .btn-main {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/* 7. BOTTOM NAVIGATION */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 450px;
+    height: 70px;
+    background: var(--white);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid #f1f5f9;
+    box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+    z-index: 1000;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.nav-item i {
+    font-size: 22px;
+    margin-bottom: 4px;
+}
+
+.nav-item.active {
+    color: var(--primary);
+}
+
+/* 8. AUTH PAGES (Login/Register) */
+.auth-header { text-align: center; margin-top: 40px; margin-bottom: 30px; }
+.brand-icon { 
+    width: 60px; height: 60px; background: var(--primary); color: white; 
+    border-radius: 15px; display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 15px; font-size: 24px; font-weight: 800;
+}
+
+input {
+    width: 100%; padding: 15px; margin-bottom: 15px;
+    border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc;
+}
+
+.footer-link { text-align: center; margin-top: 20px; font-size: 14px; color: var(--text-muted); }
+.footer-link a { color: var(--primary); text-decoration: none; font-weight: 700; }
