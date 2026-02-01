@@ -17,32 +17,94 @@
         </div>
 
         <div class="wallet-actions">
-            <button class="btn-recharge"><i class="fas fa-wallet"></i> Recharge</button>
-            <button class="btn-withdraw"><i class="fas fa-money-bill-wave"></i> Withdraws</button>
+            <button class="btn-wallet-action" onclick="window.location.href='recharge.html'">
+                <i class="fas fa-wallet"></i> Recharge
+            </button>
+            <button class="btn-wallet-action" onclick="window.location.href='withdraw.html'">
+                <i class="fas fa-money-bill-wave"></i> Withdraws
+            </button>
         </div>
 
         <div class="stats-card">
             <div class="stats-grid">
-                <div class="stat-box"><h4>0.00</h4><p>Recharge wallet</p></div>
-                <div class="stat-box"><h4 id="balance-amount">0.00</h4><p>Balance wallet</p></div>
-                <div class="stat-box"><h4>0.00</h4><p>Total earnings</p></div>
-                <div class="stat-box"><h4>0.00</h4><p>Total withdrawals</p></div>
+                <div class="stat-box">
+                    <p>Recharge wallet</p>
+                    <h4>0.00</h4>
+                </div>
+                <div class="stat-box">
+                    <p>Balance wallet</p>
+                    <h4 id="balance-amount">0.00</h4>
+                </div>
+                <div class="stat-box">
+                    <p>Total earnings</p>
+                    <h4>0.00</h4>
+                </div>
+                <div class="stat-box">
+                    <p>Total withdrawals</p>
+                    <h4>0.00</h4>
+                </div>
             </div>
         </div>
 
-        <div class="icon-menu-list">
-            <div class="icon-item"><i class="fas fa-receipt"></i><span>Funding details</span></div>
-            <div class="icon-item"><i class="fas fa-users"></i><span>My teams</span></div>
-            <div class="icon-item"><i class="fas fa-university"></i><span>Bank account</span></div>
-            <div class="icon-item"><i class="fas fa-lock"></i><span>Password</span></div>
+        <div class="icon-menu-container">
+            <div class="menu-list-item" onclick="window.location.href='funding.html'">
+                <div class="menu-left">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>Funding details</span>
+                </div>
+                <i class="fas fa-chevron-right arrow-icon"></i>
+            </div>
+
+            <div class="menu-list-item" onclick="window.location.href='team.html'">
+                <div class="menu-left">
+                    <i class="fas fa-users"></i>
+                    <span>My teams</span>
+                </div>
+                <i class="fas fa-chevron-right arrow-icon"></i>
+            </div>
+
+            <div class="menu-list-item" onclick="window.location.href='bank.html'">
+                <div class="menu-left">
+                    <i class="fas fa-university"></i>
+                    <span>Bank account</span>
+                </div>
+                <i class="fas fa-chevron-right arrow-icon"></i>
+            </div>
+
+            <div class="menu-list-item" onclick="window.location.href='password.html'">
+                <div class="menu-left">
+                    <i class="fas fa-lock"></i>
+                    <span>Password</span>
+                </div>
+                <i class="fas fa-chevron-right arrow-icon"></i>
+            </div>
+            
+            <div class="menu-list-item">
+                <div class="menu-left">
+                    <i class="fas fa-globe"></i>
+                    <span>English</span>
+                </div>
+                <i class="fas fa-chevron-right arrow-icon"></i>
+            </div>
         </div>
 
-        <button class="btn-signout" onclick="handleLogout()">Sign out</button>
+        <div style="padding: 0 20px 30px 20px;">
+            <button class="btn-signout-full" onclick="handleLogout()">Sign out</button>
+        </div>
 
         <div class="bottom-nav">
-            <a href="dashboard.html" class="nav-link"><i class="fas fa-home"></i><span>Home</span></a>
-            <a href="product_list.html" class="nav-link"><i class="fas fa-box"></i><span>Product</span></a>
-            <a href="profile.html" class="nav-link active"><i class="fas fa-user"></i><span>Me</span></a>
+            <a href="dashboard.html" class="nav-link">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="product_list.html" class="nav-link">
+                <i class="fas fa-box"></i>
+                <span>Product</span>
+            </a>
+            <a href="profile.html" class="nav-link active">
+                <i class="fas fa-user"></i>
+                <span>Me</span>
+            </a>
         </div>
     </div>
     <script src="app.js"></script>
