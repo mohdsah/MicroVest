@@ -80,50 +80,74 @@
 
     <script src="app.js"></script>
     <script>
-        async function purchase(price, name) {
-            const { data: { user } } = await client.auth.getUser();
-            
-            if (!user) {
-                alert("Sila log masuk terlebih dahulu.");
-                window.location.href = 'login.html';
-                return;
+async function buyProduct(planName, price, dailyProfit) {
+    // 1. Dapatkan user semasa
+    const { data: { user } } = await client.auth.getUser();
+    
+    if (!user) {
+        alert("Sila log masuk terlebih dahulu.");
+        window.location.href = 'login.html';
+        return;
+    }
+
+    // 2. Sahkan pembelian
+    if (!confirm(`Adakah anda pasti mahu melabur dalam ${planName} (RM ${price})?`)) {
+        return;
+    }
+
+    // 3. Semak baki pengguna di table 'profiles'
+    const { data: profile, error: profileErr } = await client
+        .from('profiles')
+        .select('balance')
+        .eq('id', user.id)
+        .single();
+
+    if (profileErr || !profile) {
+        alert("Ralat mendapatkan data profil.");
+        return;
+    }
+
+    if (profile.balance < price) {
+        alert("Baki anda tidak mencukupi (RM " + profile.balance.toFixed(2) + "). Sila topup dahulu.");
+        window.location.href = 'recharge.html';
+        return;
+    }
+
+    // 4. Proses Pembelian
+    const newBalance = profile.balance - price;
+
+    // A. Tolak baki pengguna
+    const { error: updateErr } = await client
+        .from('profiles')
+        .update({ balance: newBalance })
+        .eq('id', user.id);
+
+    if (updateErr) {
+        alert("Gagal mengemaskini baki.");
+        return;
+    }
+
+    // B. Masukkan rekod pelaburan baharu
+    const { error: investErr } = await client
+        .from('user_investments')
+        .insert([
+            { 
+                user_id: user.id, 
+                plan_name: planName, 
+                daily_profit: dailyProfit, 
+                status: 'active',
+                last_claim: new Date() // Set waktu sekarang sebagai permulaan
             }
+        ]);
 
-            // 1. Ambil baki semasa pengguna
-            const { data: profile, error: fetchError } = await client
-                .from('profiles')
-                .select('balance')
-                .eq('id', user.id)
-                .single();
+    if (investErr) {
+        alert("Baki ditolak tetapi gagal mendaftar pelaburan. Sila hubungi Admin.");
+    } else {
+        alert("Pembelian Berjaya! Sila semak di halaman Dashboard atau Mining.");
+        window.location.href = 'dashboard.html';
+    }
+}
+</script>
 
-            if (fetchError || !profile) {
-                alert("Ralat mengambil data akaun.");
-                return;
-            }
-
-            // 2. Semak baki cukup atau tidak
-            if (profile.balance < price) {
-                alert("Baki tidak mencukupi! Sila deposit terlebih dahulu.");
-                return;
-            }
-
-            // 3. Tolak baki dan rekod pembelian (Logik Ringkas)
-            if (confirm(`Adakah anda pasti mahu melabur dalam ${name} bernilai RM ${price}?`)) {
-                const newBalance = profile.balance - price;
-                
-                const { error: updateError } = await client
-                    .from('profiles')
-                    .update({ balance: newBalance })
-                    .eq('id', user.id);
-
-                if (updateError) {
-                    alert("Gagal melakukan transaksi.");
-                } else {
-                    alert(`Pelaburan ${name} Berjaya! Baki baru: RM ${newBalance.toFixed(2)}`);
-                    window.location.reload();
-                }
-            }
-        }
-    </script>
 </body>
 </html>
