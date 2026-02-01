@@ -3,91 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MicroVest - Home</title>
+    <title>Dashboard - MicroVest</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
     <div class="app-shell">
-        <div class="main-banner">
-    <img src="https://raw.githubusercontent.com/mohdsah/MicroVest/main/1769960974926.png" alt="Banner MicroVest">
-    <div class="banner-overlay">
-    </div>
-</div>
+        <div class="top-nav">
+            <div class="profile-info">
+                <div class="user-avatar" id="userInitial">U</div>
+                <div>
+                    <span style="display: block; font-size: 12px; color: var(--text-muted); font-weight: 400;">Selamat Kembali,</span>
+                    <span id="displayEmail" style="font-size: 14px;">Memuatkan...</span>
+                </div>
+            </div>
+            <button class="btn-logout" onclick="handleLogout()" title="Log Keluar">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
 
-
-        <div class="grid-menu-container">
-            <div class="menu-grid">
-                <div class="menu-item" onclick="window.location.href='product_list.html'">
-                    <i class="fas fa-shopping-bag"></i>
-                    <span>My product</span>
-                </div>
-                <div class="menu-item" onclick="window.location.href='invitation.html'">
-    <i class="fas fa-user-plus"></i>
-    <span>Invitation</span>
-</div>
-                <div class="menu-item">
-                    <i class="fas fa-download"></i>
-                    <span>App Download</span>
-                </div>
-                <div class="menu-item">
-                    <i class="fas fa-gift"></i>
-                    <span>Redeem bonus</span>
-                </div>
-                <div class="menu-item" onclick="window.location.href='team.html'">
-    <i class="fas fa-users"></i>
-    <span>My teams</span>
-</div>
-
-                <div class="menu-item">
-                    <i class="fas fa-headset"></i>
-                    <span>Online</span>
-                </div>
+        <div class="main-card">
+            <p><i class="fas fa-wallet"></i> Jumlah Baki Anda</p>
+            <h2 id="userBalance">RM 0.00</h2>
+            <div style="margin-top: 15px; font-size: 12px; background: rgba(255,255,255,0.2); display: inline-block; padding: 5px 12px; border-radius: 20px;">
+                Status: Pelabur Aktif
             </div>
         </div>
 
-        <div class="salary-section">
-            <div class="section-header">
-                <span>Weekly Salary</span>
-                <i class="far fa-question-circle"></i>
+        <div class="quick-actions">
+            <div class="action-item" onclick="location.href='recharge.html'">
+                <div class="icon-box"><i class="fas fa-plus-circle"></i></div>
+                <span>Deposit</span>
             </div>
-            
-            <div class="reward-row">
-                <div class="reward-icon">🪙 +20</div>
-                <div class="progress-container"><div class="progress-bar" style="width: 10%;"></div></div>
-                <span class="progress-text">0/3</span>
-                <button class="btn-receive">Receive</button>
+            <div class="action-item" onclick="location.href='withdraw.html'">
+                <div class="icon-box"><i class="fas fa-hand-holding-usd"></i></div>
+                <span>Keluarkan</span>
             </div>
-            <div class="reward-row">
-                <div class="reward-icon">🪙 +40</div>
-                <div class="progress-container"><div class="progress-bar" style="width: 0%;"></div></div>
-                <span class="progress-text">0/5</span>
-                <button class="btn-receive" disabled>Receive</button>
+            <div class="action-item" onclick="location.href='team.html'">
+                <div class="icon-box"><i class="fas fa-users"></i></div>
+                <span>Pasukan</span>
             </div>
         </div>
 
-        <div class="bottom-nav">
-            <a href="dashboard.html" class="nav-link active">
+        <div class="main-banner" style="margin-bottom: 25px;">
+            <img src="https://raw.githubusercontent.com/mohdsah/MicroVest/main/1769960974926.png" 
+                 alt="Promo Banner" 
+                 style="border-radius: var(--radius-md); box-shadow: var(--shadow);">
+        </div>
+
+        <div class="investment-section">
+            <h3>Ringkasan Aktiviti</h3>
+            <div class="reward-row">
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: 70%;"></div>
+                </div>
+                <span style="font-size: 11px; font-weight: bold; color: var(--primary);">70% Goal</span>
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted); text-align: center;">Tingkatkan pelaburan untuk lebih banyak keuntungan.</p>
+        </div>
+
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="nav-item active">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
-            <a href="product_list.html" class="nav-link">
-                <i class="fas fa-box"></i>
-                <span>Product</span>
+            <a href="product_list.html" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Produk</span>
             </a>
-            <a href="profile.html" class="nav-link">
-                <i class="fas fa-user"></i>
-                <span>Me</span>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user-circle"></i>
+                <span>Profil</span>
             </a>
-        </div>
+        </nav>
     </div>
+
     <script src="app.js"></script>
+    <script>
+        async function loadDashboardData() {
+            // Semak jika pengguna log masuk
+            const { data: { user } } = await client.auth.getUser();
+            
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Papar emel dan initial
+            document.getElementById('displayEmail').innerText = user.email;
+            document.getElementById('userInitial').innerText = user.email.charAt(0).toUpperCase();
+
+            // Ambil baki dari table 'profiles' (Pastikan anda ada table ini di Supabase)
+            const { data, error } = await client
+                .from('profiles')
+                .select('balance')
+                .eq('id', user.id)
+                .single();
+
+            if (data) {
+                document.getElementById('userBalance').innerText = `RM ${data.balance.toFixed(2)}`;
+            }
+        }
+
+        window.onload = loadDashboardData;
+    </script>
 </body>
 </html>
-
-
-
-
-
-
