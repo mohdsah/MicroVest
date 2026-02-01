@@ -3,25 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MicroVest - Log Masuk</title>
+    <title>MicroVest - Memuatkan...</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
-    <div class="app-shell">
-        <div class="auth-header">
-            <div class="brand-icon">M</div>
-            <h1>Micro<span>Vest</span></h1>
-            <p>Sila log masuk ke akaun anda</p>
-        </div>
-        
-        <div class="form-group">
-            <input type="text" id="login-username" placeholder="Username">
-            <input type="password" id="login-password" placeholder="Kata Laluan">
-            <button class="btn-main" onclick="handleSignIn()">Log Masuk</button>
-            <p class="footer-link">Tiada akaun? <a href="register.html">Daftar sekarang</a></p>
+<body style="background-color: var(--primary);">
+
+    <div class="app-shell" style="display: flex; align-items: center; justify-content: center; background-color: var(--primary);">
+        <div style="text-align: center; color: white;">
+            <div class="brand-icon" style="background: white; color: var(--primary); width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 35px; font-weight: 800; animation: pulse 1.5s infinite;">
+                M
+            </div>
+            <p style="font-size: 14px; opacity: 0.8;">Menyemak status akaun...</p>
         </div>
     </div>
+
+    <style>
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+
     <script src="app.js"></script>
+    <script>
+        async function checkSession() {
+            // Tunggu client Supabase sedia dari app.js
+            const { data: { session }, error } = await client.auth.getSession();
+
+            if (session) {
+                // Jika user dah login, pergi ke Dashboard
+                window.location.href = 'dashboard.html';
+            } else {
+                // Jika belum login, pergi ke Login
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Jalankan semakan sebaik sahaja halaman dimuatkan
+        window.onload = checkSession;
+    </script>
 </body>
 </html>
