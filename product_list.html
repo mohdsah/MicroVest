@@ -1,1 +1,82 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MicroVest - Products</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="app-shell gray-bg">
+        <div class="product-page-header">
+            <h3>Investment Products</h3>
+            <p>Pilih pakej yang sesuai untuk anda</p>
+        </div>
+
+        <div class="product-container">
+            <div class="product-card">
+                <div class="product-image">
+                    <i class="fas fa-microchip"></i>
+                    <span class="badge">Hot</span>
+                </div>
+                <div class="product-info">
+                    <h4>Pakej Starter</h4>
+                    <div class="product-stats">
+                        <div><small>Daily Profit</small><p>RM 0.50</p></div>
+                        <div><small>Price</small><p>RM 5.00</p></div>
+                    </div>
+                    <button class="btn-buy-now" onclick="window.location.href='starter.html'">Sertai Sekarang</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="product-image">
+                    <i class="fas fa-bolt"></i>
+                    <span class="badge red">Popular</span>
+                </div>
+                <div class="product-info">
+                    <h4>Pakej Pro</h4>
+                    <div class="product-stats">
+                        <div><small>Daily Profit</small><p>RM 6.00</p></div>
+                        <div><small>Price</small><p>RM 50.00</p></div>
+                    </div>
+                    <button class="btn-buy-now" onclick="window.location.href='pro.html'">Sertai Sekarang</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="product-image">
+                    <i class="fas fa-gem"></i>
+                </div>
+                <div class="product-info">
+                    <h4>Pakej VIP</h4>
+                    <div class="product-stats">
+                        <div><small>Daily Profit</small><p>RM 15.00</p></div>
+                        <div><small>Price</small><p>RM 100.00</p></div>
+                    </div>
+                    <button class="btn-buy-now" onclick="alert('Akan datang!')">Sertai Sekarang</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <a href="dashboard.html" class="nav-link">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="product_list.html" class="nav-link active">
+                <i class="fas fa-box"></i>
+                <span>Product</span>
+            </a>
+            <a href="profile.html" class="nav-link">
+                <i class="fas fa-user"></i>
+                <span>Me</span>
+            </a>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
 
