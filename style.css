@@ -497,4 +497,12 @@ input {
 }
 
 
+/* Tambah ini jika belum ada dalam style.css */
+.menu-list-item:active {
+    transform: scale(0.98);
+    transition: 0.2s;
+}
+
+
+
 
