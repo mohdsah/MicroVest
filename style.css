@@ -212,3 +212,54 @@ input {
 
 .footer-link { text-align: center; margin-top: 20px; font-size: 14px; color: var(--text-muted); }
 .footer-link a { color: var(--primary); text-decoration: none; font-weight: 700; }
+
+
+/* Gaya Profile Red Header */
+.profile-red-header {
+    background: #b22222;
+    color: white;
+    text-align: center;
+    padding: 40px 20px;
+    border-radius: 0 0 30px 30px;
+}
+
+.user-avatar {
+    width: 60px; height: 60px; background: white; color: #b22222;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 10px; font-weight: bold; font-size: 24px;
+}
+
+/* Wallet Buttons */
+.wallet-actions {
+    display: flex; gap: 10px; padding: 0 20px; margin-top: -25px;
+}
+
+.btn-recharge, .btn-withdraw {
+    flex: 1; padding: 15px; border-radius: 12px; border: none;
+    font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-recharge { background: white; color: black; }
+.btn-withdraw { background: white; color: black; }
+
+/* Grid Stats */
+.stats-card { background: white; margin: 20px; padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: center; }
+.stat-box h4 { font-size: 18px; margin-bottom: 5px; }
+.stat-box p { font-size: 12px; color: #666; }
+
+/* Grid Menu di Home */
+.grid-menu-container { padding: 15px; margin-top: -30px; position: relative; z-index: 10; }
+.menu-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); background: white;
+    padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); gap: 15px;
+}
+.menu-item { text-align: center; font-size: 11px; color: #333; font-weight: 500; }
+.menu-item i { display: block; font-size: 22px; color: #333; margin-bottom: 8px; }
+
+/* Progress Bar Style */
+.reward-row { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; background: #f9f9f9; padding: 10px; border-radius: 10px; }
+.progress-container { flex: 1; height: 8px; background: #ddd; border-radius: 10px; }
+.progress-bar { height: 100%; background: #b22222; border-radius: 10px; }
+.btn-receive { background: #ccc; border: none; padding: 5px 10px; border-radius: 15px; font-size: 10px; }
