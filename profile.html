@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Saya - MicroVest</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="app-shell">
+        <nav class="top-nav">
+            <a href="dashboard.html" style="color: var(--text-main); text-decoration: none;">
+                <i class="fas fa-arrow-left"></i> Kembali
+            </a>
+            <h3 style="font-size: 16px;">Profil Pengguna</h3>
+            <div style="width: 24px;"></div> </nav>
+
+        <div class="profile-header" style="text-align: center; margin-bottom: 30px;">
+            <div class="brand-icon" style="margin-bottom: 10px;">
+                <i class="fas fa-user"></i>
+            </div>
+            <h2 id="profile-username">Memuatkan...</h2>
+            <p id="profile-status" style="color: var(--success); font-weight: bold; font-size: 14px;">Akaun Aktif</p>
+        </div>
+
+        <div class="profile-menu">
+            <div class="menu-item">
+                <i class="fas fa-envelope"></i>
+                <span>ID Pengguna: <b id="profile-id">...</b></span>
+            </div>
+            <div class="menu-item" onclick="alert('Fungsi Tukar Password akan datang')">
+                <i class="fas fa-lock"></i>
+                <span>Tukar Kata Laluan</span>
+            </div>
+            <div class="menu-item" onclick="alert('Sila hubungi Admin untuk bantuan')">
+                <i class="fas fa-headset"></i>
+                <span>Hubungi Bantuan</span>
+            </div>
+            <div class="menu-item" onclick="handleLogout()" style="color: var(--danger);">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Log Keluar Akaun</span>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+    <script>
+        // Jalankan fungsi semakan profil apabila halaman dibuka
+        window.onload = function() {
+            loadUserProfile();
+        };
+
+        async function loadUserProfile() {
+            const { data: { user } } = await client.auth.getUser();
+            if (user) {
+                // Ambil data dari table profiles
+                const { data: profile } = await client.from('profiles').select('*').eq('id', user.id).single();
+                if (profile) {
+                    document.getElementById('profile-username').innerText = profile.email; // Username disimpan di kolum email
+                    document.getElementById('profile-id').innerText = profile.id.substring(0, 8); // Tunjuk 8 digit awal ID
+                }
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>
