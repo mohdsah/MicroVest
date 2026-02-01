@@ -1,139 +1,55 @@
-/* --- 1. ASAS & WARNA --- */
+/* --- TEMA UTAMA --- */
 :root {
-    --primary-maroon: #800000;
-    --dark-maroon: #4a0000;
-    --gold-card: #b08d57;
+    --maroon: #800000;
+    --dark: #4a0000;
     --white: #ffffff;
-    --text-dark: #333333;
+    --grey: #f4f4f4;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
 
-body {
-    background-color: var(--dark-maroon);
-    display: flex;
-    justify-content: center;
-}
+body { background: var(--dark); display: flex; justify-content: center; }
 
 .app-shell {
-    width: 100%;
-    max-width: 450px;
-    background-color: var(--primary-maroon);
-    min-height: 100vh;
-    padding-bottom: 80px;
-    color: var(--white);
+    width: 100%; max-width: 450px; min-height: 100vh;
+    background: var(--maroon); position: relative; padding-bottom: 80px;
 }
 
-/* --- 2. GAYA BORANG (LOGIN & REGISTER) --- */
-/* Membetulkan susunan input yang berterabur dalam gambar */
-.auth-container {
-    padding: 60px 30px;
-    text-align: center;
+/* --- AUTH (Login/Register) --- */
+.auth-box { padding: 50px 20px; text-align: center; color: white; }
+.auth-box input {
+    width: 100%; padding: 15px; margin: 10px 0; 
+    border-radius: 25px; border: none; outline: none;
+}
+.btn-submit {
+    width: 100%; padding: 15px; border-radius: 25px; border: none;
+    background: var(--white); color: var(--maroon); font-weight: bold; margin-top: 10px;
 }
 
-.auth-logo {
-    width: 80px; height: 80px; background: var(--white);
-    color: var(--primary-maroon); border-radius: 20px;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 20px; font-size: 35px; font-weight: bold;
-}
-
-.form-group { margin-bottom: 15px; }
-
-input {
-    width: 100%;
-    padding: 15px;
-    border-radius: 25px; /* Bentuk bulat seperti dalam */
-    border: none;
-    font-size: 14px;
-    outline: none;
-}
-
-.btn-auth {
-    width: 100%;
-    padding: 15px;
-    background: var(--white);
-    color: var(--primary-maroon);
-    border: none;
-    border-radius: 25px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-/* --- 3. GAYA KAD PRODUK --- */
-/* Membetulkan teks hitam bertindih pada latar merah */
-.product-container { padding: 20px; }
-
+/* --- PRODUCT CARD --- */
 .product-card {
-    background: var(--white);
-    border-radius: 20px;
-    padding: 20px;
-    margin-bottom: 20px;
-    color: var(--text-dark);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    background: var(--white); margin: 15px; padding: 20px;
+    border-radius: 15px; color: #333; display: flex;
+    justify-content: space-between; align-items: center;
 }
-
-.product-info h3 { font-size: 18px; color: var(--primary-maroon); }
-.product-info p { font-size: 13px; margin: 5px 0; }
-
 .btn-buy {
-    background: var(--primary-maroon);
-    color: var(--white);
-    padding: 8px 15px;
-    border-radius: 10px;
-    border: none;
-    font-weight: bold;
+    background: var(--maroon); color: white; padding: 10px 15px;
+    border-radius: 8px; border: none; font-weight: bold;
 }
 
-/* --- 4. GAYA PROFIL & MENU --- */
-/* Membetulkan menu yang rapat ke kiri dalam */
-.profile-header {
-    padding: 40px 20px;
-    text-align: center;
-}
-
-.info-card-white {
-    background: var(--white);
-    margin: 15px;
-    border-radius: 20px;
-    padding: 20px;
-    color: var(--text-dark);
-}
-
-.menu-list {
-    background: var(--white);
-    margin: 15px;
-    border-radius: 20px;
-    overflow: hidden;
-}
-
+/* --- PROFILE --- */
+.user-info { text-align: center; padding: 30px; color: white; }
+.menu-white { background: white; margin: 15px; border-radius: 15px; overflow: hidden; }
 .menu-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 18px 20px;
-    color: var(--text-dark);
-    text-decoration: none;
-    border-bottom: 1px solid #eee;
+    display: flex; justify-content: space-between; padding: 15px 20px;
+    color: #333; text-decoration: none; border-bottom: 1px solid #eee;
 }
 
-/* --- 5. NAVIGASI BAWAH --- */
+/* --- BOTTOM NAV --- */
 .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    max-width: 450px;
-    height: 70px;
-    background: var(--white);
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    border-top: 1px solid #ddd;
+    position: fixed; bottom: 0; width: 100%; max-width: 450px;
+    height: 70px; background: white; display: flex;
+    justify-content: space-around; align-items: center;
 }
-
-.nav-item { text-align: center; color: #888; text-decoration: none; font-size: 12px; }
-.nav-item.active { color: var(--primary-maroon); }
-.nav-item i { display: block; font-size: 20px; margin-bottom: 3px; }
+.nav-link { text-decoration: none; color: #888; font-size: 12px; text-align: center; }
+.nav-link.active { color: var(--maroon); }
