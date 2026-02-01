@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mining Area - MicroVest</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <div class="app-shell">
+        <div class="product-page-header">
+            <h2>Pusat Kutipan Hasil</h2>
+            <p>Claim untung anda setiap 24 jam</p>
+        </div>
+
+        <div class="product-container" id="miningList">
+            <p style="text-align: center; padding: 50px;">Memuatkan mesin pelaburan...</p>
+        </div>
+
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="mining.html" class="nav-item active"><i class="fas fa-hammer"></i><span>Mining</span></a>
+            <a href="profile.html" class="nav-item"><i class="fas fa-user-circle"></i><span>Profil</span></a>
+        </nav>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        async function loadMining() {
+            const { data: { user } } = await client.auth.getUser();
+            if (!user) return;
+
+            const { data: investments } = await client
+                .from('user_investments')
+                .select('*')
+                .eq('user_id', user.id)
+                .eq('status', 'active');
+
+            const listContainer = document.getElementById('miningList');
+            if (!investments || investments.length === 0) {
+                listContainer.innerHTML = '<p style="text-align: center; padding: 50px;">Tiada mesin aktif.</p>';
+                return;
+            }
+
+            listContainer.innerHTML = '';
+            investments.forEach(item => {
+                const lastClaim = new Date(item.last_claim);
+                const now = new Date();
+                const diffMs = now - lastClaim;
+                const diffHours = diffMs / (1000 * 60 * 60);
+                
+                let statusText = "";
+                let btnDisabled = "";
+                let penaltyText = "";
+                let finalAmount = item.daily_profit;
+
+                if (diffHours < 24) {
+                    const wait = Math.ceil(24 - diffHours);
+                    statusText = `Tunggu ${wait} jam lagi`;
+                    btnDisabled = "disabled style='background: #ccc; cursor: not-allowed;'";
+                } else if (diffHours >= 24 && diffHours <= 26) {
+                    statusText = "Sedia untuk di-claim (Full)";
+                } else {
+                    // Penalti jika lebih 2 jam dari waktu sepatutnya (Jam ke-26 ke atas)
+                    finalAmount = item.daily_profit * 0.8; // Contoh: Potong 20%
+                    statusText = "Kelewatan dikesan! (Penalti 20%)";
+                    penaltyText = "color: var(--danger); font-weight: bold;";
+                }
+
+                listContainer.innerHTML += `
+                    <div class="product-card" style="display: block; padding: 20px;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <h4 style="margin:0;">${item.plan_name}</h4>
+                            <span style="font-size: 12px; ${penaltyText}">RM ${finalAmount.toFixed(2)}</span>
+                        </div>
+                        <p style="font-size: 11px; color: #666; margin: 10px 0;">${statusText}</p>
+                        <button class="btn-buy-now" ${btnDisabled} onclick="processClaim('${item.id}', ${finalAmount})">
+                            CLAIM SEKARANG
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        async function processClaim(id, amount) {
+            const { data: { user } } = await client.auth.getUser();
+            
+            // 1. Ambil baki semasa
+            const { data: profile } = await client.from('profiles').select('balance').eq('id', user.id).single();
+            const newBalance = profile.balance + amount;
+
+            // 2. Update baki & update last_claim ke waktu sekarang
+            const { error: err1 } = await client.from('profiles').update({ balance: newBalance }).eq('id', user.id);
+            const { error: err2 } = await client.from('user_investments').update({ last_claim: new Date() }).eq('id', id);
+
+            if (!err1 && !err2) {
+                alert(`Berjaya claim RM ${amount.toFixed(2)}!`);
+                location.reload();
+            } else {
+                alert("Ralat sistem. Cuba lagi.");
+            }
+        }
+
+        window.onload = loadMining;
+    </script>
+</body>
+</html>
+
