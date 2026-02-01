@@ -3,69 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - MicroVest</title>
+    <title>MicroVest - Home</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div class="app-shell">
-        <nav class="top-nav">
-            <div class="profile-info">
-                <i class="fas fa-wallet" style="color: #2563eb;"></i>
-                <span id="user-display-name">Memuatkan...</span>
+        <div class="main-banner">
+            <img src="https://images.unsplash.com/photo-1611974717483-5828d1d6bd8d?auto=format&fit=crop&w=500&q=80" alt="Banner">
+            <div class="banner-overlay">
+                <h2>MicroVest 23</h2>
+                <p>Masa Depan Pelaburan Anda</p>
             </div>
-            <button class="btn-logout" onclick="handleLogout()"><i class="fas fa-power-off"></i></button>
-        </nav>
-
-        <div class="main-card">
-            <p>Baki Tersedia</p>
-            <h2 id="balance-amount">RM 0.00</h2>
         </div>
 
-        <div class="quick-actions" style="grid-template-columns: repeat(3, 1fr); background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
-            <div class="action-item">
-                <div class="icon-box"><i class="fas fa-shopping-bag"></i></div>
-                <span>Produk</span>
+        <div class="grid-menu-container">
+            <div class="menu-grid">
+                <div class="menu-item" onclick="window.location.href='product_list.html'">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>My product</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Invitation</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-download"></i>
+                    <span>App Download</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-gift"></i>
+                    <span>Redeem bonus</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-users"></i>
+                    <span>My teams</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-headset"></i>
+                    <span>Online</span>
+                </div>
             </div>
-            <div class="action-item">
-                <div class="icon-box"><i class="fas fa-user-plus"></i></div>
-                <span>Jemput</span>
+        </div>
+
+        <div class="salary-section">
+            <div class="section-header">
+                <span>Weekly Salary</span>
+                <i class="far fa-question-circle"></i>
             </div>
-            <div class="action-item">
-                <div class="icon-box"><i class="fas fa-download"></i></div>
-                <span>App</span>
+            
+            <div class="reward-row">
+                <div class="reward-icon">🪙 +20</div>
+                <div class="progress-container"><div class="progress-bar" style="width: 10%;"></div></div>
+                <span class="progress-text">0/3</span>
+                <button class="btn-receive">Receive</button>
             </div>
-            <div class="action-item">
-                <div class="icon-box"><i class="fas fa-gift"></i></div>
-                <span>Bonus</span>
-            </div>
-            <div class="action-item">
-                <div class="icon-box"><i class="fas fa-users"></i></div>
-                <span>Team</span>
-            </div>
-            <div class="action-item">
-                <div class="icon-box"><i class="fas fa-headset"></i></div>
-                <span>Online</span>
+            <div class="reward-row">
+                <div class="reward-icon">🪙 +40</div>
+                <div class="progress-container"><div class="progress-bar" style="width: 0%;"></div></div>
+                <span class="progress-text">0/5</span>
+                <button class="btn-receive" disabled>Receive</button>
             </div>
         </div>
 
         <div class="bottom-nav">
-            <a href="dashboard.html" class="nav-item active">
+            <a href="dashboard.html" class="nav-link active">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
-            <a href="product_list.html" class="nav-item">
+            <a href="product_list.html" class="nav-link">
                 <i class="fas fa-box"></i>
                 <span>Product</span>
             </a>
-            <a href="profile.html" class="nav-item">
+            <a href="profile.html" class="nav-link">
                 <i class="fas fa-user"></i>
                 <span>Me</span>
             </a>
         </div>
     </div>
-
     <script src="app.js"></script>
 </body>
 </html>
