@@ -1,24 +1,63 @@
-<div class="app-shell">
-    <div class="auth-container">
-        <div class="brand-icon">M</div>
-        <h1>Daftar Akaun</h1>
-        <p>Mula melabur dengan MicroVest</p>
-        
-        <form id="registerForm">
-            <div class="form-group">
-                <input type="text" id="regEmail" placeholder="Masukkan Username/Email" required>
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar - MicroVest</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <div class="app-shell" style="background-color: var(--primary);">
+        <div class="auth-container">
+            <div class="brand-icon" style="background: white; color: var(--primary); width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; font-weight: 800; box-shadow: var(--shadow);">
+                M
             </div>
-            <div class="form-group">
-                <input type="password" id="regPassword" placeholder="Cipta Kata Laluan" required>
+
+            <h1 style="color: white; font-size: 28px; margin-bottom: 10px;">Daftar Akaun</h1>
+            <p style="color: rgba(255,255,255,0.8); margin-bottom: 30px;">Sertai komuniti pelabur MicroVest hari ini.</p>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <input type="email" id="regEmail" placeholder="Alamat Emel" required>
+                </div>
+
+                <div class="form-group">
+                    <input type="password" id="regPassword" placeholder="Kata Laluan (min 6 aksara)" required>
+                </div>
+
+                <div class="form-group">
+                    <input type="text" id="referredBy" placeholder="Kod Jemputan (Jika ada)">
+                </div>
+
+                <button type="submit" class="btn-auth" style="background: white; color: var(--primary); width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 800; font-size: 16px; cursor: pointer; margin-top: 10px; transition: 0.3s;">
+                    DAFTAR SEKARANG
+                </button>
+            </form>
+
+            <div class="auth-footer" style="margin-top: 25px; color: white; font-size: 14px;">
+                Sudah mempunyai akaun? 
+                <a href="login.html" style="color: white; font-weight: 800; text-decoration: underline; margin-left: 5px;">Log Masuk</a>
             </div>
-            <div class="form-group">
-                <input type="text" id="referredBy" placeholder="Kod Jemputan (Opsional)">
-            </div>
-            <button type="submit" class="btn-auth">Daftar Sekarang</button>
-        </form>
-        
-        <div class="auth-footer">
-            Sudah ada akaun? <a href="login.html">Log masuk di sini</a>
         </div>
     </div>
-</div>
+
+    <script src="app.js"></script>
+    <script>
+        // Contoh ringkas pengendalian form (Pastikan logik sebenar ada dalam app.js)
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const refCode = document.getElementById('referredBy').value;
+
+            // Panggil fungsi pendaftaran dari app.js anda di sini
+            console.log("Mendaftar dengan:", email, refCode);
+            // alert("Sila pastikan logik Supabase anda dalam app.js berfungsi!");
+        });
+    </script>
+</body>
+</html>
