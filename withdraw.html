@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw - MicroVest</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <div class="app-shell">
+        <div class="product-page-header">
+            <h2>Pengeluaran Wang</h2>
+            <p>Masukkan maklumat bank yang sah untuk pengeluaran</p>
+        </div>
+
+        <div class="product-container">
+            <div class="main-card" style="padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: none;">
+                <p style="margin-bottom: 5px; opacity: 0.8;">Baki Boleh Dikeluarkan</p>
+                <h3 id="currentBalanceDisplay" style="font-size: 28px;">RM 0.00</h3>
+            </div>
+
+            <div class="product-card" style="display: block; padding: 20px;">
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="font-size: 13px; color: var(--text-muted);">Jumlah (Min RM 10.00)</label>
+                    <input type="number" id="withdrawAmount" placeholder="RM 0.00" style="border: 1px solid #ddd; margin-top: 5px;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="font-size: 13px; color: var(--text-muted);">Nama Bank</label>
+                    <select id="bankName" style="width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #ddd; background: #f8fafc;">
+                        <option value="">Pilih Bank</option>
+                        <option value="Maybank">Maybank</option>
+                        <option value="CIMB">CIMB Bank</option>
+                        <option value="Public Bank">Public Bank</option>
+                        <option value="RHB">RHB Bank</option>
+                        <option value="Hong Leong">Hong Leong Bank</option>
+                        <option value="AmBank">AmBank</option>
+                        <option value="BSN">BSN</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="font-size: 13px; color: var(--text-muted);">Nama Pemegang Akaun</label>
+                    <input type="text" id="accName" placeholder="Nama Penuh" style="border: 1px solid #ddd; margin-top: 5px;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="font-size: 13px; color: var(--text-muted);">No. Akaun Bank</label>
+                    <input type="number" id="accNo" placeholder="Nombor Akaun" style="border: 1px solid #ddd; margin-top: 5px;">
+                </div>
+
+                <button class="btn-buy-now" onclick="submitWithdrawal()">HANTAR PERMOHONAN</button>
+            </div>
+
+            <p style="font-size: 11px; color: var(--text-muted); text-align: center; padding: 10px;">
+                *Nota: Proses pengeluaran mengambil masa 24-48 jam waktu bekerja.
+            </p>
+        </div>
+
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="product_list.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Produk</span></a>
+            <a href="profile.html" class="nav-item"><i class="fas fa-user-circle"></i><span>Profil</span></a>
+        </nav>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        let availableBalance = 0;
+
+        async function fetchBalance() {
+            const { data: { user } } = await client.auth.getUser();
+            if (!user) return;
+
+            const { data, error } = await client
+                .from('profiles')
+                .select('balance')
+                .eq('id', user.id)
+                .single();
+
+            if (data) {
+                availableBalance = data.balance;
+                document.getElementById('currentBalanceDisplay').innerText = `RM ${availableBalance.toFixed(2)}`;
+            }
+        }
+
+        async function submitWithdrawal() {
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const bank = document.getElementById('bankName').value;
+            const name = document.getElementById('accName').value;
+            const no = document.getElementById('accNo').value;
+
+            if (!amount || amount < 10) {
+                alert("Jumlah minimum pengeluaran ialah RM 10.00");
+                return;
+            }
+
+            if (amount > availableBalance) {
+                alert("Baki anda tidak mencukupi!");
+                return;
+            }
+
+            if (!bank || !name || !no) {
+                alert("Sila lengkapkan maklumat bank anda.");
+                return;
+            }
+
+            const { data: { user } } = await client.auth.getUser();
+
+            // Simpan ke jadual 'withdrawals'
+            const { error } = await client.from('withdrawals').insert([
+                { 
+                    user_id: user.id, 
+                    amount: amount, 
+                    bank_info: `${bank} - ${name} (${no})`,
+                    status: 'pending' 
+                }
+            ]);
+
+            if (error) {
+                alert("Gagal menghantar permohonan: " + error.message);
+            } else {
+                alert("Permohonan pengeluaran berjaya dihantar!");
+                window.location.href = 'dashboard.html';
+            }
+        }
+
+        window.onload = fetchBalance;
+    </script>
+</body>
+</html>
