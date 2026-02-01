@@ -81,8 +81,9 @@
 
     <script src="app.js"></script>
     <script>
+    // 1. Fungsi Utama: Memuatkan Data Dashboard
     async function loadDashboardData() {
-        // 1. Semak jika pengguna log masuk
+        // Semak jika pengguna log masuk
         const { data: { user } } = await client.auth.getUser();
 
         if (!user) {
@@ -90,11 +91,15 @@
             return;
         }
 
-        // 2. Papar emel dan initial
-        document.getElementById('displayEmail').innerText = user.email;
-        document.getElementById('userInitial').innerText = user.email.charAt(0).toUpperCase();
+        // Papar emel dan initial pengguna
+        if (document.getElementById('displayEmail')) {
+            document.getElementById('displayEmail').innerText = user.email;
+        }
+        if (document.getElementById('userInitial')) {
+            document.getElementById('userInitial').innerText = user.email.charAt(0).toUpperCase();
+        }
 
-        // 3. Ambil baki dari table 'profiles'
+        // Ambil data baki dari table 'profiles'
         const { data, error } = await client
             .from('profiles')
             .select('balance')
@@ -102,18 +107,18 @@
             .single();
 
         if (data) {
+            // Kemaskini paparan baki RM
             document.getElementById('userBalance').innerText = `RM ${data.balance.toFixed(2)}`;
+            
+            // --- PANGGIL FUNGSI PELABURAN DI SINI ---
+            loadActiveInvestments(user.id);
         }
-
-        // --- TAMBAHKAN BARIS INI ---
-        // Panggil fungsi pelaburan aktif menggunakan ID pengguna
-        loadActiveInvestments(user.id);
-        // ---------------------------
     }
 
-    // --- LETAKKAN FUNGSI BARU ANDA DI SINI ---
+    // 2. Fungsi Kedua: Memuatkan Senarai Pelaburan Aktif
     async function loadActiveInvestments(userId) {
         const listContainer = document.getElementById('activeInvestmentsList');
+        if (!listContainer) return;
 
         const { data, error } = await client
             .from('user_investments')
@@ -122,27 +127,28 @@
             .eq('status', 'active');
 
         if (data && data.length > 0) {
-            listContainer.innerHTML = ''; 
+            listContainer.innerHTML = ''; // Buang mesej "Tiada pelaburan"
             
             data.forEach(item => {
+                // Logik pengiraan progress (contoh 365 hari)
                 const startDate = new Date(item.created_at);
                 const today = new Date();
                 const diffTime = Math.abs(today - startDate);
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                const progressPercent = (diffDays / 365) * 100;
+                const progressPercent = Math.min((diffDays / 365) * 100, 100);
 
                 listContainer.innerHTML += `
-                    <div class="active-plan-card" style="background: #fdf2f2; border-radius: 12px; padding: 15px; margin-bottom: 12px; border-left: 5px solid var(--primary);">
+                    <div class="active-plan-card" style="background: #fdf2f2; border-radius: 12px; padding: 15px; margin-bottom: 12px; border-left: 5px solid var(--primary); color: #333;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                             <span style="font-weight: 800; font-size: 14px; color: var(--primary);">${item.plan_name}</span>
-                            <span style="font-size: 11px; color: var(--success); font-weight: bold;">+ RM ${item.daily_profit.toFixed(2)}/hari</span>
+                            <span style="font-size: 11px; color: #10b981; font-weight: bold;">+ RM ${item.daily_profit.toFixed(2)}/hari</span>
                         </div>
-                        <div class="progress-container" style="height: 6px; background: #eee; border-radius: 10px; margin-bottom: 5px;">
-                            <div class="progress-bar" style="width: ${progressPercent}%; height: 100%; background: var(--primary); border-radius: 10px;"></div>
+                        <div style="height: 6px; background: #eee; border-radius: 10px; margin-bottom: 5px; overflow: hidden;">
+                            <div style="width: ${progressPercent}%; height: 100%; background: var(--primary); border-radius: 10px;"></div>
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted);">
+                        <div style="display: flex; justify-content: space-between; font-size: 10px; color: #666;">
                             <span>Hari ke-${diffDays}</span>
-                            <span>Tamat: 365 hari</span>
+                            <span>Tempoh: 365 Hari</span>
                         </div>
                     </div>
                 `;
@@ -150,11 +156,14 @@
         }
     }
 
+    // 3. Jalankan fungsi sebaik sahaja halaman dimuatkan
     window.onload = loadDashboardData;
 </script>
 
+
 </body>
 </html>
+
 
 
 
