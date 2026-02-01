@@ -11,14 +11,15 @@
 <body>
     <div class="app-shell">
         <nav class="top-nav">
-            <div class="profile-info">
-                <i class="fas fa-user-circle" style="font-size: 24px; color: #2563eb;"></i>
-                <span id="user-display-name">Memuatkan...</span>
-            </div>
-            <button class="btn-logout" onclick="handleLogout()">
-                <i class="fas fa-power-off"></i>
-            </button>
-        </nav>
+    <div class="profile-info" onclick="window.location.href='profile.html'" style="cursor: pointer;">
+        <i class="fas fa-user-circle" style="font-size: 24px; color: #2563eb;"></i>
+        <span id="user-display-name">Memuatkan...</span>
+    </div>
+    <button class="btn-logout" onclick="handleLogout()">
+        <i class="fas fa-power-off"></i>
+    </button>
+</nav>
+
 
         <div class="main-card">
             <p>Baki Tersedia</p>
@@ -46,3 +47,4 @@
     <script src="app.js"></script>
 </body>
 </html>
+
