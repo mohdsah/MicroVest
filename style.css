@@ -462,3 +462,20 @@ input {
     background: #fee2e2;
     color: #ef4444;
 }
+
+
+.level-tab {
+    flex: 1;
+    padding: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    border-radius: 10px;
+}
+
+.level-tab.active {
+    background: #fff5f5;
+}
+
+.team-list-section {
+    margin-bottom: 100px; /* Ruang untuk Bottom Nav */
+}
