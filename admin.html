@@ -8,58 +8,80 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --primary: #800000; --success: #10b981; --danger: #ef4444; --blue: #2196F3; }
-        body { background: #f8fafc; font-family: 'Segoe UI', sans-serif; }
-        
-        .admin-header { background: var(--primary); color: white; padding: 20px; text-align: center; border-radius: 0 0 20px 20px; }
-        
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .stat-card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; }
-        .stat-card h4 { margin: 0; font-size: 10px; color: #888; text-transform: uppercase; }
-        .stat-card p { margin: 5px 0 0; font-size: 18px; font-weight: bold; color: var(--primary); }
+    :root { --primary: #800000; --success: #10b981; --danger: #ef4444; --blue: #2196F3; }
+    body { background: #f8fafc; font-family: sans-serif; margin: 0; padding: 0; }
 
-        .tab-btn-container { display: flex; margin: 10px 15px; background: #e2e8f0; border-radius: 10px; padding: 5px; }
-        .tab-btn { flex: 1; padding: 10px; border: none; background: none; cursor: pointer; font-weight: bold; border-radius: 8px; font-size: 12px; }
-        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    /* Header & Stats */
+    .admin-header { background: var(--primary); color: white; padding: 25px 15px; text-align: center; }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; margin-top: -20px; }
+    .stat-card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
+    
+    /* Tab Navigation - Dibetulkan supaya mendatar */
+    .tab-btn-container { 
+        display: flex; 
+        margin: 15px; 
+        background: #e2e8f0; 
+        border-radius: 12px; 
+        padding: 5px;
+        gap: 5px;
+    }
+    .tab-btn { 
+        flex: 1; 
+        padding: 12px 5px; 
+        border: none; 
+        background: none; 
+        cursor: pointer; 
+        font-weight: bold; 
+        border-radius: 8px; 
+        font-size: 11px; 
+        color: #64748b;
+        transition: 0.3s;
+        white-space: nowrap; /* Elak teks turun bawah */
+    }
+    .tab-btn.active { 
+        background: white; 
+        color: var(--primary); 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+    }
 
-        .list-container { padding: 10px 15px 100px 15px; }
-        .card-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
-        .card-item.recharge { border-left: 5px solid var(--success); }
-        .card-item.withdraw { border-left: 5px solid var(--danger); }
-        .card-item.user { border-left: 5px solid var(--blue); }
+    /* User Card */
+    .card-item { 
+        background: white; 
+        margin: 0 15px 12px 15px; 
+        padding: 15px; 
+        border-radius: 12px; 
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        border-left: 5px solid var(--blue);
+    }
+    .btn-group { display: flex; gap: 8px; margin-top: 12px; }
+    .btn { flex: 1; padding: 10px; border: none; border-radius: 8px; color: white; font-weight: bold; font-size: 11px; }
+</style>
 
-        .btn-group { display: flex; gap: 8px; margin-top: 12px; }
-        .btn { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; font-size: 11px; }
-        .btn-approve { background: var(--success); }
-        .btn-reject { background: var(--danger); }
-        .btn-edit { background: var(--blue); }
-        
-        .badge { font-size: 9px; padding: 2px 6px; background: #eee; border-radius: 4px; color: #666; }
-    </style>
-</head>
-<body>
+<div class="admin-header">
+    <h2 style="margin:0;">Admin Panel</h2>
+    <p style="margin:5px 0 0; font-size: 12px; opacity: 0.8;">Urusan Platform & Ahli</p>
+</div>
 
-    <div class="admin-header">
-        <h2 style="margin:0;">Control Center</h2>
-        <p style="margin:5px 0 0; font-size: 12px; opacity: 0.8;">Uruskan Deposit, Pengeluaran & Ahli</p>
+<div class="stat-grid">
+    <div class="stat-card">
+        <h4 style="margin:0; font-size: 10px; color: #888;">DEPOSIT</h4>
+        <p id="totalDepo" style="margin:5px 0 0; font-size: 16px;">RM 0.00</p>
+    </div>
+    <div class="stat-card">
+        <h4 style="margin:0; font-size: 10px; color: #888;">WITHDRAW</h4>
+        <p id="totalWith" style="margin:5px 0 0; font-size: 16px;">RM 0.00</p>
+    </div>
+</div>
+
+<div class="tab-btn-container">
+    <button id="tabDepo" class="tab-btn active" onclick="switchTab('recharge')">DEPOSIT</button>
+    <button id="tabWith" class="tab-btn" onclick="switchTab('withdraw')">WITHDRAW</button>
+    <button id="tabUsers" class="tab-btn" onclick="switchTab('users')">USERS LIST</button>
+</div>
+
+<div id="mainContent">
     </div>
 
-    <div class="stat-grid">
-        <div class="stat-card">
-            <h4>Total Deposit</h4>
-            <p id="totalDepo">RM 0.00</p>
-        </div>
-        <div class="stat-card">
-            <h4>Total Withdraw</h4>
-            <p id="totalWith">RM 0.00</p>
-        </div>
-    </div>
-
-    <div class="tab-btn-container">
-        <button id="tabDepo" class="tab-btn active" onclick="switchTab('recharge')">DEPOSIT</button>
-        <button id="tabWith" class="tab-btn" onclick="switchTab('withdraw')">WITHDRAW</button>
-        <button id="tabUsers" class="tab-btn" onclick="switchTab('users')">USERS</button>
-    </div>
 
     <div id="mainContent" class="list-container">
         <p style="text-align: center; color: #888; margin-top: 50px;">Memuatkan data...</p>
