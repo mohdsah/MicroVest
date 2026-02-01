@@ -1,118 +1,126 @@
-/* --- 1. VARIABLE TEMA MERAH MARUN --- */
+/* --- 1. TEMA WARNA & ASAS --- */
 :root {
-    --primary-red: #800000; /* Merah Marun Padu */
-    --light-red: #a52a2a;
-    --dark-bg: #4a0000;    /* Background Luar */
+    --primary-red: #800000; /* Merah Marun Gelap */
+    --light-red: #b22222;
     --white: #ffffff;
-    --gold: #b8860b;      /* Warna Reward */
+    --gold-bg: #b8860b;
     --text-dark: #333333;
-    --text-light: #f1f5f9;
-    --shadow: 0 4px 15px rgba(0,0,0,0.3);
+    --text-light: #ffffff;
 }
 
-* {
-    box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
-    margin: 0;
-    padding: 0;
-}
+* { box-sizing: border-box; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
 
 body {
-    background-color: var(--dark-bg); /* Background luar app */
+    background-color: #4a0000;
     display: flex;
     justify-content: center;
     min-height: 100vh;
 }
 
-/* --- 2. APP SHELL (Latar Belakang Merah Seperti Gambar) --- */
 .app-shell {
     width: 100%;
     max-width: 450px;
-    background-color: var(--primary-red); /* Merah Marun penuh */
+    background-color: var(--primary-red);
     min-height: 100vh;
     position: relative;
-    padding-bottom: 90px;
-    box-shadow: 0 0 30px rgba(0,0,0,0.5);
-    overflow-x: hidden;
+    padding-bottom: 80px;
+    color: var(--text-light); /* Memastikan teks utama berwarna putih */
 }
 
-/* --- 3. BANNER & OVERLAY --- */
-.main-banner {
-    width: 100%;
-    height: auto;
-    position: relative;
-    overflow: hidden;
-}
-
-.main-banner img {
-    width: 100%;
-    height: auto;
-    display: block;
-    object-fit: cover;
-}
-
-/* --- 4. GRID MENU (Kotak Putih yang Tidak Bertindih) --- */
-.grid-menu-container {
-    padding: 0 15px;
-    margin-top: -20px; /* Menindih sikit banner seperti dalam gambar */
-    position: relative;
-    z-index: 10;
-}
-
-.menu-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    background: var(--white);
-    padding: 20px;
-    border-radius: 15px;
-    gap: 15px;
-    box-shadow: var(--shadow);
-}
-
-.menu-item {
+/* --- 2. GAYA BORANG (LOGIN & REGISTER) --- */
+/* Membetulkan masalah input yang berterabur */
+.auth-container {
+    padding: 40px 20px;
     text-align: center;
+}
+
+.auth-container h1, .auth-container h2 {
+    margin-bottom: 10px;
+    color: var(--white);
+}
+
+.auth-container p {
+    margin-bottom: 30px;
+    color: rgba(255,255,255,0.8);
+}
+
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+input[type="text"], input[type="password"], input[type="email"] {
+    width: 100%;
+    padding: 15px;
+    border-radius: 10px;
+    border: none;
+    background: var(--white);
+    color: var(--text-dark);
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.btn-auth {
+    width: 100%;
+    padding: 15px;
+    background: var(--white);
+    color: var(--primary-red);
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 16px;
     cursor: pointer;
+    margin-top: 10px;
 }
 
-.menu-item i {
-    display: block;
-    font-size: 24px;
-    color: var(--text-dark);
-    margin-bottom: 8px;
+.auth-footer {
+    margin-top: 20px;
+    font-size: 14px;
 }
 
-.menu-item span {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-dark);
-}
+.auth-footer a { color: var(--white); font-weight: bold; }
 
-/* --- 5. WEEKLY SALARY SECTION --- */
-.salary-section {
+/* --- 3. GAYA HALAMAN PRODUK --- */
+/* Membetulkan teks hitam bertindih pada latar merah */
+.product-list-container {
     padding: 20px 15px;
 }
 
-.salary-header {
-    background: var(--light-red);
-    color: var(--white);
-    padding: 6px 12px;
-    display: inline-block;
-    border-radius: 5px 5px 0 0;
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 0;
+.product-card {
+    background: var(--white);
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 15px;
+    color: var(--text-dark); /* Teks dalam kad jadi hitam supaya jelas */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
+.product-info h3 { font-size: 16px; margin-bottom: 5px; }
+.product-info p { font-size: 12px; color: #666; }
+
+.btn-invest {
+    background: var(--primary-red);
+    color: var(--white);
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* --- 4. GAYA DASHBOARD & WEEKLY SALARY --- */
 .reward-row {
+    background: var(--gold-bg);
+    margin: 10px 15px;
+    padding: 12px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    background: var(--gold); /* Warna seperti gambar rujukan */
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 10px;
+    gap: 10px;
     color: var(--white);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .progress-container {
@@ -128,90 +136,7 @@ body {
     border-radius: 10px;
 }
 
-.btn-receive {
-    background: #999;
-    color: var(--white);
-    border: none;
-    padding: 6px 15px;
-    border-radius: 20px;
-    font-size: 10px;
-    cursor: pointer;
-}
-
-/* --- 6. PROFILE PAGE HEADER --- */
-.profile-red-header {
-    background: var(--primary-red);
-    color: var(--white);
-    text-align: center;
-    padding: 40px 20px 60px;
-}
-
-.user-avatar {
-    width: 70px;
-    height: 70px;
-    background: var(--white);
-    color: var(--primary-red);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 15px;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-/* --- 7. WALLET & STATS CARD --- */
-.wallet-actions {
-    display: flex;
-    gap: 15px;
-    padding: 0 15px;
-    margin-top: -30px;
-}
-
-.btn-recharge, .btn-withdraw {
-    flex: 1;
-    background: var(--white);
-    color: var(--text-dark);
-    padding: 15px;
-    border-radius: 12px;
-    border: none;
-    font-weight: bold;
-    box-shadow: var(--shadow);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
-
-.stats-card {
-    background: var(--white);
-    margin: 20px 15px;
-    padding: 20px;
-    border-radius: 15px;
-    color: var(--text-dark);
-}
-
-/* --- 8. LIST MENU PROFILE --- */
-.icon-menu-container {
-    background: var(--white);
-    margin: 0 15px 20px;
-    border-radius: 15px;
-    overflow: hidden;
-}
-
-.menu-list-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 20px;
-    border-bottom: 1px solid #eee;
-    color: var(--text-dark);
-    text-decoration: none;
-}
-
-.menu-list-item:last-child { border-bottom: none; }
-
-/* --- 9. BOTTOM NAVIGATION (Fixed at Bottom) --- */
+/* --- 5. BOTTOM NAVIGATION --- */
 .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -228,20 +153,6 @@ body {
     z-index: 1000;
 }
 
-.nav-link {
-    text-decoration: none;
-    color: #888;
-    font-size: 11px;
-    font-weight: 600;
-    text-align: center;
-}
-
-.nav-link i {
-    display: block;
-    font-size: 22px;
-    margin-bottom: 4px;
-}
-
-.nav-link.active {
-    color: var(--primary-red);
-}
+.nav-link { text-decoration: none; color: #888; font-size: 11px; text-align: center; }
+.nav-link i { display: block; font-size: 22px; margin-bottom: 4px; }
+.nav-link.active { color: var(--primary-red); }
