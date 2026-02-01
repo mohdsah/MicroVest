@@ -3,67 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profil Saya - MicroVest</title>
+    <title>MicroVest - Profile</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div class="app-shell">
-        <nav class="top-nav">
-            <a href="dashboard.html" style="color: var(--text-main); text-decoration: none;">
-                <i class="fas fa-arrow-left"></i> Kembali
-            </a>
-            <h3 style="font-size: 16px;">Profil Pengguna</h3>
-            <div style="width: 24px;"></div> </nav>
-
-        <div class="profile-header" style="text-align: center; margin-bottom: 30px;">
-            <div class="brand-icon" style="margin-bottom: 10px;">
-                <i class="fas fa-user"></i>
-            </div>
-            <h2 id="profile-username">Memuatkan...</h2>
-            <p id="profile-status" style="color: var(--success); font-weight: bold; font-size: 14px;">Akaun Aktif</p>
+    <div class="app-shell gray-bg">
+        <div class="profile-red-header">
+            <div class="user-avatar">M</div>
+            <h3 id="user-display-name">Username</h3>
+            <p>ID: <span id="user-id-display">000000</span></p>
         </div>
 
-        <div class="profile-menu">
-            <div class="menu-item">
-                <i class="fas fa-envelope"></i>
-                <span>ID Pengguna: <b id="profile-id">...</b></span>
+        <div class="wallet-actions">
+            <button class="btn-recharge"><i class="fas fa-wallet"></i> Recharge</button>
+            <button class="btn-withdraw"><i class="fas fa-money-bill-wave"></i> Withdraws</button>
+        </div>
+
+        <div class="stats-card">
+            <div class="stats-grid">
+                <div class="stat-box"><h4>0.00</h4><p>Recharge wallet</p></div>
+                <div class="stat-box"><h4 id="balance-amount">0.00</h4><p>Balance wallet</p></div>
+                <div class="stat-box"><h4>0.00</h4><p>Total earnings</p></div>
+                <div class="stat-box"><h4>0.00</h4><p>Total withdrawals</p></div>
             </div>
-            <div class="menu-item" onclick="alert('Fungsi Tukar Password akan datang')">
-                <i class="fas fa-lock"></i>
-                <span>Tukar Kata Laluan</span>
-            </div>
-            <div class="menu-item" onclick="alert('Sila hubungi Admin untuk bantuan')">
-                <i class="fas fa-headset"></i>
-                <span>Hubungi Bantuan</span>
-            </div>
-            <div class="menu-item" onclick="handleLogout()" style="color: var(--danger);">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Log Keluar Akaun</span>
-            </div>
+        </div>
+
+        <div class="icon-menu-list">
+            <div class="icon-item"><i class="fas fa-receipt"></i><span>Funding details</span></div>
+            <div class="icon-item"><i class="fas fa-users"></i><span>My teams</span></div>
+            <div class="icon-item"><i class="fas fa-university"></i><span>Bank account</span></div>
+            <div class="icon-item"><i class="fas fa-lock"></i><span>Password</span></div>
+        </div>
+
+        <button class="btn-signout" onclick="handleLogout()">Sign out</button>
+
+        <div class="bottom-nav">
+            <a href="dashboard.html" class="nav-link"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="product_list.html" class="nav-link"><i class="fas fa-box"></i><span>Product</span></a>
+            <a href="profile.html" class="nav-link active"><i class="fas fa-user"></i><span>Me</span></a>
         </div>
     </div>
     <script src="app.js"></script>
-    <script>
-        // Jalankan fungsi semakan profil apabila halaman dibuka
-        window.onload = function() {
-            loadUserProfile();
-        };
-
-        async function loadUserProfile() {
-            const { data: { user } } = await client.auth.getUser();
-            if (user) {
-                // Ambil data dari table profiles
-                const { data: profile } = await client.from('profiles').select('*').eq('id', user.id).single();
-                if (profile) {
-                    document.getElementById('profile-username').innerText = profile.email; // Username disimpan di kolum email
-                    document.getElementById('profile-id').innerText = profile.id.substring(0, 8); // Tunjuk 8 digit awal ID
-                }
-            } else {
-                window.location.href = 'index.html';
-            }
-        }
-    </script>
 </body>
 </html>
