@@ -340,3 +340,55 @@ input {
     font-weight: bold;
     cursor: pointer;
 }
+
+
+.product-detail-card {
+    background: white;
+    margin: 20px;
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: var(--shadow);
+}
+
+.product-icon-large {
+    font-size: 60px;
+    margin-bottom: 15px;
+    color: var(--primary);
+}
+
+.price-tag {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 10px 0 20px;
+}
+
+.roi-list {
+    text-align: left;
+    background: #f8fafc;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+}
+
+.roi-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.roi-item:last-child { border-bottom: none; }
+
+.btn-confirm-buy {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    background: var(--primary);
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+}
