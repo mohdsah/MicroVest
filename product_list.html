@@ -3,80 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MicroVest - Products</title>
+    <title>Produk Pelaburan - MicroVest</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div class="app-shell gray-bg">
+
+    <div class="app-shell">
         <div class="product-page-header">
-            <h3>Investment Products</h3>
-            <p>Pilih pakej yang sesuai untuk anda</p>
+            <h2 style="margin-bottom: 5px;">Pakej Pelaburan</h2>
+            <p style="font-size: 13px; opacity: 0.9;">Pilih pelan dan mula menjana pendapatan harian.</p>
         </div>
 
         <div class="product-container">
             <div class="product-card">
                 <div class="product-image">
-                    <i class="fas fa-microchip"></i>
-                    <span class="badge">Hot</span>
+                    <i class="fas fa-seedling"></i>
+                    <span class="badge red">HOT</span>
                 </div>
                 <div class="product-info">
-                    <h4>Pakej Starter</h4>
+                    <h3>Pakej Starter</h3>
                     <div class="product-stats">
-                        <div><small>Daily Profit</small><p>RM 0.50</p></div>
-                        <div><small>Price</small><p>RM 5.00</p></div>
+                        <div>
+                            <p style="font-size: 11px; color: var(--text-muted);">Harian</p>
+                            <p style="color: var(--success);">RM 0.50</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="font-size: 11px; color: var(--text-muted);">Tempoh</p>
+                            <p>365 Hari</p>
+                        </div>
                     </div>
-                    <button class="btn-buy-now" onclick="window.location.href='starter.html'">Sertai Sekarang</button>
+                    <p style="font-size: 18px; font-weight: 800; margin: 10px 0;">RM 5.00</p>
+                    <button class="btn-buy-now" onclick="purchase(5, 'Starter')">BELI SEKARANG</button>
                 </div>
             </div>
 
             <div class="product-card">
                 <div class="product-image">
-                    <i class="fas fa-bolt"></i>
-                    <span class="badge red">Popular</span>
+                    <i class="fas fa-rocket"></i>
+                    <span class="badge">BEST SELLER</span>
                 </div>
                 <div class="product-info">
-                    <h4>Pakej Pro</h4>
+                    <h3>Pakej Pro</h3>
                     <div class="product-stats">
-                        <div><small>Daily Profit</small><p>RM 6.00</p></div>
-                        <div><small>Price</small><p>RM 50.00</p></div>
+                        <div>
+                            <p style="font-size: 11px; color: var(--text-muted);">Harian</p>
+                            <p style="color: var(--success);">RM 6.00</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="font-size: 11px; color: var(--text-muted);">Tempoh</p>
+                            <p>365 Hari</p>
+                        </div>
                     </div>
-                    <button class="btn-buy-now" onclick="window.location.href='pro.html'">Sertai Sekarang</button>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-image">
-                    <i class="fas fa-gem"></i>
-                </div>
-                <div class="product-info">
-                    <h4>Pakej VIP</h4>
-                    <div class="product-stats">
-                        <div><small>Daily Profit</small><p>RM 15.00</p></div>
-                        <div><small>Price</small><p>RM 100.00</p></div>
-                    </div>
-                    <button class="btn-buy-now" onclick="alert('Akan datang!')">Sertai Sekarang</button>
+                    <p style="font-size: 18px; font-weight: 800; margin: 10px 0;">RM 50.00</p>
+                    <button class="btn-buy-now" onclick="purchase(50, 'Pro')">BELI SEKARANG</button>
                 </div>
             </div>
         </div>
 
-        <div class="bottom-nav">
-            <a href="dashboard.html" class="nav-link">
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="nav-item">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
-            <a href="product_list.html" class="nav-link active">
-                <i class="fas fa-box"></i>
-                <span>Product</span>
+            <a href="product_list.html" class="nav-item active">
+                <i class="fas fa-chart-line"></i>
+                <span>Produk</span>
             </a>
-            <a href="profile.html" class="nav-link">
-                <i class="fas fa-user"></i>
-                <span>Me</span>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user-circle"></i>
+                <span>Profil</span>
             </a>
-        </div>
+        </nav>
     </div>
+
     <script src="app.js"></script>
+    <script>
+        async function purchase(price, name) {
+            const { data: { user } } = await client.auth.getUser();
+            
+            if (!user) {
+                alert("Sila log masuk terlebih dahulu.");
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // 1. Ambil baki semasa pengguna
+            const { data: profile, error: fetchError } = await client
+                .from('profiles')
+                .select('balance')
+                .eq('id', user.id)
+                .single();
+
+            if (fetchError || !profile) {
+                alert("Ralat mengambil data akaun.");
+                return;
+            }
+
+            // 2. Semak baki cukup atau tidak
+            if (profile.balance < price) {
+                alert("Baki tidak mencukupi! Sila deposit terlebih dahulu.");
+                return;
+            }
+
+            // 3. Tolak baki dan rekod pembelian (Logik Ringkas)
+            if (confirm(`Adakah anda pasti mahu melabur dalam ${name} bernilai RM ${price}?`)) {
+                const newBalance = profile.balance - price;
+                
+                const { error: updateError } = await client
+                    .from('profiles')
+                    .update({ balance: newBalance })
+                    .eq('id', user.id);
+
+                if (updateError) {
+                    alert("Gagal melakukan transaksi.");
+                } else {
+                    alert(`Pelaburan ${name} Berjaya! Baki baru: RM ${newBalance.toFixed(2)}`);
+                    window.location.reload();
+                }
+            }
+        }
+    </script>
 </body>
 </html>
-
