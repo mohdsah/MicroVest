@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MicroVest - Dashboard</title>
+    <title>Dashboard - MicroVest</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,16 +11,36 @@
 <body>
     <div class="app-shell">
         <nav class="top-nav">
-            <span id="user-display-name">Memuatkan...</span>
-            <button class="btn-logout" onclick="handleLogout()"><i class="fas fa-power-off"></i></button>
+            <div class="profile-info">
+                <i class="fas fa-user-circle" style="font-size: 24px; color: #2563eb;"></i>
+                <span id="user-display-name">Memuatkan...</span>
+            </div>
+            <button class="btn-logout" onclick="handleLogout()">
+                <i class="fas fa-power-off"></i>
+            </button>
         </nav>
+
         <div class="main-card">
             <p>Baki Tersedia</p>
             <h2 id="balance-amount">RM 0.00</h2>
         </div>
+
         <div class="quick-actions">
-            <div class="action-item"><div class="icon-box"><i class="fas fa-plus"></i></div><span>Deposit</span></div>
-            <div class="action-item"><div class="icon-box"><i class="fas fa-wallet"></i></div><span>Keluaran</span></div>
+            <div class="action-item" onclick="alert('Fungsi Deposit dalam pembinaan')">
+                <div class="icon-box"><i class="fas fa-plus"></i></div>
+                <span>Deposit</span>
+            </div>
+            <div class="action-item" onclick="alert('Fungsi Keluaran dalam pembinaan')">
+                <div class="icon-box"><i class="fas fa-wallet"></i></div>
+                <span>Keluaran</span>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <h3 style="font-size: 16px; margin-bottom: 15px; color: #1e293b;">Pakej Aktif</h3>
+            <div style="padding: 20px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 15px; text-align: center; color: #64748b;">
+                Tiada pelaburan aktif buat masa ini.
+            </div>
         </div>
     </div>
     <script src="app.js"></script>
