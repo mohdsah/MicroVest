@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pasukan Saya - MicroVest</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="app-shell gray-bg">
+        <div class="profile-red-header" style="padding-bottom: 80px;">
+            <h3 style="margin-bottom: 10px;">My Team</h3>
+            <p>Total Team Members: <span id="total-team">0</span></p>
+        </div>
+
+        <div class="stats-card" style="margin-top: -50px;">
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <p>Total Team Commission</p>
+                    <h4>RM 0.00</h4>
+                </div>
+                <div class="stat-box">
+                    <p>Total Team Deposit</p>
+                    <h4>RM 0.00</h4>
+                </div>
+            </div>
+            <button class="btn-view-comm" style="width: 100%; margin-top: 15px; padding: 10px; background: #eee; border: none; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;">
+                View team commissions
+            </button>
+        </div>
+
+        <div class="team-levels" style="display: flex; justify-content: space-around; background: white; margin: 20px; padding: 15px; border-radius: 15px; box-shadow: var(--shadow);">
+            <div class="level-tab active" style="text-align: center; color: var(--primary-red); font-weight: bold;">
+                <div style="font-size: 18px;">0</div>
+                <div style="font-size: 12px;">B-13%</div>
+            </div>
+            <div class="level-tab" style="text-align: center; color: #94a3b8;">
+                <div style="font-size: 18px;">0</div>
+                <div style="font-size: 12px;">C-7%</div>
+            </div>
+            <div class="level-tab" style="text-align: center; color: #94a3b8;">
+                <div style="font-size: 18px;">0</div>
+                <div style="font-size: 12px;">D-4%</div>
+            </div>
+        </div>
+
+        <div class="team-list-section" style="padding: 0 20px;">
+            <h4 style="margin-bottom: 15px; font-size: 14px; color: var(--text-muted);">Team Details</h4>
+            <div id="team-members-container">
+                <div style="text-align: center; padding: 40px; color: #cbd5e1;">
+                    <i class="fas fa-users-slash" style="font-size: 40px; margin-bottom: 10px;"></i>
+                    <p>Tiada ahli pasukan lagi.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <a href="dashboard.html" class="nav-link"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="product_list.html" class="nav-link"><i class="fas fa-box"></i><span>Product</span></a>
+            <a href="profile.html" class="nav-link active"><i class="fas fa-user"></i><span>Me</span></a>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        async function fetchTeam() {
+            const { data: { user } } = await client.auth.getUser();
+            if (!user) return;
+
+            const myRefCode = user.id.substring(0, 6).toUpperCase();
+            
+            // Ambil ahli yang mendaftar menggunakan kod anda (Level B)
+            const { data: team, error } = await client
+                .from('profiles')
+                .select('email, created_at')
+                .eq('referred_by', myRefCode);
+
+            if (team && team.length > 0) {
+                document.getElementById('total-team').innerText = team.length;
+                const container = document.getElementById('team-members-container');
+                container.innerHTML = ''; // Kosongkan placeholder
+
+                team.forEach(member => {
+                    const date = new Date(member.created_at).toLocaleDateString();
+                    container.innerHTML += `
+                        <div style="background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+                            <div>
+                                <div style="font-weight: bold; font-size: 14px;">${member.email}</div>
+                                <div style="font-size: 11px; color: #94a3b8;">Sertai: ${date}</div>
+                            </div>
+                            <div style="color: var(--success); font-weight: bold; font-size: 12px;">Level B</div>
+                        </div>
+                    `;
+                });
+            }
+        }
+        window.onload = fetchTeam;
+    </script>
+</body>
+</html>
+
