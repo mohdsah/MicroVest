@@ -11,40 +11,61 @@
 <body>
     <div class="app-shell">
         <nav class="top-nav">
-    <div class="profile-info" onclick="window.location.href='profile.html'" style="cursor: pointer;">
-        <i class="fas fa-user-circle" style="font-size: 24px; color: #2563eb;"></i>
-        <span id="user-display-name">Memuatkan...</span>
-    </div>
-    <button class="btn-logout" onclick="handleLogout()">
-        <i class="fas fa-power-off"></i>
-    </button>
-</nav>
-
+            <div class="profile-info">
+                <i class="fas fa-wallet" style="color: #2563eb;"></i>
+                <span id="user-display-name">Memuatkan...</span>
+            </div>
+            <button class="btn-logout" onclick="handleLogout()"><i class="fas fa-power-off"></i></button>
+        </nav>
 
         <div class="main-card">
             <p>Baki Tersedia</p>
             <h2 id="balance-amount">RM 0.00</h2>
         </div>
 
-        <div class="quick-actions">
-            <div class="action-item" onclick="alert('Fungsi Deposit dalam pembinaan')">
-                <div class="icon-box"><i class="fas fa-plus"></i></div>
-                <span>Deposit</span>
+        <div class="quick-actions" style="grid-template-columns: repeat(3, 1fr); background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+            <div class="action-item">
+                <div class="icon-box"><i class="fas fa-shopping-bag"></i></div>
+                <span>Produk</span>
             </div>
-            <div class="action-item" onclick="alert('Fungsi Keluaran dalam pembinaan')">
-                <div class="icon-box"><i class="fas fa-wallet"></i></div>
-                <span>Keluaran</span>
+            <div class="action-item">
+                <div class="icon-box"><i class="fas fa-user-plus"></i></div>
+                <span>Jemput</span>
+            </div>
+            <div class="action-item">
+                <div class="icon-box"><i class="fas fa-download"></i></div>
+                <span>App</span>
+            </div>
+            <div class="action-item">
+                <div class="icon-box"><i class="fas fa-gift"></i></div>
+                <span>Bonus</span>
+            </div>
+            <div class="action-item">
+                <div class="icon-box"><i class="fas fa-users"></i></div>
+                <span>Team</span>
+            </div>
+            <div class="action-item">
+                <div class="icon-box"><i class="fas fa-headset"></i></div>
+                <span>Online</span>
             </div>
         </div>
 
-        <div style="margin-top: 30px;">
-            <h3 style="font-size: 16px; margin-bottom: 15px; color: #1e293b;">Pakej Aktif</h3>
-            <div style="padding: 20px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 15px; text-align: center; color: #64748b;">
-                Tiada pelaburan aktif buat masa ini.
-            </div>
+        <div class="bottom-nav">
+            <a href="dashboard.html" class="nav-item active">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="product_list.html" class="nav-item">
+                <i class="fas fa-box"></i>
+                <span>Product</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>Me</span>
+            </a>
         </div>
     </div>
+
     <script src="app.js"></script>
 </body>
 </html>
-
