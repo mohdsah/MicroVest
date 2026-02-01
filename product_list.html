@@ -12,54 +12,36 @@
 
     <div class="app-shell">
         <div class="product-page-header">
-            <h2 style="margin-bottom: 5px;">Pakej Pelaburan</h2>
-            <p style="font-size: 13px; opacity: 0.9;">Pilih pelan dan mula menjana pendapatan harian.</p>
+    <h2>Pakej Pelaburan</h2>
+    <p>Pilih pakej yang sesuai untuk mula menjana pendapatan</p>
+</div>
+
+<div class="product-container" style="padding: 15px; padding-bottom: 100px;">
+    <div class="product-card" style="background: white; padding: 20px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-left: 5px solid var(--primary);">
+        <h3 style="margin: 0; color: var(--primary);">Pakej Starter</h3>
+        <div style="margin: 15px 0;">
+            <p style="font-size: 14px; margin: 5px 0;">Harga: <b>RM 50.00</b></p>
+            <p style="font-size: 14px; margin: 5px 0;">Untung Harian: <b style="color: #10b981;">RM 2.50</b></p>
+            <p style="font-size: 14px; margin: 5px 0;">Tempoh: <b>365 Hari</b></p>
         </div>
+        <button class="btn-buy-now" onclick="buyProduct('Pakej Starter', 50, 2.50)" style="width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
+            BELI SEKARANG
+        </button>
+    </div>
 
-        <div class="product-container">
-            <div class="product-card">
-                <div class="product-image">
-                    <i class="fas fa-seedling"></i>
-                    <span class="badge red">HOT</span>
-                </div>
-                <div class="product-info">
-                    <h3>Pakej Starter</h3>
-                    <div class="product-stats">
-                        <div>
-                            <p style="font-size: 11px; color: var(--text-muted);">Harian</p>
-                            <p style="color: var(--success);">RM 0.50</p>
-                        </div>
-                        <div style="text-align: right;">
-                            <p style="font-size: 11px; color: var(--text-muted);">Tempoh</p>
-                            <p>365 Hari</p>
-                        </div>
-                    </div>
-                    <p style="font-size: 18px; font-weight: 800; margin: 10px 0;">RM 5.00</p>
-                    <button class="btn-buy-now" onclick="purchase(5, 'Starter')">BELI SEKARANG</button>
-                </div>
-            </div>
+    <div class="product-card" style="background: white; padding: 20px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-left: 5px solid var(--primary);">
+        <h3 style="margin: 0; color: var(--primary);">Pakej Pro</h3>
+        <div style="margin: 15px 0;">
+            <p style="font-size: 14px; margin: 5px 0;">Harga: <b>RM 100.00</b></p>
+            <p style="font-size: 14px; margin: 5px 0;">Untung Harian: <b style="color: #10b981;">RM 5.50</b></p>
+            <p style="font-size: 14px; margin: 5px 0;">Tempoh: <b>365 Hari</b></p>
+        </div>
+        <button class="btn-buy-now" onclick="buyProduct('Pakej Pro', 100, 5.50)" style="width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
+            BELI SEKARANG
+        </button>
+    </div>
+</div>
 
-            <div class="product-card">
-                <div class="product-image">
-                    <i class="fas fa-rocket"></i>
-                    <span class="badge">BEST SELLER</span>
-                </div>
-                <div class="product-info">
-                    <h3>Pakej Pro</h3>
-                    <div class="product-stats">
-                        <div>
-                            <p style="font-size: 11px; color: var(--text-muted);">Harian</p>
-                            <p style="color: var(--success);">RM 6.00</p>
-                        </div>
-                        <div style="text-align: right;">
-                            <p style="font-size: 11px; color: var(--text-muted);">Tempoh</p>
-                            <p>365 Hari</p>
-                        </div>
-                    </div>
-                    <p style="font-size: 18px; font-weight: 800; margin: 10px 0;">RM 50.00</p>
-                    <button class="btn-buy-now" onclick="purchase(50, 'Pro')">BELI SEKARANG</button>
-                </div>
-            </div>
         </div>
 
         <nav class="bottom-nav">
