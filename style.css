@@ -392,3 +392,73 @@ input {
     font-size: 16px;
     cursor: pointer;
 }
+
+
+/* Gaya untuk Menu Senarai di Profile */
+.icon-menu-container {
+    background: white;
+    margin: 20px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.menu-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.menu-list-item:last-child {
+    border-bottom: none;
+}
+
+.menu-list-item:active {
+    background: #f8fafc;
+}
+
+.menu-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.menu-left i {
+    font-size: 18px;
+    color: #333;
+    width: 25px; /* Tetapkan lebar ikon supaya teks selari */
+    text-align: center;
+}
+
+.menu-left span {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.arrow-icon {
+    font-size: 12px;
+    color: #cbd5e1;
+}
+
+/* Gaya Butang Sign Out yang lebih kemas */
+.btn-signout-full {
+    width: 100%;
+    padding: 15px;
+    background: #f1f5f9;
+    color: #64748b;
+    border: none;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-signout-full:hover {
+    background: #fee2e2;
+    color: #ef4444;
+}
