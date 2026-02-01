@@ -9,95 +9,114 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div class="app-shell gray-bg">
-        <div class="profile-red-header" style="padding-bottom: 80px;">
-            <h3 style="margin-bottom: 10px;">My Team</h3>
-            <p>Total Team Members: <span id="total-team">0</span></p>
+
+    <div class="app-shell">
+        <div class="profile-red-header" style="padding-bottom: 60px;">
+            <i class="fas fa-users" style="font-size: 40px; margin-bottom: 10px;"></i>
+            <h3>Pasukan Saya</h3>
+            <p>Bina rangkaian dan jana komisen pasif</p>
         </div>
 
-        <div class="stats-card" style="margin-top: -50px;">
+        <div class="stats-card" style="margin-top: -30px;">
             <div class="stats-grid">
                 <div class="stat-box">
-                    <p>Total Team Commission</p>
-                    <h4>RM 0.00</h4>
+                    <h4 id="teamSize">0</h4>
+                    <p>Jumlah Ahli</p>
                 </div>
                 <div class="stat-box">
-                    <p>Total Team Deposit</p>
-                    <h4>RM 0.00</h4>
-                </div>
-            </div>
-            <button class="btn-view-comm" style="width: 100%; margin-top: 15px; padding: 10px; background: #eee; border: none; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;">
-                View team commissions
-            </button>
-        </div>
-
-        <div class="team-levels" style="display: flex; justify-content: space-around; background: white; margin: 20px; padding: 15px; border-radius: 15px; box-shadow: var(--shadow);">
-            <div class="level-tab active" style="text-align: center; color: var(--primary-red); font-weight: bold;">
-                <div style="font-size: 18px;">0</div>
-                <div style="font-size: 12px;">B-13%</div>
-            </div>
-            <div class="level-tab" style="text-align: center; color: #94a3b8;">
-                <div style="font-size: 18px;">0</div>
-                <div style="font-size: 12px;">C-7%</div>
-            </div>
-            <div class="level-tab" style="text-align: center; color: #94a3b8;">
-                <div style="font-size: 18px;">0</div>
-                <div style="font-size: 12px;">D-4%</div>
-            </div>
-        </div>
-
-        <div class="team-list-section" style="padding: 0 20px;">
-            <h4 style="margin-bottom: 15px; font-size: 14px; color: var(--text-muted);">Team Details</h4>
-            <div id="team-members-container">
-                <div style="text-align: center; padding: 40px; color: #cbd5e1;">
-                    <i class="fas fa-users-slash" style="font-size: 40px; margin-bottom: 10px;"></i>
-                    <p>Tiada ahli pasukan lagi.</p>
+                    <h4 id="teamCommission">RM 0.00</h4>
+                    <p>Total Komisen</p>
                 </div>
             </div>
         </div>
 
-        <div class="bottom-nav">
-            <a href="dashboard.html" class="nav-link"><i class="fas fa-home"></i><span>Home</span></a>
-            <a href="product_list.html" class="nav-link"><i class="fas fa-box"></i><span>Product</span></a>
-            <a href="profile.html" class="nav-link active"><i class="fas fa-user"></i><span>Me</span></a>
+        <div style="display: flex; background: white; margin: 15px; border-radius: 12px; padding: 5px; box-shadow: var(--shadow);">
+            <div class="level-tab active" onclick="switchLevel(1)" id="tab1" style="text-align: center; flex: 1; padding: 10px; cursor: pointer; font-size: 13px; font-weight: bold;">Level 1</div>
+            <div class="level-tab" onclick="switchLevel(2)" id="tab2" style="text-align: center; flex: 1; padding: 10px; cursor: pointer; font-size: 13px; font-weight: bold;">Level 2</div>
+            <div class="level-tab" onclick="switchLevel(3)" id="tab3" style="text-align: center; flex: 1; padding: 10px; cursor: pointer; font-size: 13px; font-weight: bold;">Level 3</div>
         </div>
+
+        <div class="icon-menu-container" style="background: transparent; box-shadow: none;">
+            <div id="teamList" class="team-list-section">
+                <p style="text-align: center; color: var(--text-muted); padding: 20px;">Memuatkan data pasukan...</p>
+            </div>
+        </div>
+
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="product_list.html" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Produk</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user-circle"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
     </div>
 
     <script src="app.js"></script>
     <script>
-        async function fetchTeam() {
+        let currentLevel = 1;
+
+        async function loadTeamData(level) {
             const { data: { user } } = await client.auth.getUser();
             if (!user) return;
 
-            const myRefCode = user.id.substring(0, 6).toUpperCase();
-            
-            // Ambil ahli yang mendaftar menggunakan kod anda (Level B)
-            const { data: team, error } = await client
+            const listContainer = document.getElementById('teamList');
+            listContainer.innerHTML = '<p style="text-align: center; padding: 20px;">Mencari ahli...</p>';
+
+            // Nota: Logik ini bergantung kepada struktur table 'profiles' anda yang mempunyai kolum 'referred_by'
+            const { data, error } = await client
                 .from('profiles')
                 .select('email, created_at')
-                .eq('referred_by', myRefCode);
+                .eq('referred_by', user.id); // Ini untuk Level 1
 
-            if (team && team.length > 0) {
-                document.getElementById('total-team').innerText = team.length;
-                const container = document.getElementById('team-members-container');
-                container.innerHTML = ''; // Kosongkan placeholder
-
-                team.forEach(member => {
+            if (data && data.length > 0) {
+                listContainer.innerHTML = '';
+                data.forEach(member => {
                     const date = new Date(member.created_at).toLocaleDateString();
-                    container.innerHTML += `
-                        <div style="background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
-                            <div>
-                                <div style="font-weight: bold; font-size: 14px;">${member.email}</div>
-                                <div style="font-size: 11px; color: #94a3b8;">Sertai: ${date}</div>
+                    listContainer.innerHTML += `
+                        <div class="menu-list-item" style="background: white; margin-bottom: 10px; border-radius: 12px; border: none;">
+                            <div class="menu-left">
+                                <div style="width: 35px; height: 35px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div>
+                                    <span style="display: block; font-weight: bold;">${member.email.split('@')[0]}</span>
+                                    <span style="font-size: 11px; color: #888;">Sertai: ${date}</span>
+                                </div>
                             </div>
-                            <div style="color: var(--success); font-weight: bold; font-size: 12px;">Level B</div>
+                            <span style="font-size: 11px; background: #e8f5e9; color: #2e7d32; padding: 4px 8px; border-radius: 5px;">Aktif</span>
                         </div>
                     `;
                 });
+                document.getElementById('teamSize').innerText = data.length;
+            } else {
+                listContainer.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Tiada ahli di tahap ini.</p>';
             }
         }
-        window.onload = fetchTeam;
+
+        function switchLevel(lvl) {
+            // Reset active tabs
+            document.querySelectorAll('.level-tab').forEach(t => {
+                t.style.background = 'transparent';
+                t.style.color = 'var(--text-main)';
+            });
+            
+            // Set active
+            const activeTab = document.getElementById('tab' + lvl);
+            activeTab.style.background = 'var(--primary)';
+            activeTab.style.color = 'white';
+            activeTab.style.borderRadius = '10px';
+            
+            loadTeamData(lvl);
+        }
+
+        window.onload = () => switchLevel(1);
     </script>
 </body>
 </html>
-
