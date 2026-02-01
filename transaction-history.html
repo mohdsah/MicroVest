@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekod Transaksi - MicroVest</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <div class="app-shell">
+        <div class="product-page-header">
+            <button onclick="history.back()" style="position: absolute; left: 20px; background: none; border: none; color: white; font-size: 20px;">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h2>Rekod Transaksi</h2>
+            <p>Sejarah aktiviti kewangan anda</p>
+        </div>
+
+        <div style="display: flex; gap: 10px; padding: 15px;">
+            <button class="level-tab active" style="flex: 1; font-size: 12px; border: 1px solid var(--primary);">Semua</button>
+        </div>
+
+        <div class="product-container" id="transactionList">
+            <p style="text-align: center; color: var(--text-muted); padding: 50px;">Memuatkan rekod...</p>
+        </div>
+
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="product_list.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Produk</span></a>
+            <a href="profile.html" class="nav-item active"><i class="fas fa-user-circle"></i><span>Profil</span></a>
+        </nav>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        async function loadTransactions() {
+            const { data: { user } } = await client.auth.getUser();
+            if (!user) return;
+
+            const listContainer = document.getElementById('transactionList');
+
+            // 1. Tarik data Recharge
+            const { data: recharges } = await client
+                .from('recharge_requests')
+                .select('amount, status, created_at')
+                .eq('user_id', user.id);
+
+            // 2. Tarik data Withdraw
+            const { data: withdraws } = await client
+                .from('withdrawals')
+                .select('amount, status, created_at')
+                .eq('user_id', user.id);
+
+            // Gabungkan dan susun mengikut tarikh (Terbaru di atas)
+            let allTransactions = [
+                ...(recharges || []).map(item => ({ ...item, type: 'RECHARGE', color: 'var(--success)' })),
+                ...(withdraws || []).map(item => ({ ...item, type: 'WITHDRAW', color: 'var(--danger)' }))
+            ];
+
+            allTransactions.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            if (allTransactions.length === 0) {
+                listContainer.innerHTML = '<p style="text-align: center; padding: 50px; color: #888;">Tiada rekod transaksi dijumpai.</p>';
+                return;
+            }
+
+            listContainer.innerHTML = '';
+            allTransactions.forEach(item => {
+                const date = new Date(item.created_at).toLocaleString('ms-MY', { 
+                    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' 
+                });
+
+                const statusColor = item.status === 'approved' ? '#10b981' : (item.status === 'pending' ? '#f59e0b' : '#ef4444');
+
+                listContainer.innerHTML += `
+                    <div class="plan-item" style="margin-bottom: 10px; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="width: 40px; height: 40px; border-radius: 10px; background: #f8fafc; display: flex; align-items: center; justify-content: center; color: ${item.color};">
+                                <i class="fas ${item.type === 'RECHARGE' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+                            </div>
+                            <div>
+                                <h4 style="font-size: 14px; margin: 0;">${item.type}</h4>
+                                <span style="font-size: 11px; color: #94a3b8;">${date}</span>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="font-weight: 800; color: var(--text-main); margin: 0;">RM ${item.amount.toFixed(2)}</p>
+                            <span style="font-size: 10px; font-weight: 700; color: ${statusColor}; text-transform: uppercase;">${item.status}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        window.onload = loadTransactions;
+    </script>
+</body>
+</html>
+
