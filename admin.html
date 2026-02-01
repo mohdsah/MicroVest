@@ -3,200 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Control - MicroVest</title>
+    <title>Admin Panel - MicroVest</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --primary: #800000; --success: #10b981; --danger: #ef4444; }
-        body { background: #f4f7f6; font-family: sans-serif; }
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .stat-card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-top: 4px solid var(--primary); }
-        .stat-card h4 { margin: 0; font-size: 10px; color: #666; text-transform: uppercase; }
-        .stat-card p { margin: 5px 0 0; font-size: 18px; font-weight: bold; color: var(--primary); }
+        :root { --primary: #800000; --success: #10b981; --danger: #ef4444; --blue: #2196F3; }
+        body { background: #f8fafc; font-family: 'Segoe UI', sans-serif; }
         
-        .tab-btn-container { display: flex; margin: 10px 15px; background: #ddd; border-radius: 8px; overflow: hidden; }
-        .tab-btn { flex: 1; padding: 12px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .tab-btn.active { background: var(--primary); color: white; }
+        .admin-header { background: var(--primary); color: white; padding: 20px; text-align: center; border-radius: 0 0 20px 20px; }
+        
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
+        .stat-card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; }
+        .stat-card h4 { margin: 0; font-size: 10px; color: #888; text-transform: uppercase; }
+        .stat-card p { margin: 5px 0 0; font-size: 18px; font-weight: bold; color: var(--primary); }
 
-        .request-item { background: white; margin: 10px 15px; padding: 15px; border-radius: 12px; border-left: 5px solid var(--primary); }
-        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-act { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; }
-        .btn-lulus { background: var(--success); }
-        .btn-tolak { background: var(--danger); }
+        .tab-btn-container { display: flex; margin: 10px 15px; background: #e2e8f0; border-radius: 10px; padding: 5px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; background: none; cursor: pointer; font-weight: bold; border-radius: 8px; font-size: 12px; }
+        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        .list-container { padding: 10px 15px 100px 15px; }
+        .card-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
+        .card-item.recharge { border-left: 5px solid var(--success); }
+        .card-item.withdraw { border-left: 5px solid var(--danger); }
+        .card-item.user { border-left: 5px solid var(--blue); }
+
+        .btn-group { display: flex; gap: 8px; margin-top: 12px; }
+        .btn { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; font-size: 11px; }
+        .btn-approve { background: var(--success); }
+        .btn-reject { background: var(--danger); }
+        .btn-edit { background: var(--blue); }
+        
+        .badge { font-size: 9px; padding: 2px 6px; background: #eee; border-radius: 4px; color: #666; }
     </style>
 </head>
 <body>
 
-    <div class="app-shell">
-        <div class="product-page-header">
-            <h2>Admin Control Panel</h2>
-            <p id="adminStatus">Sila semak permohonan ahli</p>
-        </div>
-
-        <div class="stat-grid">
-            <div class="stat-card">
-                <h4>Total Deposit</h4>
-                <p id="totalDepo">RM 0.00</p>
-            </div>
-            <div class="stat-card">
-                <h4>Total Withdraw</h4>
-                <p id="totalWith">RM 0.00</p>
-            </div>
-        </div>
-
-        <div class="tab-btn-container">
-    <button id="btnTabDepo" class="tab-btn active" onclick="switchTab('recharge')">DEPOSIT</button>
-    <button id="btnTabWith" class="tab-btn" onclick="switchTab('withdraw')">WITHDRAW</button>
-    <button id="btnTabUsers" class="tab-btn" onclick="switchTab('users')">USERS</button>
-</div>
-
-
-        <div id="requestList" style="padding-bottom: 100px;">
-            <p style="text-align: center; margin-top: 50px; color: #888;">Memuatkan data...</p>
-        </div>
-
-        <nav class="bottom-nav">
-            <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
-            <a href="admin.html" class="nav-item active"><i class="fas fa-user-shield"></i><span>Admin</span></a>
-        </nav>
+    <div class="admin-header">
+        <h2 style="margin:0;">Control Center</h2>
+        <p style="margin:5px 0 0; font-size: 12px; opacity: 0.8;">Uruskan Deposit, Pengeluaran & Ahli</p>
     </div>
 
-    // Fungsi untuk memaparkan senarai user
-function renderUserList(users) {
-    const list = document.getElementById('requestList');
-    list.innerHTML = '';
-    if (!users) return;
+    <div class="stat-grid">
+        <div class="stat-card">
+            <h4>Total Deposit</h4>
+            <p id="totalDepo">RM 0.00</p>
+        </div>
+        <div class="stat-card">
+            <h4>Total Withdraw</h4>
+            <p id="totalWith">RM 0.00</p>
+        </div>
+    </div>
 
-    users.forEach(u => {
-        list.innerHTML += `
-            <div class="request-item" style="border-left: 5px solid #2196F3;">
-                <p style="font-size: 10px; color: #999; margin:0;">Email: ${u.email}</p>
-                <h3 style="margin: 5px 0;">Baki: RM ${u.balance.toFixed(2)}</h3>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button onclick="editBalance('${u.id}', ${u.balance})" style="flex:1; padding: 8px; background: #2196F3; color: white; border: none; border-radius: 5px; font-size: 11px; font-weight: bold;">EDIT BAKI</button>
-                    <button onclick="deleteUser('${u.id}')" style="flex:1; padding: 8px; background: #ef4444; color: white; border: none; border-radius: 5px; font-size: 11px; font-weight: bold;">PADAM</button>
-                </div>
-            </div>`;
-    });
-}
+    <div class="tab-btn-container">
+        <button id="tabDepo" class="tab-btn active" onclick="switchTab('recharge')">DEPOSIT</button>
+        <button id="tabWith" class="tab-btn" onclick="switchTab('withdraw')">WITHDRAW</button>
+        <button id="tabUsers" class="tab-btn" onclick="switchTab('users')">USERS</button>
+    </div>
 
-// Fungsi Edit Baki
-async function editBalance(id, oldBal) {
-    const newBal = prompt("Masukkan baki baru (RM):", oldBal);
-    if (newBal === null) return;
-    await client.from('profiles').update({ balance: parseFloat(newBal) }).eq('id', id);
-    alert("Baki dikemaskini!");
-    loadRequests();
-}
+    <div id="mainContent" class="list-container">
+        <p style="text-align: center; color: #888; margin-top: 50px;">Memuatkan data...</p>
+    </div>
 
-// Fungsi Padam User
-async function deleteUser(id) {
-    if (!confirm("Padam akaun ini secara kekal?")) return;
-    await client.from('profiles').delete().eq('id', id);
-    alert("User dipadam!");
-    loadRequests();
-}
-
-// Kemaskini fungsi switchTab sedia ada
-function switchTab(t) {
-    activeTab = t;
-    document.getElementById('btnTabDepo').classList.toggle('active', t === 'recharge');
-    document.getElementById('btnTabWith').classList.toggle('active', t === 'withdraw');
-    document.getElementById('btnTabUsers').classList.toggle('active', t === 'users');
-    loadRequests();
-}
-
+    <nav class="bottom-nav">
+        <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="admin.html" class="nav-item active"><i class="fas fa-user-shield"></i><span>Admin</span></a>
+    </nav>
 
     <script src="app.js"></script>
     <script>
-        let activeTab = 'recharge';
+        let currentTab = 'recharge';
 
+        // 1. Jalankan fungsi utama
         async function initAdmin() {
             await loadStats();
-            await loadRequests();
+            await loadData();
         }
 
+        // 2. Kira Statistik (Deposit & Withdraw yang Berjaya)
         async function loadStats() {
-            // Kira Deposit Berjaya
             const { data: dData } = await client.from('recharge_requests').select('amount').eq('status', 'approved');
-            const totalD = dData ? dData.reduce((sum, i) => sum + i.amount, 0) : 0;
+            const totalD = dData ? dData.reduce((s, i) => s + i.amount, 0) : 0;
             document.getElementById('totalDepo').innerText = `RM ${totalD.toFixed(2)}`;
 
-            // Kira Withdraw Berjaya
             const { data: wData } = await client.from('withdrawals').select('amount').eq('status', 'approved');
-            const totalW = wData ? wData.reduce((sum, i) => sum + i.amount, 0) : 0;
+            const totalW = wData ? wData.reduce((s, i) => s + i.amount, 0) : 0;
             document.getElementById('totalWith').innerText = `RM ${totalW.toFixed(2)}`;
         }
 
-        async function loadRequests() {
-    const list = document.getElementById('requestList');
-    
-    // Jika tab 'users' dipilih
-    if (activeTab === 'users') {
-        const { data, error } = await client.from('profiles').select('*').order('created_at', { ascending: false });
-        renderUserList(data);
-        return;
-    }
+        // 3. Tarik Data Berdasarkan Tab
+        async function loadData() {
+            const content = document.getElementById('mainContent');
+            content.innerHTML = '<p style="text-align: center; color: #888; margin-top: 50px;">Sedang memproses...</p>';
 
-    // Jika tab 'recharge' atau 'withdraw' dipilih
-    const table = activeTab === 'recharge' ? 'recharge_requests' : 'withdrawals';
-    const { data, error } = await client.from(table).select('*').eq('status', 'pending').order('created_at', { ascending: false });
+            if (currentTab === 'users') {
+                const { data } = await client.from('profiles').select('*').order('created_at', { ascending: false });
+                renderUsers(data);
+            } else {
+                const table = currentTab === 'recharge' ? 'recharge_requests' : 'withdrawals';
+                const { data } = await client.from(table).select('*').eq('status', 'pending').order('created_at', { ascending: false });
+                renderRequests(data);
+            }
+        }
 
-    if (!data || data.length === 0) {
-        list.innerHTML = `<p style="text-align:center; margin-top:50px;">Tiada permohonan baru.</p>`;
-        return;
-    }
+        // 4. Render Senarai Deposit/Withdraw
+        function renderRequests(items) {
+            const content = document.getElementById('mainContent');
+            if (!items || items.length === 0) {
+                content.innerHTML = `<p style="text-align:center; margin-top:50px; color:#888;">Tiada permohonan pending.</p>`;
+                return;
+            }
+            content.innerHTML = '';
+            items.forEach(item => {
+                content.innerHTML += `
+                    <div class="card-item ${currentTab}">
+                        <span class="badge">ID: ${item.user_id.substring(0,8)}</span>
+                        <h2 style="margin: 10px 0; color: var(--primary);">RM ${item.amount.toFixed(2)}</h2>
+                        ${currentTab === 'withdraw' ? `<p style="font-size: 11px; background:#f0f0f0; padding:5px; border-radius:4px;">${item.bank_info}</p>` : ''}
+                        <div class="btn-group">
+                            <button class="btn btn-approve" onclick="actionApprove('${item.id}', '${item.user_id}', ${item.amount})">LULUSKAN</button>
+                            <button class="btn btn-reject" onclick="actionReject('${item.id}')">TOLAK</button>
+                        </div>
+                    </div>`;
+            });
+        }
 
-    list.innerHTML = '';
-    data.forEach(item => {
-        list.innerHTML += `
-            <div class="request-item">
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="font-size: 11px; color: #999;">ID: ${item.user_id.substring(0,8)}</span>
-                    <span style="font-size: 11px; color: #999;">${new Date(item.created_at).toLocaleDateString()}</span>
-                </div>
-                <h2 style="margin: 10px 0; color: var(--primary);">RM ${item.amount.toFixed(2)}</h2>
-                ${activeTab === 'withdraw' ? `<p style="font-size: 12px; color: #666;">Bank: ${item.bank_info}</p>` : ''}
-                <div class="btn-group">
-                    <button class="btn-act btn-lulus" onclick="approveRequest('${item.id}', '${item.user_id}', ${item.amount})">LULUSKAN</button>
-                    <button class="btn-act btn-tolak" onclick="rejectRequest('${item.id}')">TOLAK</button>
-                </div>
-            </div>`;
-    });
-}
+        // 5. Render Senarai Pengguna
+        function renderUsers(users) {
+            const content = document.getElementById('mainContent');
+            content.innerHTML = '';
+            users.forEach(u => {
+                content.innerHTML += `
+                    <div class="card-item user">
+                        <p style="font-size: 11px; color: #888; margin:0;">${u.email}</p>
+                        <h3 style="margin: 5px 0;">RM ${u.balance.toFixed(2)}</h3>
+                        <div class="btn-group">
+                            <button class="btn btn-edit" onclick="manualEditBalance('${u.id}', ${u.balance})">EDIT BAKI</button>
+                            <button class="btn btn-reject" onclick="manualDeleteUser('${u.id}')">PADAM</button>
+                        </div>
+                    </div>`;
+            });
+        }
 
+        // --- FUNGSI TINDAKAN ---
 
-        async function approveRequest(id, userId, amount) {
-            if(!confirm("Luluskan permohonan ini?")) return;
-
-            if (activeTab === 'recharge') {
-                // Ambil baki semasa & tambah
+        async function actionApprove(id, userId, amount) {
+            if (!confirm("Sahkan kelulusan?")) return;
+            if (currentTab === 'recharge') {
                 const { data: p } = await client.from('profiles').select('balance').eq('id', userId).single();
                 await client.from('profiles').update({ balance: p.balance + amount }).eq('id', userId);
                 await client.from('recharge_requests').update({ status: 'approved' }).eq('id', id);
             } else {
-                // Withdraw: Hanya tukar status (baki biasanya ditolak masa user mohon)
                 await client.from('withdrawals').update({ status: 'approved' }).eq('id', id);
             }
-            
-            alert("Berjaya Diluluskan!");
-            initAdmin();
+            alert("Berjaya!"); initAdmin();
         }
 
-        async function rejectRequest(id) {
-            if(!confirm("Tolak permohonan ini?")) return;
-            const table = activeTab === 'recharge' ? 'recharge_requests' : 'withdrawals';
+        async function actionReject(id) {
+            if (!confirm("Tolak permohonan ini?")) return;
+            const table = currentTab === 'recharge' ? 'recharge_requests' : 'withdrawals';
             await client.from(table).update({ status: 'rejected' }).eq('id', id);
-            alert("Permohonan ditolak.");
-            initAdmin();
+            alert("Ditolak."); initAdmin();
+        }
+
+        async function manualEditBalance(id, old) {
+            const val = prompt("Masukkan baki baru:", old);
+            if (val === null) return;
+            await client.from('profiles').update({ balance: parseFloat(val) }).eq('id', id);
+            alert("Baki dikemaskini!"); initAdmin();
+        }
+
+        async function manualDeleteUser(id) {
+            if (!confirm("Padam user ini secara kekal?")) return;
+            await client.from('profiles').delete().eq('id', id);
+            alert("User dipadam."); initAdmin();
         }
 
         function switchTab(t) {
-            activeTab = t;
-            document.getElementById('btnTabDepo').classList.toggle('active', t === 'recharge');
-            document.getElementById('btnTabWith').classList.toggle('active', t === 'withdraw');
-            loadRequests();
+            currentTab = t;
+            document.getElementById('tabDepo').classList.toggle('active', t === 'recharge');
+            document.getElementById('tabWith').classList.toggle('active', t === 'withdraw');
+            document.getElementById('tabUsers').classList.toggle('active', t === 'users');
+            loadData();
         }
 
         window.onload = initAdmin;
