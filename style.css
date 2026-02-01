@@ -188,3 +188,35 @@ input:focus {
     font-weight: 600;
     color: var(--text-main);
 }
+
+/* Profile Menu Styles */
+.profile-menu {
+    margin-top: 20px;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: #f8fafc;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.menu-item:hover {
+    background: #f1f5f9;
+}
+
+.menu-item i {
+    width: 30px;
+    color: var(--primary);
+    font-size: 18px;
+}
+
+.menu-item span {
+    font-size: 14px;
+    color: var(--text-main);
+    font-weight: 500;
+}
