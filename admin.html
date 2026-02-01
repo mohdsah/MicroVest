@@ -46,9 +46,11 @@
         </div>
 
         <div class="tab-btn-container">
-            <button id="btnTabDepo" class="tab-btn active" onclick="switchTab('recharge')">DEPOSIT</button>
-            <button id="btnTabWith" class="tab-btn" onclick="switchTab('withdraw')">WITHDRAW</button>
-        </div>
+    <button id="btnTabDepo" class="tab-btn active" onclick="switchTab('recharge')">DEPOSIT</button>
+    <button id="btnTabWith" class="tab-btn" onclick="switchTab('withdraw')">WITHDRAW</button>
+    <button id="btnTabUsers" class="tab-btn" onclick="switchTab('users')">USERS</button>
+</div>
+
 
         <div id="requestList" style="padding-bottom: 100px;">
             <p style="text-align: center; margin-top: 50px; color: #888;">Memuatkan data...</p>
@@ -59,6 +61,52 @@
             <a href="admin.html" class="nav-item active"><i class="fas fa-user-shield"></i><span>Admin</span></a>
         </nav>
     </div>
+
+    // Fungsi untuk memaparkan senarai user
+function renderUserList(users) {
+    const list = document.getElementById('requestList');
+    list.innerHTML = '';
+    if (!users) return;
+
+    users.forEach(u => {
+        list.innerHTML += `
+            <div class="request-item" style="border-left: 5px solid #2196F3;">
+                <p style="font-size: 10px; color: #999; margin:0;">Email: ${u.email}</p>
+                <h3 style="margin: 5px 0;">Baki: RM ${u.balance.toFixed(2)}</h3>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button onclick="editBalance('${u.id}', ${u.balance})" style="flex:1; padding: 8px; background: #2196F3; color: white; border: none; border-radius: 5px; font-size: 11px; font-weight: bold;">EDIT BAKI</button>
+                    <button onclick="deleteUser('${u.id}')" style="flex:1; padding: 8px; background: #ef4444; color: white; border: none; border-radius: 5px; font-size: 11px; font-weight: bold;">PADAM</button>
+                </div>
+            </div>`;
+    });
+}
+
+// Fungsi Edit Baki
+async function editBalance(id, oldBal) {
+    const newBal = prompt("Masukkan baki baru (RM):", oldBal);
+    if (newBal === null) return;
+    await client.from('profiles').update({ balance: parseFloat(newBal) }).eq('id', id);
+    alert("Baki dikemaskini!");
+    loadRequests();
+}
+
+// Fungsi Padam User
+async function deleteUser(id) {
+    if (!confirm("Padam akaun ini secara kekal?")) return;
+    await client.from('profiles').delete().eq('id', id);
+    alert("User dipadam!");
+    loadRequests();
+}
+
+// Kemaskini fungsi switchTab sedia ada
+function switchTab(t) {
+    activeTab = t;
+    document.getElementById('btnTabDepo').classList.toggle('active', t === 'recharge');
+    document.getElementById('btnTabWith').classList.toggle('active', t === 'withdraw');
+    document.getElementById('btnTabUsers').classList.toggle('active', t === 'users');
+    loadRequests();
+}
+
 
     <script src="app.js"></script>
     <script>
@@ -82,39 +130,42 @@
         }
 
         async function loadRequests() {
-            const list = document.getElementById('requestList');
-            const table = activeTab === 'recharge' ? 'recharge_requests' : 'withdrawals';
-            
-            const { data, error } = await client
-                .from(table)
-                .select('*')
-                .eq('status', 'pending')
-                .order('created_at', { ascending: false });
+    const list = document.getElementById('requestList');
+    
+    // Jika tab 'users' dipilih
+    if (activeTab === 'users') {
+        const { data, error } = await client.from('profiles').select('*').order('created_at', { ascending: false });
+        renderUserList(data);
+        return;
+    }
 
-            if (!data || data.length === 0) {
-                list.innerHTML = `<p style="text-align:center; margin-top:50px;">Tiada permohonan baru.</p>`;
-                return;
-            }
+    // Jika tab 'recharge' atau 'withdraw' dipilih
+    const table = activeTab === 'recharge' ? 'recharge_requests' : 'withdrawals';
+    const { data, error } = await client.from(table).select('*').eq('status', 'pending').order('created_at', { ascending: false });
 
-            list.innerHTML = '';
-            data.forEach(item => {
-                list.innerHTML += `
-                    <div class="request-item">
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="font-size: 11px; color: #999;">ID: ${item.user_id.substring(0,8)}</span>
-                            <span style="font-size: 11px; color: #999;">${new Date(item.created_at).toLocaleDateString()}</span>
-                        </div>
-                        <h2 style="margin: 10px 0; color: var(--primary);">RM ${item.amount.toFixed(2)}</h2>
-                        ${activeTab === 'withdraw' ? `<p style="font-size: 12px; color: #666;">Bank: ${item.bank_info}</p>` : ''}
-                        
-                        <div class="btn-group">
-                            <button class="btn-act btn-lulus" onclick="approveRequest('${item.id}', '${item.user_id}', ${item.amount})">LULUSKAN</button>
-                            <button class="btn-act btn-tolak" onclick="rejectRequest('${item.id}')">TOLAK</button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
+    if (!data || data.length === 0) {
+        list.innerHTML = `<p style="text-align:center; margin-top:50px;">Tiada permohonan baru.</p>`;
+        return;
+    }
+
+    list.innerHTML = '';
+    data.forEach(item => {
+        list.innerHTML += `
+            <div class="request-item">
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-size: 11px; color: #999;">ID: ${item.user_id.substring(0,8)}</span>
+                    <span style="font-size: 11px; color: #999;">${new Date(item.created_at).toLocaleDateString()}</span>
+                </div>
+                <h2 style="margin: 10px 0; color: var(--primary);">RM ${item.amount.toFixed(2)}</h2>
+                ${activeTab === 'withdraw' ? `<p style="font-size: 12px; color: #666;">Bank: ${item.bank_info}</p>` : ''}
+                <div class="btn-group">
+                    <button class="btn-act btn-lulus" onclick="approveRequest('${item.id}', '${item.user_id}', ${item.amount})">LULUSKAN</button>
+                    <button class="btn-act btn-tolak" onclick="rejectRequest('${item.id}')">TOLAK</button>
+                </div>
+            </div>`;
+    });
+}
+
 
         async function approveRequest(id, userId, amount) {
             if(!confirm("Luluskan permohonan ini?")) return;
