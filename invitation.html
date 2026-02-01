@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jemput Kawan - MicroVest</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="app-shell gray-bg">
+        <nav class="top-nav" style="padding: 15px;">
+            <a href="dashboard.html" style="text-decoration:none; color:var(--text-main)">
+                <i class="fas fa-arrow-left"></i> Kembali
+            </a>
+        </nav>
+
+        <div class="invitation-header" style="background: var(--primary-red); color: white; padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px;">
+            <i class="fas fa-gift" style="font-size: 50px; margin-bottom: 15px;"></i>
+            <h2>Jemput & Jana Wang</h2>
+            <p>Kongsi pautan anda dan dapatkan komisen dari setiap pelaburan rakan anda.</p>
+        </div>
+
+        <div class="invite-card" style="background: white; margin: -30px 20px 20px; padding: 25px; border-radius: 20px; box-shadow: var(--shadow); text-align: center;">
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 10px;">Kod Jemputan Anda</p>
+            <h3 id="referral-code" style="font-size: 24px; letter-spacing: 2px; color: var(--primary-red); margin-bottom: 20px;">Memuatkan...</h3>
+            
+            <button onclick="copyInviteLink()" style="width: 100%; padding: 15px; border: none; background: var(--primary-red); color: white; border-radius: 12px; font-weight: bold; cursor: pointer;">
+                Salin Pautan Jemputan
+            </button>
+        </div>
+
+        <div class="commission-info" style="padding: 20px;">
+            <h4 style="margin-bottom: 15px;">Tahap Komisen</h4>
+            <div style="background: white; border-radius: 15px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee;">
+                    <span>Level B</span> <b>13%</b>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee;">
+                    <span>Level C</span> <b>7%</b>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 10px 0;">
+                    <span>Level D</span> <b>4%</b>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <a href="dashboard.html" class="nav-link active"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="product_list.html" class="nav-link"><i class="fas fa-box"></i><span>Product</span></a>
+            <a href="profile.html" class="nav-link"><i class="fas fa-user"></i><span>Me</span></a>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        async function loadInviteData() {
+            const { data: { user } } = await client.auth.getUser();
+            if (user) {
+                // Gunakan 6 digit terakhir ID user sebagai kod
+                const code = user.id.substring(0, 6).toUpperCase();
+                document.getElementById('referral-code').innerText = code;
+            }
+        }
+
+        function copyInviteLink() {
+            const code = document.getElementById('referral-code').innerText;
+            const link = window.location.origin + "/register.html?ref=" + code;
+            
+            navigator.clipboard.writeText(link).then(() => {
+                alert("Pautan jemputan telah disalin!");
+            });
+        }
+
+        window.onload = loadInviteData;
+    </script>
+</body>
+</html>
+
