@@ -1,48 +1,190 @@
-:root { --blue: #3b82f6; --dark: #1e293b; --white: #ffffff; }
-body { background: #f1f5f9; margin: 0; font-family: sans-serif; display: flex; justify-content: center; }
-.app-container { width: 100%; max-width: 450px; background: white; min-height: 100vh; position: relative; }
-.page { display: none; padding: 25px; }
-.page.active { display: block; }
+/* 1. Tetapan Asas & Warna */
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1e40af;
+    --success: #10b981;
+    --danger: #ef4444;
+    --bg: #f8fafc;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --white: #ffffff;
+}
 
-/* Logo Section */
-.logo-container { text-align: center; margin-bottom: 40px; margin-top: 60px; }
-.logo-icon { width: 60px; height: 60px; background: var(--blue); color: white; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: bold; margin: 0 auto; box-shadow: 0 5px 15px rgba(59,130,246,0.3); }
-.logo-text { font-size: 24px; font-weight: 800; color: var(--dark); margin-top: 10px; }
-.logo-text span { color: var(--blue); }
+* {
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, sans-serif;
+    margin: 0;
+    padding: 0;
+}
 
-/* Inputs & Buttons */
-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
-.btn-primary { width: 100%; padding: 14px; background: var(--blue); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
-.btn-secondary { width: 100%; padding: 12px; background: none; color: var(--dark); border: none; font-weight: 500; cursor: pointer; margin-top: 10px; text-decoration: underline; }
+body {
+    background-color: #e2e8f0;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
 
-/* Header & Balance */
-.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.logout-icon { background: none; border: none; color: red; font-size: 20px; }
-.balance-card { background: var(--blue); color: white; padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 10px 20px rgba(59,130,246,0.2); }
+/* 2. Bekas Aplikasi (App Shell) */
+.app-shell {
+    width: 100%;
+    max-width: 450px; /* Saiz telefon pintar */
+    background: var(--white);
+    min-height: 100vh;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    position: relative;
+    padding: 20px;
+}
 
-/* Grid Actions */
-.action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 25px 0; }
-.action-btn { text-align: center; font-size: 11px; font-weight: bold; color: var(--dark); }
-.action-btn i { width: 45px; height: 45px; background: #eff6ff; color: var(--blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; font-size: 18px; }
+/* 3. Gaya Halaman & Animasi */
+.page {
+    animation: fadeIn 0.4s ease;
+}
 
-.plan-card { border: 1px solid #e2e8f0; padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.plan-card button { background: var(--dark); color: white; border: none; padding: 8px 15px; border-radius: 20px; font-size: 12px; }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
-/* Tambah dalam style.css sedia ada */
-.switch-text {
+/* 4. Reka Bentuk Header & Logo */
+.auth-header {
     text-align: center;
+    margin: 50px 0 30px;
+}
+
+.brand-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--primary), #60a5fa);
+    color: white;
+    font-size: 32px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 18px;
+    margin: 0 auto 15px;
+    box-shadow: 0 10px 15px rgba(37, 99, 235, 0.2);
+}
+
+.brand-icon.reg { background: linear-gradient(135deg, var(--success), #34d399); }
+
+h1 { font-size: 26px; color: var(--text-main); margin-bottom: 5px; }
+h1 span { color: var(--primary); }
+.auth-header p { color: var(--text-muted); font-size: 14px; }
+
+/* 5. Input & Butang */
+.form-group {
     margin-top: 20px;
-    font-size: 14px;
-    color: #64748b;
 }
 
-.switch-text span {
-    color: var(--blue);
-    font-weight: bold;
+input {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: white;
+}
+
+.btn-main {
+    width: 100%;
+    padding: 16px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 16px;
     cursor: pointer;
-    text-decoration: underline;
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
 }
 
-.auth-box {
-    padding: 0 10px;
+.btn-main:active { transform: scale(0.98); }
+.btn-reg { background: var(--success); }
+
+.footer-link {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.footer-link a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+/* 6. Dashboard Styles */
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 20px;
+}
+
+#user-display-name {
+    font-weight: 700;
+    color: var(--text-main);
+    font-size: 16px;
+}
+
+.btn-logout {
+    background: #fee2e2;
+    color: var(--danger);
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.main-card {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    padding: 25px;
+    border-radius: 20px;
+    color: white;
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+    margin-bottom: 25px;
+}
+
+.main-card p { opacity: 0.8; font-size: 13px; margin-bottom: 5px; }
+.main-card h2 { font-size: 32px; letter-spacing: 1px; }
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.action-item {
+    background: #f1f5f9;
+    padding: 15px;
+    border-radius: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.action-item:hover { background: #e2e8f0; }
+
+.icon-box {
+    font-size: 20px;
+    color: var(--primary);
+    margin-bottom: 5px;
+}
+
+.action-item span {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-main);
 }
