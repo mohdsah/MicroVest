@@ -1,85 +1,55 @@
-// CONFIG SUPABASE
 const _url = 'https://rgrsqgalhzponuqdkrpd.supabase.co';
 const _key = 'sb_publishable_5A42jyOUzPOEa9F6OmFGww_nApDPmoM';
-
 const { createClient } = supabase;
 const client = createClient(_url, _key);
 
-// FUNGSI NAVIGASI
-function showPage(id) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+// LOG MASUK
+async function handleSignIn() {
+    const user = document.getElementById('login-username').value;
+    const pass = document.getElementById('login-password').value;
+    const { data, error } = await client.auth.signInWithPassword({
+        email: `${user}@microvest.com`,
+        password: pass
+    });
+    if (error) alert("Gagal: " + error.message);
+    else window.location.href = 'dashboard.html';
 }
 
-// 1. DAFTAR AKAUN (Konsep Username)
+// DAFTAR
 async function handleSignUp() {
-    const user = document.getElementById('username').value.trim();
-    const pass = document.getElementById('password').value;
-    
-    if(!user || !pass) return alert("Isi semua ruangan!");
-
-    // Samarkan username jadi email untuk Supabase Auth
-    const fakeEmail = `${user}@microvest.com`;
-
-    const { data, error } = await client.auth.signUp({ 
-        email: fakeEmail, 
-        password: pass 
+    const user = document.getElementById('reg-username').value;
+    const pass = document.getElementById('reg-password').value;
+    const { data, error } = await client.auth.signUp({
+        email: `${user}@microvest.com`,
+        password: pass
     });
-
-    if (error) {
-        alert(error.message);
-    } else {
-        // Simpan rekod ke table 'profiles'
-        const { error: dbError } = await client.from('profiles').insert([
-            { id: data.user.id, email: user, balance: 0.00 }
-        ]);
-        
-        if(dbError) console.error(dbError);
-        alert("Pendaftaran Berjaya! Sila Log Masuk.");
+    if (error) alert("Ralat: " + error.message);
+    else {
+        await client.from('profiles').insert([{ id: data.user.id, email: user, balance: 0.00 }]);
+        alert("Berjaya! Sila Log Masuk.");
+        window.location.href = 'index.html';
     }
 }
 
-// 2. LOG MASUK
-async function handleSignIn() {
-    const user = document.getElementById('username').value.trim();
-    const pass = document.getElementById('password').value;
-    const fakeEmail = `${user}@microvest.com`;
-
-    const { data, error } = await client.auth.signInWithPassword({ 
-        email: fakeEmail, 
-        password: pass 
-    });
-    
-    if (error) alert("Gagal Log Masuk: Username atau Kata Laluan Salah.");
-    else checkUser();
+// LOGOUT
+async function handleLogout() {
+    await client.auth.signOut();
+    window.location.href = 'index.html';
 }
 
-// 3. SEMAK STATUS USER (Auto-Login)
+// AMBIL DATA DASHBOARD (Hanya jalan di dashboard.html)
+if (window.location.pathname.includes('dashboard.html')) {
+    checkUser();
+}
+
 async function checkUser() {
     const { data: { user } } = await client.auth.getUser();
-    if (user) {
-        showPage('home-page');
-        // Ambil baki dari database
-        const { data: profile } = await client
-            .from('profiles')
-            .select('email, balance')
-            .eq('id', user.id)
-            .single();
-
+    if (!user) window.location.href = 'index.html';
+    else {
+        const { data: profile } = await client.from('profiles').select('*').eq('id', user.id).single();
         if (profile) {
             document.getElementById('user-display-name').innerText = profile.email;
             document.getElementById('balance-amount').innerText = `RM ${profile.balance.toFixed(2)}`;
         }
-    } else {
-        showPage('auth-page');
     }
 }
-
-// 4. LOG KELUAR
-async function handleLogout() {
-    await client.auth.signOut();
-    location.reload();
-}
-
-// Jalankan semakan setiap kali aplikasi dibuka
-checkUser();

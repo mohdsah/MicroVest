@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MicroVest - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="app-shell">
+        <nav class="top-nav">
+            <span id="user-display-name">Memuatkan...</span>
+            <button class="btn-logout" onclick="handleLogout()"><i class="fas fa-power-off"></i></button>
+        </nav>
+        <div class="main-card">
+            <p>Baki Tersedia</p>
+            <h2 id="balance-amount">RM 0.00</h2>
+        </div>
+        <div class="quick-actions">
+            <div class="action-item"><div class="icon-box"><i class="fas fa-plus"></i></div><span>Deposit</span></div>
+            <div class="action-item"><div class="icon-box"><i class="fas fa-wallet"></i></div><span>Keluaran</span></div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
