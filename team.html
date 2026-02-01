@@ -8,115 +8,91 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
+<body style="background: #f8fafc;">
 
     <div class="app-shell">
-        <div class="profile-red-header" style="padding-bottom: 60px;">
-            <i class="fas fa-users" style="font-size: 40px; margin-bottom: 10px;"></i>
-            <h3>Pasukan Saya</h3>
-            <p>Bina rangkaian dan jana komisen pasif</p>
+        <div class="product-page-header" style="background: #0056b3;">
+            <h2>Rangkaian Pasukan</h2>
+            <p>Jemput rakan & terima komisen 10%</p>
         </div>
 
-        <div class="stats-card" style="margin-top: -30px;">
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <h4 id="teamSize">0</h4>
-                    <p>Jumlah Ahli</p>
-                </div>
-                <div class="stat-box">
-                    <h4 id="teamCommission">RM 0.00</h4>
-                    <p>Total Komisen</p>
-                </div>
+        <div style="margin: 20px 15px; background: white; padding: 20px; border-radius: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Pautan Jemputan Anda</p>
+            <div style="display: flex; background: #f1f5f9; padding: 10px; border-radius: 10px; align-items: center;">
+                <input type="text" id="referralLink" readonly value="Memuatkan..." style="flex: 1; border: none; background: none; font-size: 12px; color: #333; outline: none;">
+                <button onclick="copyReferral()" style="background: #0056b3; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer;">SALIN</button>
             </div>
         </div>
 
-        <div style="display: flex; background: white; margin: 15px; border-radius: 12px; padding: 5px; box-shadow: var(--shadow);">
-            <div class="level-tab active" onclick="switchLevel(1)" id="tab1" style="text-align: center; flex: 1; padding: 10px; cursor: pointer; font-size: 13px; font-weight: bold;">Level 1</div>
-            <div class="level-tab" onclick="switchLevel(2)" id="tab2" style="text-align: center; flex: 1; padding: 10px; cursor: pointer; font-size: 13px; font-weight: bold;">Level 2</div>
-            <div class="level-tab" onclick="switchLevel(3)" id="tab3" style="text-align: center; flex: 1; padding: 10px; cursor: pointer; font-size: 13px; font-weight: bold;">Level 3</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 15px;">
+            <div style="background: white; padding: 15px; border-radius: 15px; text-align: center;">
+                <p style="font-size: 10px; color: #888; margin: 0;">AHLI AKTIF</p>
+                <h3 id="teamCount" style="margin: 5px 0; color: #0056b3;">0</h3>
+            </div>
+            <div style="background: white; padding: 15px; border-radius: 15px; text-align: center;">
+                <p style="font-size: 10px; color: #888; margin: 0;">TOTAL KOMISEN</p>
+                <h3 id="totalCommission" style="margin: 5px 0; color: #10b981;">RM 0.00</h3>
+            </div>
         </div>
 
-        <div class="icon-menu-container" style="background: transparent; box-shadow: none;">
-            <div id="teamList" class="team-list-section">
-                <p style="text-align: center; color: var(--text-muted); padding: 20px;">Memuatkan data pasukan...</p>
+        <div style="padding: 20px 15px;">
+            <h4 style="margin-bottom: 15px; color: #333;">Senarai Ahli (Level 1)</h4>
+            <div id="downlineList">
+                <p style="text-align: center; color: #999; font-size: 13px; margin-top: 30px;">Tiada ahli pasukan lagi.</p>
             </div>
         </div>
 
         <nav class="bottom-nav">
-            <a href="dashboard.html" class="nav-item">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
-            </a>
-            <a href="product_list.html" class="nav-item">
-                <i class="fas fa-chart-line"></i>
-                <span>Produk</span>
-            </a>
-            <a href="profile.html" class="nav-item">
-                <i class="fas fa-user-circle"></i>
-                <span>Profil</span>
-            </a>
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="product_list.html" class="nav-item"><i class="fas fa-box"></i><span>Produk</span></a>
+            <a href="profile.html" class="nav-item active"><i class="fas fa-user"></i><span>Profil</span></a>
         </nav>
     </div>
 
     <script src="app.js"></script>
     <script>
-        let currentLevel = 1;
-
-        async function loadTeamData(level) {
+        async function loadTeamData() {
             const { data: { user } } = await client.auth.getUser();
             if (!user) return;
 
-            const listContainer = document.getElementById('teamList');
-            listContainer.innerHTML = '<p style="text-align: center; padding: 20px;">Mencari ahli...</p>';
+            // 1. Set Pautan Jemputan (Guna ID User)
+            const refUrl = window.location.origin + "/register.html?ref=" + user.id;
+            document.getElementById('referralLink').value = refUrl;
 
-            // Nota: Logik ini bergantung kepada struktur table 'profiles' anda yang mempunyai kolum 'referred_by'
-            const { data, error } = await client
+            // 2. Tarik senarai downline dari table 'profiles'
+            const { data: downline, error } = await client
                 .from('profiles')
                 .select('email, created_at')
-                .eq('referred_by', user.id); // Ini untuk Level 1
+                .eq('referred_by', user.id);
 
-            if (data && data.length > 0) {
-                listContainer.innerHTML = '';
-                data.forEach(member => {
+            if (downline && downline.length > 0) {
+                document.getElementById('teamCount').innerText = downline.length;
+                const list = document.getElementById('downlineList');
+                list.innerHTML = '';
+
+                downline.forEach(member => {
                     const date = new Date(member.created_at).toLocaleDateString();
-                    listContainer.innerHTML += `
-                        <div class="menu-list-item" style="background: white; margin-bottom: 10px; border-radius: 12px; border: none;">
-                            <div class="menu-left">
-                                <div style="width: 35px; height: 35px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary);">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                                <div>
-                                    <span style="display: block; font-weight: bold;">${member.email.split('@')[0]}</span>
-                                    <span style="font-size: 11px; color: #888;">Sertai: ${date}</span>
-                                </div>
+                    list.innerHTML += `
+                        <div style="background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+                            <div>
+                                <p style="margin:0; font-weight: bold; font-size: 13px;">${member.email.split('@')[0]}***</p>
+                                <p style="margin:0; font-size: 10px; color: #999;">Sertai: ${date}</p>
                             </div>
-                            <span style="font-size: 11px; background: #e8f5e9; color: #2e7d32; padding: 4px 8px; border-radius: 5px;">Aktif</span>
+                            <span style="font-size: 10px; color: #10b981; font-weight: bold;">AKTIF</span>
                         </div>
                     `;
                 });
-                document.getElementById('teamSize').innerText = data.length;
-            } else {
-                listContainer.innerHTML = '<p style="text-align: center; color: #888; padding: 20px;">Tiada ahli di tahap ini.</p>';
             }
         }
 
-        function switchLevel(lvl) {
-            // Reset active tabs
-            document.querySelectorAll('.level-tab').forEach(t => {
-                t.style.background = 'transparent';
-                t.style.color = 'var(--text-main)';
-            });
-            
-            // Set active
-            const activeTab = document.getElementById('tab' + lvl);
-            activeTab.style.background = 'var(--primary)';
-            activeTab.style.color = 'white';
-            activeTab.style.borderRadius = '10px';
-            
-            loadTeamData(lvl);
+        function copyReferral() {
+            const copyText = document.getElementById("referralLink");
+            copyText.select();
+            navigator.clipboard.writeText(copyText.value);
+            alert("Pautan jemputan berjaya disalin!");
         }
 
-        window.onload = () => switchLevel(1);
+        window.onload = loadTeamData;
     </script>
 </body>
 </html>
