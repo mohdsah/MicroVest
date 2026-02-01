@@ -3,110 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MicroVest - Profile</title>
+    <title>Profil Saya - MicroVest</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div class="app-shell gray-bg">
+
+    <div class="app-shell">
         <div class="profile-red-header">
-            <div class="user-avatar">M</div>
-            <h3 id="user-display-name">Username</h3>
-            <p>ID: <span id="user-id-display">000000</span></p>
+            <div class="user-avatar" id="avatarInitial">M</div>
+            <h3 id="profileEmail">Memuatkan...</h3>
+            <p id="profileID" style="font-size: 12px; opacity: 0.8;">ID: 000000</p>
         </div>
 
         <div class="wallet-actions">
-            <button class="btn-wallet-action" onclick="window.location.href='recharge.html'">
+            <button class="btn-recharge" onclick="location.href='recharge.html'">
                 <i class="fas fa-wallet"></i> Recharge
             </button>
-            <button class="btn-wallet-action" onclick="window.location.href='withdraw.html'">
-                <i class="fas fa-money-bill-wave"></i> Withdraws
+            <button class="btn-withdraw" onclick="location.href='withdraw.html'">
+                <i class="fas fa-money-bill-wave"></i> Withdraw
             </button>
         </div>
 
         <div class="stats-card">
             <div class="stats-grid">
                 <div class="stat-box">
-                    <p>Recharge wallet</p>
-                    <h4>0.00</h4>
+                    <h4 id="walletBalance">RM 0.00</h4>
+                    <p>Baki Wallet</p>
                 </div>
                 <div class="stat-box">
-                    <p>Balance wallet</p>
-                    <h4 id="balance-amount">0.00</h4>
-                </div>
-                <div class="stat-box">
-                    <p>Total earnings</p>
-                    <h4>0.00</h4>
-                </div>
-                <div class="stat-box">
-                    <p>Total withdrawals</p>
-                    <h4>0.00</h4>
+                    <h4 id="totalEarnings">RM 0.00</h4>
+                    <p>Jumlah Pendapatan</p>
                 </div>
             </div>
         </div>
 
         <div class="icon-menu-container">
-            <div class="menu-list-item" onclick="window.location.href='funding.html'">
-                <div class="menu-left">
-                    <i class="fas fa-file-invoice-dollar"></i>
-                    <span>Funding details</span>
-                </div>
-                <i class="fas fa-chevron-right arrow-icon"></i>
-            </div>
-
-            <div class="menu-list-item" onclick="window.location.href='team.html'">
-                <div class="menu-left">
-                    <i class="fas fa-users"></i>
-                    <span>My teams</span>
-                </div>
-                <i class="fas fa-chevron-right arrow-icon"></i>
-            </div>
-
-            <div class="menu-list-item" onclick="window.location.href='bank.html'">
+            <a href="bank.html" class="menu-list-item">
                 <div class="menu-left">
                     <i class="fas fa-university"></i>
-                    <span>Bank account</span>
+                    <span>Akaun Bank</span>
                 </div>
                 <i class="fas fa-chevron-right arrow-icon"></i>
-            </div>
-
-            <div class="menu-list-item" onclick="window.location.href='password.html'">
+            </a>
+            <a href="team.html" class="menu-list-item">
                 <div class="menu-left">
-                    <i class="fas fa-lock"></i>
-                    <span>Password</span>
+                    <i class="fas fa-users"></i>
+                    <span>Kumpulan Saya (Team)</span>
                 </div>
                 <i class="fas fa-chevron-right arrow-icon"></i>
-            </div>
-            
-            <div class="menu-list-item">
+            </a>
+            <a href="invitation.html" class="menu-list-item">
                 <div class="menu-left">
-                    <i class="fas fa-globe"></i>
-                    <span>English</span>
+                    <i class="fas fa-user-plus"></i>
+                    <span>Jemput Rakan</span>
                 </div>
                 <i class="fas fa-chevron-right arrow-icon"></i>
-            </div>
+            </a>
+            <a href="transaction-history.html" class="menu-list-item">
+                <div class="menu-left">
+                    <i class="fas fa-history"></i>
+                    <span>Rekod Transaksi</span>
+                </div>
+                <i class="fas fa-chevron-right arrow-icon"></i>
+            </a>
         </div>
 
-        <div style="padding: 0 20px 30px 20px;">
-            <button class="btn-signout-full" onclick="handleLogout()">Sign out</button>
+        <div style="padding: 0 20px; margin-top: 10px;">
+            <button class="btn-signout-full" onclick="handleLogout()">
+                <i class="fas fa-sign-out-alt"></i> Log Keluar
+            </button>
         </div>
 
-        <div class="bottom-nav">
-            <a href="dashboard.html" class="nav-link">
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="nav-item">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
-            <a href="product_list.html" class="nav-link">
-                <i class="fas fa-box"></i>
-                <span>Product</span>
+            <a href="product_list.html" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Produk</span>
             </a>
-            <a href="profile.html" class="nav-link active">
-                <i class="fas fa-user"></i>
-                <span>Me</span>
+            <a href="profile.html" class="nav-item active">
+                <i class="fas fa-user-circle"></i>
+                <span>Profil</span>
             </a>
-        </div>
+        </nav>
     </div>
+
     <script src="app.js"></script>
+    <script>
+        async function getProfileData() {
+            const { data: { user } } = await client.auth.getUser();
+
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Papar emel & initial
+            document.getElementById('profileEmail').innerText = user.email;
+            document.getElementById('avatarInitial').innerText = user.email.charAt(0).toUpperCase();
+            document.getElementById('profileID').innerText = "ID: " + user.id.substring(0, 8).toUpperCase();
+
+            // Tarik baki dari table profiles
+            const { data, error } = await client
+                .from('profiles')
+                .select('balance, total_earnings')
+                .eq('id', user.id)
+                .single();
+
+            if (data) {
+                document.getElementById('walletBalance').innerText = `RM ${data.balance.toFixed(2)}`;
+                document.getElementById('totalEarnings').innerText = `RM ${data.total_earnings ? data.total_earnings.toFixed(2) : '0.00'}`;
+            }
+        }
+
+        window.onload = getProfileData;
+    </script>
 </body>
 </html>
