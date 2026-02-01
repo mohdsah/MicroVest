@@ -1,14 +1,11 @@
 /* 1. TETAPAN ASAS */
 :root {
-    --primary: #2563eb;
-    --primary-dark: #1e40af;
-    --success: #10b981;
-    --danger: #ef4444;
-    --bg: #f8fafc;
-    --text-main: #1e293b;
-    --text-muted: #64748b;
+    --primary: #8b0000;      /* Maroon utama */
+    --primary-dark: #660000; /* Maroon lebih gelap */
+    --accent: #ffcccc;       /* Soft pink highlight */
+    --bg: #7a0000;           /* Background utama seperti gambar */
     --white: #ffffff;
-    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 * {
@@ -19,22 +16,20 @@
 }
 
 body {
-    background-color: #f1f5f9;
+    background: linear-gradient(to bottom, #8b0000, #660000);
     display: flex;
     justify-content: center;
     min-height: 100vh;
-    padding-bottom: 80px; /* Ruang untuk Bottom Nav */
 }
 
 /* 2. APP SHELL (Mobile View) */
 .app-shell {
     width: 100%;
     max-width: 450px;
-    background: var(--white);
+    background: transparent; /* Biar ikut warna body */
     min-height: 100vh;
     position: relative;
     padding: 20px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.05);
 }
 
 /* 3. HEADER & TOP NAV */
@@ -200,14 +195,27 @@ body {
 /* 8. AUTH PAGES (Login/Register) */
 .auth-header { text-align: center; margin-top: 40px; margin-bottom: 30px; }
 .brand-icon { 
-    width: 60px; height: 60px; background: var(--primary); color: white; 
-    border-radius: 15px; display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 15px; font-size: 24px; font-weight: 800;
+    width: 70px;
+    height: 70px;
+    background: white;
+    color: #8b0000;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    font-size: 28px;
+    font-weight: 900;
 }
 
 input {
-    width: 100%; padding: 15px; margin-bottom: 15px;
-    border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc;
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 15px;
+    background: white;
+    color: black;
 }
 
 .footer-link { text-align: center; margin-top: 20px; font-size: 14px; color: var(--text-muted); }
