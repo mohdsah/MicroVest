@@ -3,109 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mining Area - MicroVest</title>
+    <title>Mining Centre - MicroVest</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --primary: #800000; --gold: #f59e0b; }
+        body { background: #f1f5f9; font-family: sans-serif; }
+        .mining-header { background: var(--primary); color: white; padding: 30px 20px; text-align: center; border-radius: 0 0 30px 30px; }
+        .mining-card { background: white; margin: 15px; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .claim-btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-ready { background: var(--gold); color: white; animation: pulse 1.5s infinite; }
+        .btn-waiting { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+    </style>
 </head>
 <body>
 
-    <div class="app-shell">
-        <div class="product-page-header">
-            <h2>Pusat Kutipan Hasil</h2>
-            <p>Claim untung anda setiap 24 jam</p>
-        </div>
-
-        <div class="product-container" id="miningList">
-            <p style="text-align: center; padding: 50px;">Memuatkan mesin pelaburan...</p>
-        </div>
-
-        <nav class="bottom-nav">
-            <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
-            <a href="mining.html" class="nav-item active"><i class="fas fa-hammer"></i><span>Mining</span></a>
-            <a href="profile.html" class="nav-item"><i class="fas fa-user-circle"></i><span>Profil</span></a>
-        </nav>
+    <div class="mining-header">
+        <i class="fas fa-microchip fa-3x" style="margin-bottom: 10px; color: var(--gold);"></i>
+        <h2>Pusat Perlombongan</h2>
+        <p>Kutip hasil pelaburan anda setiap 24 jam</p>
     </div>
+
+    <div id="miningList" style="padding-bottom: 100px;">
+        </div>
+
+    <nav class="bottom-nav">
+        <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="mining.html" class="nav-item active"><i class="fas fa-hammer"></i><span>Mining</span></a>
+        <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><span>Profil</span></a>
+    </nav>
 
     <script src="app.js"></script>
     <script>
-        async function loadMining() {
+        async function loadMiningMachines() {
             const { data: { user } } = await client.auth.getUser();
             if (!user) return;
 
-            const { data: investments } = await client
+            const { data: machines, error } = await client
                 .from('user_investments')
                 .select('*')
                 .eq('user_id', user.id)
                 .eq('status', 'active');
 
-            const listContainer = document.getElementById('miningList');
-            if (!investments || investments.length === 0) {
-                listContainer.innerHTML = '<p style="text-align: center; padding: 50px;">Tiada mesin aktif.</p>';
+            const list = document.getElementById('miningList');
+            if (!machines || machines.length === 0) {
+                list.innerHTML = `<div style="text-align:center; margin-top:50px; color:#666;">
+                    <i class="fas fa-exclamation-circle fa-2x"></i>
+                    <p>Tiada mesin aktif. Sila beli pakej di menu Produk.</p>
+                </div>`;
                 return;
             }
 
-            listContainer.innerHTML = '';
-            investments.forEach(item => {
-                const lastClaim = new Date(item.last_claim);
+            list.innerHTML = '';
+            machines.forEach(m => {
                 const now = new Date();
-                const diffMs = now - lastClaim;
-                const diffHours = diffMs / (1000 * 60 * 60);
-                
-                let statusText = "";
-                let btnDisabled = "";
-                let penaltyText = "";
-                let finalAmount = item.daily_profit;
+                const lastClaim = new Date(m.last_claim);
+                const diff = now - lastClaim;
+                const hoursLeft = 24 - (diff / (1000 * 60 * 60));
+                const canClaim = hoursLeft <= 0;
 
-                if (diffHours < 24) {
-                    const wait = Math.ceil(24 - diffHours);
-                    statusText = `Tunggu ${wait} jam lagi`;
-                    btnDisabled = "disabled style='background: #ccc; cursor: not-allowed;'";
-                } else if (diffHours >= 24 && diffHours <= 26) {
-                    statusText = "Sedia untuk di-claim (Full)";
-                } else {
-                    // Penalti jika lebih 2 jam dari waktu sepatutnya (Jam ke-26 ke atas)
-                    finalAmount = item.daily_profit * 0.8; // Contoh: Potong 20%
-                    statusText = "Kelewatan dikesan! (Penalti 20%)";
-                    penaltyText = "color: var(--danger); font-weight: bold;";
-                }
-
-                listContainer.innerHTML += `
-                    <div class="product-card" style="display: block; padding: 20px;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <h4 style="margin:0;">${item.plan_name}</h4>
-                            <span style="font-size: 12px; ${penaltyText}">RM ${finalAmount.toFixed(2)}</span>
+                list.innerHTML += `
+                    <div class="mining-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                            <h3 style="margin:0; color:var(--primary); font-size:16px;">${m.plan_name}</h3>
+                            <span style="color:#10b981; font-weight:bold;">+ RM ${m.daily_profit.toFixed(2)}</span>
                         </div>
-                        <p style="font-size: 11px; color: #666; margin: 10px 0;">${statusText}</p>
-                        <button class="btn-buy-now" ${btnDisabled} onclick="processClaim('${item.id}', ${finalAmount})">
-                            CLAIM SEKARANG
+                        
+                        <p style="font-size:12px; color:#666; margin-bottom:15px;">
+                            <i class="fas fa-clock"></i> ${canClaim ? 'Hasil sedia untuk dikutip!' : 'Tunggu: ' + hoursLeft.toFixed(1) + ' jam lagi'}
+                        </p>
+
+                        <button class="claim-btn ${canClaim ? 'btn-ready' : 'btn-waiting'}" 
+                                onclick="${canClaim ? `claimProfit('${m.id}', ${m.daily_profit})` : ''}">
+                            ${canClaim ? 'CLAIM HASIL SEKARANG' : 'SEDANG MELOMBONG...'}
                         </button>
                     </div>
                 `;
             });
         }
 
-        async function processClaim(id, amount) {
+        async function claimProfit(id, profit) {
             const { data: { user } } = await client.auth.getUser();
             
-            // 1. Ambil baki semasa
-            const { data: profile } = await client.from('profiles').select('balance').eq('id', user.id).single();
-            const newBalance = profile.balance + amount;
+            // 1. Tambah baki user
+            const { data: p } = await client.from('profiles').select('balance').eq('id', user.id).single();
+            await client.from('profiles').update({ balance: p.balance + profit }).eq('id', user.id);
 
-            // 2. Update baki & update last_claim ke waktu sekarang
-            const { error: err1 } = await client.from('profiles').update({ balance: newBalance }).eq('id', user.id);
-            const { error: err2 } = await client.from('user_investments').update({ last_claim: new Date() }).eq('id', id);
+            // 2. Kemaskini last_claim ke waktu sekarang
+            await client.from('user_investments').update({ last_claim: new Date() }).eq('id', id);
 
-            if (!err1 && !err2) {
-                alert(`Berjaya claim RM ${amount.toFixed(2)}!`);
-                location.reload();
-            } else {
-                alert("Ralat sistem. Cuba lagi.");
-            }
+            alert("Tahniah! RM " + profit.toFixed(2) + " telah dimasukkan ke baki anda.");
+            loadMiningMachines();
         }
 
-        window.onload = loadMining;
+        window.onload = loadMiningMachines;
     </script>
 </body>
 </html>
-
