@@ -1,16 +1,15 @@
 // 1. KONFIGURASI SUPABASE
 const SUPABASE_URL = 'https://mgvjwgbjccgsjkjhddru.supabase.co';
-// Pastikan anda tampal key eyJh... yang baru di sini
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ndmp3Z2JqY2Nnc2pramhkZHJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwMzQxNzcsImV4cCI6MjA4NTYxMDE3N30.JJ03f7HO4bKiCF2g0eY3HzrT2KHKUzjpYgBALYHeYa0'; 
 
-// Inisialisasi client
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
 
 // 2. FUNGSI AUTH & SESI
 async function checkUserSession() {
     const { data: { session } } = await client.auth.getSession();
     const path = window.location.pathname;
+    
+    // Elakkan 'infinite loop' jika sudah berada di page login
     const isAuthPage = ['/login.html', '/register.html', '/index.html', '/forgot-password.html'].some(p => path.includes(p));
 
     if (!session && !isAuthPage) {
@@ -28,53 +27,44 @@ function formatRM(amount) {
     }).format(amount || 0);
 }
 
-// 4. LOGIKA DASHBOARD & PROFILE
+// 4. LOGIKA DASHBOARD & PROFILE (DIKEMASKINI)
 async function loadUserData() {
-    const user = await checkUserSession();
-    if (!user) return;
+    try {
+        const { data: { user } } = await client.auth.getUser(); // Gunakan getUser() untuk data lebih tepat
+        if (!user) return;
 
-    const { data: profile } = await client
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+        // Ambil data profil terbaru terus dari database
+        const { data: profile, error } = await client
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
 
-    if (profile) {
-        // Update elemen UI jika ada
-        if (document.getElementById('userBalance')) 
-            document.getElementById('userBalance').innerText = formatRM(profile.balance);
-        if (document.getElementById('userName')) 
-            document.getElementById('userName').innerText = profile.full_name || 'User';
-        if (document.getElementById('userEmail')) 
-            document.getElementById('userEmail').innerText = user.email;
-        if (document.getElementById('refCode')) 
-            document.getElementById('refCode').value = profile.referral_code || '';
+        if (error) throw error;
+
+        if (profile) {
+            // Update paparan baki dengan paksaan (force update)
+            const balanceEl = document.getElementById('userBalance');
+            if (balanceEl) {
+                balanceEl.innerText = formatRM(profile.balance);
+                console.log("Baki dikemaskini:", profile.balance); // Untuk semakan di console
+            }
+
+            if (document.getElementById('userName')) 
+                document.getElementById('userName').innerText = profile.full_name || user.email.split('@')[0];
+            
+            if (document.getElementById('userEmail')) 
+                document.getElementById('userEmail').innerText = user.email;
+            
+            if (document.getElementById('refCode')) 
+                document.getElementById('refCode').value = profile.referral_code || '';
+        }
+    } catch (err) {
+        console.error("Gagal memuatkan data user:", err.message);
     }
 }
 
-// 5. LOGIKA TAB (Untuk records.html atau transaction-history.html)
-function setupTabs() {
-    const tabs = document.querySelectorAll('.tab-item');
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            // Tambahkan logika filter data berdasarkan tab di sini
-            const filter = tab.getAttribute('data-filter');
-            console.log("Filtering by:", filter);
-        });
-    });
-}
-
-// 6. LOGIKA MINING PROGRESS BAR
-function updateMiningProgress(percent) {
-    const progressBar = document.querySelector('.mining-progress-bar');
-    if (progressBar) {
-        progressBar.style.width = percent + '%';
-    }
-}
-
-// 7. GLOBAL LOGOUT & CLEAR CACHE
+// 5. GLOBAL LOGOUT
 async function logout() {
     if (confirm("Adakah anda pasti mahu log keluar?")) {
         await client.auth.signOut();
@@ -84,17 +74,12 @@ async function logout() {
     }
 }
 
-async function clearUserCache() {
-    if (confirm("Bersihkan cache dan reset aplikasi?")) {
-        localStorage.clear();
-        sessionStorage.clear();
-        location.reload();
-    }
-}
-
 // JALANKAN SAAT HALAMAN DIMUAT
 document.addEventListener('DOMContentLoaded', () => {
-    checkUserSession();
-    loadUserData();
+    // Jalankan loadUserData selepas memastikan sesi wujud
+    checkUserSession().then(user => {
+        if (user) loadUserData();
+    });
+    
     if (document.querySelector('.tab-item')) setupTabs();
 });
