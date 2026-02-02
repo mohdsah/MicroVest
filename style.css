@@ -1,67 +1,112 @@
-/* RESET TOTAL */
-* { 
-    box-sizing: border-box; 
-    margin: 0; 
-    padding: 0; 
+:root {
+    --primary: #8b0000;
+    --primary-dark: #660000;
+    --text-muted: #64748b;
+    --white: #ffffff;
 }
 
-body { 
-    background: #f1f5f9; 
-    font-family: sans-serif; 
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* PEMBUNGKUS UTAMA */
+body { background: #f1f5f9; font-family: 'Inter', sans-serif; display: flex; justify-content: center; }
+
+/* SHELL UTAMA */
 .app-shell {
     width: 100%;
-    max-width: 480px;
-    margin: 0 auto;
-    min-height: 100vh;
+    max-width: 450px;
     background: #f8fafc;
+    min-height: 100vh;
+    padding: 20px;
+    padding-bottom: 90px;
+}
+
+/* TOP NAV MENDATAR */
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.profile-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-avatar {
+    width: 40px; height: 40px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+/* KAD BAKI */
+.main-card {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    padding: 25px;
+    border-radius: 20px;
+    color: white;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 20px rgba(139, 0, 0, 0.2);
+}
+
+.main-card h2 { font-size: 32px; margin: 10px 0; }
+
+/* MENU GRID MENDATAR (Fix Gambar Anda) */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.action-item {
+    text-align: center;
+    cursor: pointer;
+}
+
+.icon-box {
+    width: 55px; height: 55px;
+    background: white;
+    color: var(--primary);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px;
+    font-size: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.action-item span { font-size: 12px; font-weight: 600; color: #333; }
+
+/* NAVIGASI BAWAH MENDATAR */
+.bottom-nav {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 450px;
+    height: 70px;
+    background: white;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid #eee;
+}
+
+.nav-item {
+    text-decoration: none;
+    color: #94a3b8;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    font-size: 11px;
 }
 
-/* FIX MENDATAR UNTUK STATS */
-.stat-grid {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 10px;
-    padding: 15px;
-    justify-content: center;
-}
-
-.stat-box {
-    flex: 1;
-    background: white;
-    padding: 15px;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-/* FIX MENDATAR UNTUK TABS */
-.tab-btn-container {
-    display: flex !important;
-    flex-direction: row !important;
-    margin: 15px;
-    gap: 5px;
-    background: #e2e8f0;
-    padding: 5px;
-    border-radius: 10px;
-}
-
-.tab-btn {
-    flex: 1;
-    border: none;
-    padding: 10px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    background: transparent;
-    color: #64748b;
-}
-
-.tab-btn.active {
-    background: white;
-    color: #8b0000;
-}
+.nav-item.active { color: var(--primary); }
+.nav-item i { font-size: 20px; margin-bottom: 4px; }
