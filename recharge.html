@@ -17,34 +17,23 @@
         </div>
 
         <div class="product-container">
-            <div class="product-card" style="display: block; padding: 25px;">
-                <label style="font-size: 14px; color: var(--text-muted); display: block; margin-bottom: 10px;">Masukkan Jumlah (RM)</label>
-                <input type="number" id="rechargeAmount" placeholder="Min RM 5.00" style="font-size: 24px; font-weight: 800; color: var(--primary); text-align: center; border: 2px solid #eee;">
-                
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px;">
-                    <button type="button" class="btn-buy" style="background:#f1f5f9; color: #333;" onclick="setAmount(10)">RM 10</button>
-                    <button type="button" class="btn-buy" style="background:#f1f5f9; color: #333;" onclick="setAmount(50)">RM 50</button>
-                    <button type="button" class="btn-buy" style="background:#f1f5f9; color: #333;" onclick="setAmount(100)">RM 100</button>
-                </div>
-            </div>
+            <div class="product-card" style="display: block; padding: 20px; border-left: 5px solid #007aff;">
+    <h4 style="color: #007aff; margin-bottom: 10px;">Langkah Pembayaran TNG:</h4>
+    <ol style="font-size: 13px; padding-left: 20px; color: #555;">
+        <li>Buka aplikasi TNG eWallet anda.</li>
+        <li>Pilih 'Transfer' atau 'Scan'.</li>
+        <li>Masukkan nombor telefon di bawah:</li>
+    </ol>
+    
+    <div style="background: #f1f5f9; padding: 15px; border-radius: 12px; margin-top: 15px; text-align: center;">
+        <span style="font-size: 12px; color: #64748b; display: block;">NOMBOR TNG EWALLET ADMIN</span>
+        <strong style="font-size: 20px; color: #1e293b;" id="adminTng">012-3456789</strong>
+        <button onclick="copyTng()" style="display: block; margin: 10px auto 0; background: #007aff; color: white; border: none; padding: 5px 15px; border-radius: 20px; font-size: 11px;">
+            Salin Nombor
+        </button>
+    </div>
+</div>
 
-            <div class="product-card" style="display: block; background: #fff5f5; border: 1px dashed var(--primary);">
-                <h4 style="color: var(--primary); margin-bottom: 15px;"><i class="fas fa-university"></i> Bank Akaun Tujuan</h4>
-                <div style="font-size: 14px; line-height: 1.8;">
-                    <p>Bank: <strong>MAYBANK</strong></p>
-                    <p>Nama: <strong>MICROVEST ADMIN</strong></p>
-                    <p>No. Akaun: <strong>123456789012</strong></p>
-                </div>
-                <button class="btn-buy" style="margin-top: 10px; width: 100%; font-size: 12px;" onclick="copyAcc()">Salin No. Akaun</button>
-            </div>
-
-            <div style="padding: 10px;">
-                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px;">
-                    *Nota: Selepas membuat pembayaran, sila klik butang "Hantar Bukti" untuk pengesahan admin.
-                </p>
-                <button class="btn-buy-now" id="btnSubmitRecharge" onclick="submitRecharge()">HANTAR BUKTI PEMBAYARAN</button>
-            </div>
-        </div>
 
         <nav class="bottom-nav">
             <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
@@ -55,6 +44,12 @@
 
     <script src="app.js"></script>
     <script>
+    	function copyTng() {
+    const tngNum = document.getElementById('adminTng').innerText;
+    navigator.clipboard.writeText(tngNum);
+    alert("Nombor TNG Admin telah disalin! Sila buat bayaran di aplikasi TNG eWallet anda.");
+}
+
         function setAmount(val) {
             document.getElementById('rechargeAmount').value = val;
         }

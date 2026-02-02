@@ -7,92 +7,86 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
     <div class="app-shell">
-        <div class="profile-red-header">
-            <i class="fas fa-gift" style="font-size: 40px; color: #ffd700; margin-bottom: 15px;"></i>
-            <h2>Program Rujukan</h2>
-            <p>Jemput rakan & terima komisen sehingga 15%</p>
+        <div class="product-page-header">
+            <button onclick="history.back()" style="position: absolute; left: 20px; background: none; border: none; color: white; font-size: 20px;">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h2>Jemput Rakan</h2>
+            <p>Kongsi rezeki, jana komisyen bersama</p>
         </div>
 
-        <div class="product-detail-card" style="margin-top: -30px;">
-            <p style="color: var(--text-muted); font-size: 14px;">Kod Jemputan Anda</p>
-            <h1 id="myReferralCode" style="color: var(--primary); font-size: 32px; letter-spacing: 5px; margin: 10px 0;">------</h1>
+        <div class="invitation-card">
+            <div id="qrcode" class="qr-placeholder">
+                </div>
             
-            <div style="background: #fff5f5; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px dashed var(--primary);">
-                <p style="font-size: 12px; color: var(--text-main); margin-bottom: 5px;">Pautan Pendaftaran:</p>
-                <p id="refLink" style="font-size: 11px; color: var(--primary); word-break: break-all; font-weight: bold;">Memuatkan pautan...</p>
-            </div>
+            <p style="font-size: 13px; color: var(--text-muted);">Kod Rujukan Anda:</p>
+            <div class="ref-code-display" id="refCode">MEMUATKAN...</div>
 
-            <button class="btn-confirm-buy" onclick="copyLink()">
-                <i class="fas fa-copy"></i> SALIN PAUTAN
-            </button>
+            <div class="share-buttons">
+                <button class="btn-share btn-copy" onclick="copyLink()">
+                    <i class="fas fa-copy"></i> Salin Pautan
+                </button>
+                <button class="btn-share btn-whatsapp" onclick="shareWhatsapp()">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
+            </div>
         </div>
 
         <div style="padding: 0 20px;">
-            <h3 style="margin-bottom: 15px; font-size: 16px;">Ganjaran Pasukan</h3>
-            <div class="menu-white" style="margin: 0; padding: 10px;">
-                <div class="roi-item">
-                    <span>Ahli Tahap 1</span>
-                    <span style="color: var(--success); font-weight: bold;">10% Komisen</span>
-                </div>
-                <div class="roi-item">
-                    <span>Ahli Tahap 2</span>
-                    <span style="color: var(--success); font-weight: bold;">3% Komisen</span>
-                </div>
-                <div class="roi-item">
-                    <span>Ahli Tahap 3</span>
-                    <span style="color: var(--success); font-weight: bold;">2% Komisen</span>
-                </div>
+            <div class="product-card" style="display: block; padding: 15px; background: #fffbeb; border: none;">
+                <h4 style="font-size: 14px; color: #92400e;"><i class="fas fa-gift"></i> Bonus Rujukan</h4>
+                <p style="font-size: 11px; color: #b45309; margin-top: 5px;">
+                    Dapatkan komisyen sehingga 10% daripada setiap pelaburan rakan yang anda jemput secara terus!
+                </p>
             </div>
         </div>
 
         <nav class="bottom-nav">
-            <a href="dashboard.html" class="nav-item">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
-            </a>
-            <a href="product_list.html" class="nav-item">
-                <i class="fas fa-chart-line"></i>
-                <span>Produk</span>
-            </a>
-            <a href="profile.html" class="nav-item">
-                <i class="fas fa-user-circle"></i>
-                <span>Profil</span>
-            </a>
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="product_list.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Produk</span></a>
+            <a href="team.html" class="nav-item active"><i class="fas fa-users"></i><span>Pasukan</span></a>
         </nav>
     </div>
 
     <script src="app.js"></script>
     <script>
-        async function loadReferralInfo() {
+        let fullLink = "";
+
+        async function initInvitation() {
             const { data: { user } } = await client.auth.getUser();
-            
-            if (!user) {
-                window.location.href = 'login.html';
-                return;
-            }
+            if (!user) return;
 
-            // Gunakan ID pengguna atau sebahagian ID sebagai kod rujukan
-            const referralCode = user.id.substring(0, 8).toUpperCase();
-            const registrationLink = window.location.origin + "/register.html?ref=" + referralCode;
+            // Kita guna 6 digit terakhir ID user sebagai kod
+            const shortCode = user.id.substring(0, 6).toUpperCase();
+            document.getElementById('refCode').innerText = shortCode;
 
-            document.getElementById('myReferralCode').innerText = referralCode;
-            document.getElementById('refLink').innerText = registrationLink;
-        }
+            // Bina URL pautan rujukan
+            fullLink = `${window.location.origin}/register.html?ref=${shortCode}`;
 
-        function copyLink() {
-            const linkText = document.getElementById('refLink').innerText;
-            navigator.clipboard.writeText(linkText).then(() => {
-                alert("Pautan rujukan telah disalin ke clipboard!");
-            }).catch(err => {
-                console.error('Gagal menyalin: ', err);
+            // Jana QR Code
+            new QRCode(document.getElementById("qrcode"), {
+                text: fullLink,
+                width: 160,
+                height: 160
             });
         }
 
-        window.onload = loadReferralInfo;
+        function copyLink() {
+            navigator.clipboard.writeText(fullLink);
+            alert("Pautan rujukan telah disalin!");
+        }
+
+        function shareWhatsapp() {
+            const text = encodeURIComponent(`Jom buat duit sampingan dengan MicroVest! Daftar sekarang menggunakan pautan saya: ${fullLink}`);
+            window.open(`https://wa.me/?text=${text}`);
+        }
+
+        window.onload = initInvitation;
     </script>
 </body>
 </html>

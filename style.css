@@ -62,3 +62,480 @@ body { background: #f1f5f9; display: flex; justify-content: center; min-height: 
 .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; font-size: 11px; }
 .nav-item.active { color: var(--primary); }
 .nav-item i { font-size: 22px; margin-bottom: 4px; }
+
+/* --- GAYA TAMBAHAN UNTUK PROFILE --- */
+
+/* Header Merah Profile */
+.profile-red-header {
+    background: linear-gradient(to bottom, var(--primary), var(--primary-dark));
+    color: white;
+    text-align: center;
+    padding: 40px 20px 60px;
+    border-radius: 0 0 30px 30px;
+}
+
+/* Kotak Butang Wallet (Mendatar) */
+.wallet-actions {
+    display: flex;
+    gap: 15px;
+    padding: 0 20px;
+    margin-top: -30px; /* Menindih header sedikit */
+    margin-bottom: 20px;
+}
+
+.btn-recharge, .btn-withdraw {
+    flex: 1;
+    padding: 15px;
+    border-radius: 15px;
+    border: none;
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    background: white;
+    color: var(--primary);
+    transition: 0.3s;
+}
+
+.btn-recharge:active, .btn-withdraw:active {
+    transform: scale(0.95);
+}
+
+/* Kad Statistik */
+.stats-card {
+    background: white;
+    margin: 10px 20px;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    text-align: center;
+}
+
+/* Menu Senarai (Ikon & Teks) */
+.icon-menu-container {
+    background: white;
+    margin: 20px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.menu-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    text-decoration: none;
+    color: var(--text-main);
+}
+
+.menu-list-item:last-child { border-bottom: none; }
+
+.menu-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.menu-left i {
+    font-size: 18px;
+    color: var(--primary);
+    width: 25px;
+    text-align: center;
+}
+
+/* --- PRODUCT LIST STYLES --- */
+.product-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Satu kolum untuk mobile */
+    gap: 15px;
+    padding: 15px;
+}
+
+.product-card-modern {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+    transition: transform 0.2s;
+}
+
+.product-card-modern:active {
+    transform: scale(0.98);
+}
+
+.product-badge {
+    background: #fff5f5;
+    color: var(--primary);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.product-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 5px;
+}
+
+.product-price {
+    font-size: 24px;
+    font-weight: 900;
+    color: var(--primary);
+    margin-bottom: 15px;
+}
+
+.product-features {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 15px;
+}
+
+.feature-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 5px;
+    color: #64748b;
+}
+
+.feature-item b {
+    color: #1e293b;
+}
+
+.btn-buy-modern {
+    width: 100%;
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Header Produk yang Kemas */
+.product-page-header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+    border-radius: 0 0 30px 30px;
+    box-shadow: 0 4px 15px rgba(139, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Kesan hiasan di belakang header */
+.product-page-header::after {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+}
+
+.product-page-header h2 {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.product-page-header p {
+    font-size: 13px;
+    opacity: 0.85;
+    font-weight: 400;
+}
+
+/* --- TRANSACTION HISTORY STYLES --- */
+.transaction-list {
+    padding: 15px;
+}
+
+.transaction-card {
+    background: white;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.trans-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.trans-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+/* Warna Ikon Ikut Jenis */
+.icon-recharge { background: #e6fffa; color: #319795; }
+.icon-withdraw { background: #fff5f5; color: #e53e3e; }
+
+.trans-info h4 {
+    font-size: 14px;
+    color: #1e293b;
+    margin-bottom: 2px;
+}
+
+.trans-info span {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.trans-right {
+    text-align: right;
+}
+
+.trans-amount {
+    font-weight: 800;
+    font-size: 15px;
+    display: block;
+}
+
+.status-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 5px;
+    text-transform: uppercase;
+}
+
+.status-pending { background: #fef3c7; color: #d97706; }
+.status-approved { background: #d1fae5; color: #059669; }
+.status-rejected { background: #fee2e2; color: #dc2626; }
+
+/* --- TRANSACTION HISTORY STYLES --- */
+.transaction-container {
+    padding: 15px;
+}
+
+.transaction-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex; /* Paksa susunan mendatar */
+    justify-content: space-between; /* Tolak satu ke kiri, satu ke kanan */
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    border: 1px solid #f1f5f9;
+}
+
+.trans-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.trans-icon-box {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+/* Warna Status & Jenis */
+.bg-recharge { background: #ecfdf5; color: #10b981; } /* Hijau cair */
+.bg-withdraw { background: #fef2f2; color: #ef4444; } /* Merah cair */
+
+.trans-info h4 {
+    font-size: 14px;
+    color: #1e293b;
+    margin: 0;
+    font-weight: 700;
+}
+
+.trans-info span {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.trans-right {
+    text-align: right;
+}
+
+.trans-amount {
+    font-weight: 800;
+    font-size: 15px;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.status-badge {
+    font-size: 9px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+}
+
+/* Status Colors */
+.status-pending { background: #fef3c7; color: #d97706; }
+.status-approved { background: #d1fae5; color: #059669; }
+.status-rejected { background: #fee2e2; color: #dc2626; }
+
+
+/* --- BANK SETUP STYLES --- */
+.bank-card {
+    background: white;
+    margin: 20px;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    outline: none;
+    background: #fffcfc;
+}
+
+.info-box {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+    padding: 15px;
+    margin: 20px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #92400e;
+}
+
+
+/* TNG EWALLET THEME */
+.tng-blue {
+    color: #007aff;
+}
+
+.btn-tng {
+    background: #007aff;
+    color: white;
+    border-radius: 12px;
+    padding: 12px;
+    font-weight: bold;
+    text-align: center;
+    border: none;
+    width: 100%;
+}
+
+/* --- INVITATION PAGE STYLES --- */
+.invitation-card {
+    background: linear-gradient(145deg, #ffffff, #f1f5f9);
+    margin: 20px;
+    padding: 30px;
+    border-radius: 25px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    border: 1px solid rgba(255,255,255,0.8);
+}
+
+.qr-placeholder {
+    width: 180px;
+    height: 180px;
+    background: white;
+    margin: 0 auto 20px;
+    padding: 10px;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ref-code-display {
+    background: #f8fafc;
+    border: 2px dashed var(--primary);
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: 2px;
+    margin: 15px 0;
+}
+
+.share-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-share {
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-whatsapp { background: #25D366; color: white; }
+.btn-copy { background: var(--primary); color: white; }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Akaun Bank - MicroVest</title>
+    <title>Maklumat Bank - MicroVest</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -12,112 +12,107 @@
 
     <div class="app-shell">
         <div class="product-page-header">
-            <h2 style="margin-bottom: 5px;">Maklumat Bank</h2>
-            <p style="font-size: 13px; opacity: 0.9;">Tetapkan akaun bank utama anda untuk pengeluaran.</p>
+            <button onclick="history.back()" style="position: absolute; left: 20px; background: none; border: none; color: white; font-size: 20px;">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h2>Tetapan Bank</h2>
+            <p>Sila pastikan maklumat bank anda tepat</p>
         </div>
 
-        <div class="product-container">
-            <div id="currentBankBox" class="product-card" style="display: none; padding: 20px; background: #fff5f5; border: 1px solid var(--primary);">
-                <p style="font-size: 12px; color: var(--primary); font-weight: bold; margin-bottom: 10px;">AKAUN BERDAFTAR</p>
-                <h4 id="displayBankName" style="margin-bottom: 5px;">-</h4>
-                <p id="displayAccName" style="font-size: 14px; color: #333;">-</p>
-                <p id="displayAccNo" style="font-size: 16px; font-weight: 800; color: var(--primary); margin-top: 5px;">-</p>
+        <div class="info-box">
+            <i class="fas fa-exclamation-triangle"></i> 
+            Pihak kami tidak bertanggungjawab jika wang dihantar ke akaun yang salah disebabkan kesilapan maklumat anda.
+        </div>
+
+        <div class="bank-card">
+            <div class="form-group">
+    <label>NAMA BANK / EWALLET</label>
+    <select id="bankName" class="form-control">
+        <option value="">Pilih Bank / eWallet</option>
+        <option value="TNG eWallet">TNG eWallet (DuitNow)</option>
+        <option value="Maybank">Maybank</option>
+        <option value="CIMB">CIMB Bank</option>
+        </select>
+</div>
+
+<div class="form-group">
+    <label>NOMBOR TELEFON TNG / AKAUN</label>
+    <input type="number" id="accNumber" class="form-control" placeholder="Contoh: 0123456789">
+</div>
+
+
+            <div class="form-group">
+                <label>NAMA PENUH PEMEGANG AKAUN</label>
+                <input type="text" id="accName" class="form-control" placeholder="Ikut nama dalam IC">
             </div>
 
-            <div class="product-card" style="display: block; padding: 20px;">
-                <h3 style="font-size: 16px; margin-bottom: 15px;">Kemaskini Akaun Bank</h3>
-                
-                <div class="form-group" style="margin-bottom: 15px;">
-                    <label style="font-size: 12px; color: var(--text-muted);">Nama Bank</label>
-                    <select id="inputBankName" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-top: 5px;">
-                        <option value="Maybank">Maybank</option>
-                        <option value="CIMB">CIMB Bank</option>
-                        <option value="Public Bank">Public Bank</option>
-                        <option value="RHB">RHB Bank</option>
-                        <option value="Hong Leong">Hong Leong Bank</option>
-                        <option value="AmBank">AmBank</option>
-                        <option value="BSN">BSN</option>
-                    </select>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 15px;">
-                    <label style="font-size: 12px; color: var(--text-muted);">Nama Pemegang Akaun</label>
-                    <input type="text" id="inputAccName" placeholder="Nama Penuh mengikut IC" style="margin-top: 5px; border: 1px solid #ddd;">
-                </div>
-
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label style="font-size: 12px; color: var(--text-muted);">Nombor Akaun</label>
-                    <input type="number" id="inputAccNo" placeholder="Contoh: 164012345678" style="margin-top: 5px; border: 1px solid #ddd;">
-                </div>
-
-                <button class="btn-buy-now" onclick="saveBankDetails()">SIMPAN MAKLUMAT</button>
-            </div>
+            <button class="btn-main" onclick="saveBankDetails()" style="width: 100%; padding: 15px; margin-top: 10px;">
+                SIMPAN MAKLUMAT BANK
+            </button>
         </div>
 
         <nav class="bottom-nav">
-            <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
-            <a href="product_list.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Produk</span></a>
-            <a href="profile.html" class="nav-item active"><i class="fas fa-user-circle"></i><span>Profil</span></a>
+            <a href="dashboard.html" class="nav-item">
+                <i class="fas fa-home"></i><span>Home</span>
+            </a>
+            <a href="product_list.html" class="nav-item">
+                <i class="fas fa-chart-line"></i><span>Produk</span>
+            </a>
+            <a href="profile.html" class="nav-item active">
+                <i class="fas fa-user-circle"></i><span>Profil</span>
+            </a>
         </nav>
     </div>
 
     <script src="app.js"></script>
     <script>
-        async function loadBankInfo() {
+        async function loadCurrentBank() {
             const { data: { user } } = await client.auth.getUser();
             if (!user) return;
 
-            // Ambil data bank dari table 'profiles'
             const { data, error } = await client
                 .from('profiles')
-                .select('bank_name, bank_acc_name, bank_acc_no')
+                .select('bank_name, bank_acc_no, bank_acc_name')
                 .eq('id', user.id)
                 .single();
 
-            if (data && data.bank_acc_no) {
-                document.getElementById('currentBankBox').style.display = 'block';
-                document.getElementById('displayBankName').innerText = data.bank_name;
-                document.getElementById('displayAccName').innerText = data.bank_acc_name;
-                document.getElementById('displayAccNo').innerText = data.bank_acc_no;
-                
-                // Isi borang dengan data sedia ada
-                document.getElementById('inputBankName').value = data.bank_name;
-                document.getElementById('inputAccName').value = data.bank_acc_name;
-                document.getElementById('inputAccNo').value = data.bank_acc_no;
+            if (data) {
+                document.getElementById('bankName').value = data.bank_name || '';
+                document.getElementById('accNumber').value = data.bank_acc_no || '';
+                document.getElementById('accName').value = data.bank_acc_name || '';
             }
         }
 
         async function saveBankDetails() {
-            const bank = document.getElementById('inputBankName').value;
-            const name = document.getElementById('inputAccName').value;
-            const no = document.getElementById('inputAccNo').value;
+            const bName = document.getElementById('bankName').value;
+            const bNo = document.getElementById('accNumber').value;
+            const bUser = document.getElementById('accName').value;
 
-            if (!name || !no) {
+            if (!bName || !bNo || !bUser) {
                 alert("Sila lengkapkan semua maklumat!");
                 return;
             }
 
             const { data: { user } } = await client.auth.getUser();
-
+            
             const { error } = await client
                 .from('profiles')
                 .update({ 
-                    bank_name: bank, 
-                    bank_acc_name: name, 
-                    bank_acc_no: no 
+                    bank_name: bName, 
+                    bank_acc_no: bNo, 
+                    bank_acc_name: bUser 
                 })
                 .eq('id', user.id);
 
             if (error) {
-                alert("Gagal menyimpan: " + error.message);
+                alert("Gagal simpan: " + error.message);
             } else {
-                alert("Maklumat akaun bank berjaya dikemaskini!");
-                location.reload();
+                alert("Maklumat bank berjaya dikemas kini!");
+                window.location.href = 'profile.html';
             }
         }
 
-        window.onload = loadBankInfo;
+        window.onload = loadCurrentBank;
     </script>
 </body>
 </html>
-

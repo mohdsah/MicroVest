@@ -67,32 +67,40 @@
                 return;
             }
 
-            listContainer.innerHTML = '';
+                        listContainer.innerHTML = '';
             allTransactions.forEach(item => {
                 const date = new Date(item.created_at).toLocaleString('ms-MY', { 
                     day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' 
                 });
 
-                const statusColor = item.status === 'approved' ? '#10b981' : (item.status === 'pending' ? '#f59e0b' : '#ef4444');
+                const isRecharge = item.type === 'RECHARGE';
+                
+                // Tentukan class status
+                let statusClass = 'status-pending';
+                if(item.status === 'approved') statusClass = 'status-approved';
+                if(item.status === 'rejected') statusClass = 'status-rejected';
 
                 listContainer.innerHTML += `
-                    <div class="plan-item" style="margin-bottom: 10px; align-items: center;">
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <div style="width: 40px; height: 40px; border-radius: 10px; background: #f8fafc; display: flex; align-items: center; justify-content: center; color: ${item.color};">
-                                <i class="fas ${item.type === 'RECHARGE' ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+                    <div class="transaction-card">
+                        <div class="trans-left">
+                            <div class="trans-icon-box ${isRecharge ? 'bg-recharge' : 'bg-withdraw'}">
+                                <i class="fas ${isRecharge ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
                             </div>
-                            <div>
-                                <h4 style="font-size: 14px; margin: 0;">${item.type}</h4>
-                                <span style="font-size: 11px; color: #94a3b8;">${date}</span>
+                            <div class="trans-info">
+                                <h4>${isRecharge ? 'Deposit' : 'Pengeluaran'}</h4>
+                                <span>${date}</span>
                             </div>
                         </div>
-                        <div style="text-align: right;">
-                            <p style="font-weight: 800; color: var(--text-main); margin: 0;">RM ${item.amount.toFixed(2)}</p>
-                            <span style="font-size: 10px; font-weight: 700; color: ${statusColor}; text-transform: uppercase;">${item.status}</span>
+                        <div class="trans-right">
+                            <span class="trans-amount" style="color: ${isRecharge ? '#10b981' : '#ef4444'}">
+                                ${isRecharge ? '+' : '-'} RM ${item.amount.toFixed(2)}
+                            </span>
+                            <span class="status-badge ${statusClass}">${item.status}</span>
                         </div>
                     </div>
                 `;
             });
+
         }
 
         window.onload = loadTransactions;

@@ -16,33 +16,44 @@
     <p>Pilih pakej yang sesuai untuk mula menjana pendapatan</p>
 </div>
 
-<div class="product-container" style="padding: 15px; padding-bottom: 100px;">
-    <div class="product-card" style="background: white; padding: 20px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-left: 5px solid var(--primary);">
-        <h3 style="margin: 0; color: var(--primary);">Pakej Starter</h3>
-        <div style="margin: 15px 0;">
-            <p style="font-size: 14px; margin: 5px 0;">Harga: <b>RM 50.00</b></p>
-            <p style="font-size: 14px; margin: 5px 0;">Untung Harian: <b style="color: #10b981;">RM 2.50</b></p>
-            <p style="font-size: 14px; margin: 5px 0;">Tempoh: <b>365 Hari</b></p>
-        </div>
-        <button class="btn-buy-now" onclick="buyProduct('Pakej Starter', 50, 2.50)" style="width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
-            BELI SEKARANG
-        </button>
-    </div>
+<div class="product-container" style="padding-bottom: 100px;">
+    <div class="product-grid">
+        
+        <div class="product-card-modern">
+            <span class="product-badge">Hot Selling</span>
+            <h3 class="product-title">Pakej Starter</h3>
+            <div class="product-price">RM 50.00</div>
+            
+            <div class="product-features">
+                <div class="feature-item"><span>Untung Harian</span> <b>RM 2.50</b></div>
+                <div class="feature-item"><span>Tempoh Kontrak</span> <b>30 Hari</b></div>
+                <div class="feature-item"><span>Total Pulangan</span> <b>RM 75.00</b></div>
+            </div>
 
-    <div class="product-card" style="background: white; padding: 20px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-left: 5px solid var(--primary);">
-        <h3 style="margin: 0; color: var(--primary);">Pakej Pro</h3>
-        <div style="margin: 15px 0;">
-            <p style="font-size: 14px; margin: 5px 0;">Harga: <b>RM 100.00</b></p>
-            <p style="font-size: 14px; margin: 5px 0;">Untung Harian: <b style="color: #10b981;">RM 5.50</b></p>
-            <p style="font-size: 14px; margin: 5px 0;">Tempoh: <b>365 Hari</b></p>
+            <button class="btn-buy-modern" onclick="buyPlan('Starter', 50.00, 2.50)">
+                <i class="fas fa-shopping-cart"></i> Beli Sekarang
+            </button>
         </div>
-        <button class="btn-buy-now" onclick="buyProduct('Pakej Pro', 100, 5.50)" style="width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
-            BELI SEKARANG
-        </button>
+
+        <div class="product-card-modern">
+            <span class="product-badge" style="background: #fff9db; color: #fab005;">Premium</span>
+            <h3 class="product-title">Pakej VIP</h3>
+            <div class="product-price">RM 200.00</div>
+            
+            <div class="product-features">
+                <div class="feature-item"><span>Untung Harian</span> <b>RM 12.00</b></div>
+                <div class="feature-item"><span>Tempoh Kontrak</span> <b>30 Hari</b></div>
+                <div class="feature-item"><span>Total Pulangan</span> <b>RM 360.00</b></div>
+            </div>
+
+            <button class="btn-buy-modern" onclick="buyPlan('VIP', 200.00, 12.00)">
+                <i class="fas fa-gem"></i> Beli Sekarang
+            </button>
+        </div>
+
     </div>
 </div>
 
-        </div>
 
         <nav class="bottom-nav">
             <a href="dashboard.html" class="nav-item">
