@@ -55,54 +55,80 @@
     <script src="app.js"></script>
     <script>
         async function loadActiveMining() {
-            const { data: { user } } = await client.auth.getUser();
-            if (!user) return;
+    const { data: { user } } = await client.auth.getUser();
+    if (!user) return;
 
-            try {
-                // Ambil data dari table investments
-                const { data: investments, error } = await client
-                    .from('investments')
-                    .select('*')
-                    .eq('user_id', user.id)
-                    .eq('status', 'active');
+    try {
+        const { data: investments, error } = await client
+            .from('investments')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('status', 'active');
 
-                if (error) throw error;
+        if (error) throw error;
 
-                const container = document.getElementById('miningList');
-                let totalDaily = 0;
+        const container = document.getElementById('miningList');
+        let totalDaily = 0;
 
-                if (investments.length > 0) {
-                    document.getElementById('totalMachines').innerText = investments.length;
-                    
-                    container.innerHTML = investments.map(item => {
-                        totalDaily += parseFloat(item.daily_profit);
-                        return `
-                            <div class="recharge-card" style="margin-bottom: 15px; border-left: 5px solid #10b981;">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <div>
-                                        <h4 style="margin: 0;">${item.product_name}</h4>
-                                        <small style="color: #64748b;">Mula: ${new Date(item.created_at).toLocaleDateString()}</small>
-                                    </div>
-                                    <div style="text-align: right;">
-                                        <b style="color: #10b981;">+ RM ${parseFloat(item.daily_profit).toFixed(2)}</b><br>
-                                        <small style="color: #94a3b8;">Harian</small>
-                                    </div>
-                                </div>
-                                <div style="margin-top: 15px; background: #f1f5f9; height: 8px; border-radius: 10px; overflow: hidden;">
-                                    <div class="mining-progress-bar" style="width: 45%; height: 100%; background: #10b981;"></div>
-                                </div>
+        if (investments && investments.length > 0) {
+            document.getElementById('totalMachines').innerText = investments.length;
+            
+            container.innerHTML = investments.map(item => {
+                totalDaily += parseFloat(item.daily_profit);
+                return `
+                    <div class="recharge-card" style="margin-bottom: 15px; border-left: 5px solid #10b981; background: white;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="margin: 0;">${item.product_name}</h4>
+                                <small style="color: #64748b;">Mula: ${new Date(item.created_at).toLocaleDateString()}</small>
                             </div>
-                        `;
-                    }).join('');
+                            <div style="text-align: right;">
+                                <b style="color: #10b981;">+ RM ${parseFloat(item.daily_profit).toFixed(2)}</b><br>
+                                <button onclick="claimProfit('${item.id}', ${item.daily_profit})" 
+                                        style="margin-top:5px; background:#1e293b; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:10px; cursor:pointer;">
+                                    CLAIM PROFIT
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
 
-                    document.getElementById('totalProfit').innerText = `RM ${totalDaily.toFixed(2)}`;
-                }
-            } catch (err) {
-                console.error("Ralat memuatkan mining:", err.message);
-            }
+            document.getElementById('totalProfit').innerText = `RM ${totalDaily.toFixed(2)}`;
         }
+    } catch (err) {
+        console.error(err.message);
+    }
+}
 
-        document.addEventListener('DOMContentLoaded', loadActiveMining);
+// FUNGSI UNTUK CLAIM DUIT
+async function claimProfit(investmentId, amount) {
+    const { data: { user } } = await client.auth.getUser();
+    
+    try {
+        // 1. Ambil baki semasa
+        const { data: profile } = await client.from('profiles').select('balance').eq('id', user.id).single();
+        
+        // 2. Tambah baki baru
+        const newBalance = parseFloat(profile.balance) + parseFloat(amount);
+        
+        const { error: updateError } = await client
+            .from('profiles')
+            .update({ balance: newBalance })
+            .eq('id', user.id);
+
+        if (updateError) throw updateError;
+
+        alert(`Berjaya claim RM ${amount.toFixed(2)}! Baki anda telah dikemaskini.`);
+        location.reload(); // Refresh untuk nampak baki baru
+
+    } catch (err) {
+        alert("Gagal claim: " + err.message);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadActiveMining);
+
     </script>
 </body>
 </html>
