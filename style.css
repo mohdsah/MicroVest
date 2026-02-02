@@ -1736,3 +1736,60 @@ body { background: #f1f5f9; display: flex; justify-content: center; min-height: 
     line-height: 1.5;
 }
 
+/* RECHARGE PAGE STYLES */
+.recharge-card {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.bank-details {
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.bank-details p {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 5px;
+}
+
+.bank-details b {
+    color: #1e293b;
+    font-size: 15px;
+}
+
+.upload-area {
+    border: 2px dashed #e2e8f0;
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 10px;
+}
+
+.upload-area:hover {
+    border-color: #800000;
+    background: #fff5f5;
+}
+
+.upload-area i {
+    font-size: 30px;
+    color: #94a3b8;
+    margin-bottom: 10px;
+}
+
+#imagePreview {
+    width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    margin-top: 15px;
+    display: none;
+    border-radius: 8px;
+}
