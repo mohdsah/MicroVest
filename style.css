@@ -505,4 +505,125 @@ input {
 
 
 
+/* 1. Reset & Asas */
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #f1f5f9;
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: #1e293b;
+}
+
+/* 2. App Shell & Layout Utama */
+.app-shell {
+    max-width: 500px; /* Saiz mobile standard */
+    margin: 0 auto;
+    background: #f8fafc;
+    min-height: 100vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 3. Header & Statistik (Fix untuk gambar Admin anda) */
+.product-page-header, .admin-nav, .header-blue {
+    padding: 25px 20px 50px 20px;
+    text-align: center;
+    color: white;
+}
+
+.stat-grid, .stat-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Memastikan 2 kolum mendatar */
+    gap: 12px;
+    padding: 0 15px;
+    margin-top: -30px; /* Menindih header sedikit supaya nampak moden */
+}
+
+/* 4. Tab Navigation (Fix untuk gambar Admin yang menegak) */
+.tab-btn-container, .tabs {
+    display: flex; /* WAJIB: Supaya butang duduk sebelah-sebelah */
+    flex-direction: row;
+    justify-content: space-around;
+    background: #e2e8f0;
+    margin: 20px 15px;
+    padding: 5px;
+    border-radius: 12px;
+    gap: 5px;
+}
+
+.tab-btn, .tab-item {
+    flex: 1;
+    padding: 12px 5px;
+    border: none;
+    background: none;
+    font-weight: bold;
+    font-size: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #64748b;
+    white-space: nowrap;
+}
+
+.tab-btn.active, .tab-item.active {
+    background: white;
+    color: #800000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 5. Kad Data (Untuk Team & Admin) */
+.request-item, .card-item, .card, .data-card {
+    background: white;
+    margin: 10px 15px;
+    padding: 15px;
+    border-radius: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    display: block; /* Pastikan kad tidak mengecil */
+}
+
+/* 6. Navigasi Bawah (Bottom Nav) */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    max-width: 500px; /* Mesti sama dengan app-shell */
+    height: 70px;
+    background: white;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid #e2e8f0;
+    z-index: 1000;
+}
+
+.nav-item {
+    text-decoration: none;
+    color: #94a3b8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 10px;
+    gap: 4px;
+}
+
+.nav-item.active {
+    color: #800000;
+}
+
+.nav-item i {
+    font-size: 20px;
+}
+
+/* 7. Utiliti */
+.btn-group, .actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
 
