@@ -132,20 +132,38 @@
         }
 
         // FUNGSI UPDATE BAKI MANUAL
-        async function updateBalance() {
-            const email = document.getElementById('searchEmail').value;
-            const amount = parseFloat(document.getElementById('adjustAmount').value);
-            
-            const { data: u } = await client.from('profiles').select('id, balance').eq('email', email).single();
-            if(u) {
-                await client.from('profiles').update({ balance: u.balance + amount }).eq('id', u.id);
-                alert("Baki berjaya dikemaskini!");
-            } else {
-                alert("User tidak ditemui!");
-            }
+        async function manualUpdate() {
+    const email = document.getElementById('userEmailInput').value;
+    const amount = document.getElementById('amountInput').value;
+
+    const { error } = await client
+        .from('profiles')
+        .update({ balance: parseFloat(amount) })
+        .eq('email', email);
+
+    if (error) alert("Gagal: " + error.message);
+    else alert("Baki Berjaya Dikemaskini!");
+}
+
         }
 
         window.onload = loadAdminData;
+        
+        <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item active">
+        <i class="fas fa-home"></i><span>Home</span>
+    </a>
+    <a href="product_list.html" class="nav-item">
+        <i class="fas fa-chart-line"></i><span>Produk</span>
+    </a>
+    <a href="records.html" class="nav-item">
+        <i class="fas fa-history"></i><span>Rekod</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+        <i class="fas fa-user-circle"></i><span>Profil</span>
+    </a>
+</nav>
+
     </script>
 </body>
 </html>
