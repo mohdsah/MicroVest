@@ -8,161 +8,90 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
+<body style="background: #f8fafc;">
 
     <div class="app-shell">
-        <div class="top-nav">
-            <div class="profile-info">
-                <div class="user-avatar" id="userInitial">U</div>
-                <div>
-                    <span style="display: block; font-size: 12px; color: var(--text-muted); font-weight: 400;">Selamat Kembali,</span>
-                    <span id="displayEmail" style="font-size: 14px;">Memuatkan...</span>
-                </div>
+        <div style="padding: 20px 20px 0; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <p style="font-size: 12px; color: #64748b;">Selamat Datang,</p>
+                <h4 id="userEmail" style="font-size: 14px; color: #1e293b;">Memuatkan...</h4>
             </div>
-            <button class="btn-logout" onclick="handleLogout()" title="Log Keluar">
-                <i class="fas fa-sign-out-alt"></i>
-            </button>
+            <div style="width: 40px; height: 40px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-user" style="color: #8b0000;"></i>
+            </div>
         </div>
 
-        <div class="main-card">
-            <p><i class="fas fa-wallet"></i> Jumlah Baki Anda</p>
-            <h2 id="userBalance">RM 0.00</h2>
-            <div style="margin-top: 15px; font-size: 12px; background: rgba(255,255,255,0.2); display: inline-block; padding: 5px 12px; border-radius: 20px;">
-                Status: Pelabur Aktif
+        <div class="wallet-section">
+            <div class="wallet-balance">
+                <h3>Jumlah Baki (Wallet)</h3>
+                <h2 id="userBalance">RM 0.00</h2>
+            </div>
+            <div style="margin-top: 15px; font-size: 12px; opacity: 0.7;">
+                <i class="fas fa-shield-alt"></i> Akaun Dilindungi
             </div>
         </div>
 
         <div class="quick-actions">
-    <div class="action-item" onclick="location.href='recharge.html'">
-        <div class="icon-box"><i class="fas fa-plus-circle"></i></div>
-        <span>Deposit</span>
-    </div>
-    <div class="action-item" onclick="location.href='withdraw.html'">
-        <div class="icon-box"><i class="fas fa-hand-holding-usd"></i></div>
-        <span>Keluarkan</span>
-    </div>
-    <div class="action-item" onclick="location.href='team.html'">
-        <div class="icon-box"><i class="fas fa-users"></i></div>
-        <span>Pasukan</span>
-    </div>
-</div>
+            <div>
+                <a href="recharge.html" class="action-btn"><i class="fas fa-wallet"></i></a>
+                <p class="action-label">RECHARGE</p>
+            </div>
+            <div>
+                <a href="withdraw.html" class="action-btn"><i class="fas fa-hand-holding-usd"></i></a>
+                <p class="action-label">WITHDRAW</p>
+            </div>
+            <div>
+                <a href="team.html" class="action-btn"><i class="fas fa-users"></i></a>
+                <p class="action-label">TEAM</p>
+            </div>
+            <div>
+                <a href="bank.html" class="action-btn"><i class="fas fa-university"></i></a>
+                <p class="action-label">BANK</p>
+            </div>
+        </div>
 
-        <div class="investment-section">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h3 style="margin: 0; font-size: 16px;">Pelaburan Aktif</h3>
-        <span style="font-size: 11px; color: var(--primary); font-weight: bold;">Status: Berjalan</span>
-    </div>
-
-    <div id="activeInvestmentsList">
-        <p style="text-align: center; color: var(--text-muted); font-size: 12px; padding: 20px;">
-            Tiada pelaburan aktif buat masa ini.
-        </p>
-    </div>
-</div>
-
+        <h3 class="section-title">Pelaburan Saya</h3>
+        <div id="activeInvestments" style="padding: 0 20px; padding-bottom: 100px;">
+            <p style="text-align: center; color: #94a3b8; font-size: 12px; padding: 20px; background: white; border-radius: 15px;">Tiada pelaburan aktif saat ini.</p>
+        </div>
 
         <nav class="bottom-nav">
             <a href="dashboard.html" class="nav-item active">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
+                <i class="fas fa-home"></i><span>Home</span>
             </a>
             <a href="product_list.html" class="nav-item">
-                <i class="fas fa-chart-line"></i>
-                <span>Produk</span>
+                <i class="fas fa-chart-line"></i><span>Produk</span>
             </a>
             <a href="profile.html" class="nav-item">
-                <i class="fas fa-user-circle"></i>
-                <span>Profil</span>
+                <i class="fas fa-user-circle"></i><span>Profil</span>
             </a>
         </nav>
     </div>
 
     <script src="app.js"></script>
     <script>
-    // 1. Fungsi Utama: Memuatkan Data Dashboard
-    async function loadDashboardData() {
-        // Semak jika pengguna log masuk
-        const { data: { user } } = await client.auth.getUser();
+        async function loadDashboard() {
+            const { data: { user } } = await client.auth.getUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
 
-        if (!user) {
-            window.location.href = 'login.html';
-            return;
+            document.getElementById('userEmail').innerText = user.email.split('@')[0];
+
+            // Tarik data baki dari table profiles
+            const { data: profile } = await client
+                .from('profiles')
+                .select('balance')
+                .eq('id', user.id)
+                .single();
+
+            if (profile) {
+                document.getElementById('userBalance').innerText = `RM ${profile.balance.toFixed(2)}`;
+            }
         }
 
-        // Papar emel dan initial pengguna
-        if (document.getElementById('displayEmail')) {
-            document.getElementById('displayEmail').innerText = user.email;
-        }
-        if (document.getElementById('userInitial')) {
-            document.getElementById('userInitial').innerText = user.email.charAt(0).toUpperCase();
-        }
-
-        // Ambil data baki dari table 'profiles'
-        const { data, error } = await client
-            .from('profiles')
-            .select('balance')
-            .eq('id', user.id)
-            .single();
-
-        if (data) {
-            // Kemaskini paparan baki RM
-            document.getElementById('userBalance').innerText = `RM ${data.balance.toFixed(2)}`;
-            
-            // --- PANGGIL FUNGSI PELABURAN DI SINI ---
-            loadActiveInvestments(user.id);
-        }
-    }
-
-    // 2. Fungsi Kedua: Memuatkan Senarai Pelaburan Aktif
-    async function loadActiveInvestments(userId) {
-        const listContainer = document.getElementById('activeInvestmentsList');
-        if (!listContainer) return;
-
-        const { data, error } = await client
-            .from('user_investments')
-            .select('*')
-            .eq('user_id', userId)
-            .eq('status', 'active');
-
-        if (data && data.length > 0) {
-            listContainer.innerHTML = ''; // Buang mesej "Tiada pelaburan"
-            
-            data.forEach(item => {
-                // Logik pengiraan progress (contoh 365 hari)
-                const startDate = new Date(item.created_at);
-                const today = new Date();
-                const diffTime = Math.abs(today - startDate);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                const progressPercent = Math.min((diffDays / 365) * 100, 100);
-
-                listContainer.innerHTML += `
-                    <div class="active-plan-card" style="background: #fdf2f2; border-radius: 12px; padding: 15px; margin-bottom: 12px; border-left: 5px solid var(--primary); color: #333;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span style="font-weight: 800; font-size: 14px; color: var(--primary);">${item.plan_name}</span>
-                            <span style="font-size: 11px; color: #10b981; font-weight: bold;">+ RM ${item.daily_profit.toFixed(2)}/hari</span>
-                        </div>
-                        <div style="height: 6px; background: #eee; border-radius: 10px; margin-bottom: 5px; overflow: hidden;">
-                            <div style="width: ${progressPercent}%; height: 100%; background: var(--primary); border-radius: 10px;"></div>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 10px; color: #666;">
-                            <span>Hari ke-${diffDays}</span>
-                            <span>Tempoh: 365 Hari</span>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-    }
-
-    // 3. Jalankan fungsi sebaik sahaja halaman dimuatkan
-    window.onload = loadDashboardData;
-</script>
-
-
+        window.onload = loadDashboard;
+    </script>
 </body>
 </html>
-
-
-
-
-

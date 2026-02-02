@@ -539,3 +539,736 @@ body { background: #f1f5f9; display: flex; justify-content: center; min-height: 
 
 .btn-whatsapp { background: #25D366; color: white; }
 .btn-copy { background: var(--primary); color: white; }
+
+/* --- TEAM PAGE STYLES --- */
+.team-header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+    border-radius: 0 0 30px 30px;
+}
+
+.ref-card {
+    background: white;
+    margin: -25px 20px 20px;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.ref-input-group {
+    display: flex;
+    background: #f1f5f9;
+    padding: 8px;
+    border-radius: 12px;
+    margin-top: 10px;
+}
+
+.ref-input-group input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 10px;
+    font-size: 13px;
+    color: #475569;
+    outline: none;
+}
+
+.btn-copy {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.stats-grid-team {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    padding: 0 20px;
+    margin-bottom: 20px;
+}
+
+.team-stat-box {
+    background: white;
+    padding: 15px;
+    border-radius: 15px;
+    text-align: center;
+    border: 1px solid #f1f5f9;
+}
+
+.team-stat-box span { font-size: 11px; color: var(--text-muted); display: block; }
+.team-stat-box strong { font-size: 18px; color: var(--primary); }
+
+.commission-item {
+    background: white;
+    margin: 0 20px 10px;
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid #10b981;
+}
+
+/* PAKSA SEMUA CONTAINER MENDATAR */
+.stats-grid-team, .bottom-nav, .quick-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+}
+
+.nav-item, .team-stat-box {
+    flex: 1 !important;
+}
+
+
+/* Paksa susunan mendatar untuk semua grid menu dan nav */
+.quick-actions, .bottom-nav, .stats-grid-team, .menu-grid {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+}
+
+.nav-item, .action-item, .team-stat-box {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-decoration: none !important;
+}
+
+
+/* --- ADMIN DASHBOARD STYLES --- */
+.admin-badge {
+    background: #1e293b;
+    color: #f8fafc;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.admin-list-card {
+    background: white;
+    margin: 10px 20px;
+    padding: 15px;
+    border-radius: 12px;
+    border-left: 5px solid var(--primary);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.admin-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.btn-approve {
+    flex: 1;
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.btn-reject {
+    flex: 1;
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.tab-admin {
+    display: flex;
+    margin: 20px;
+    background: #eee;
+    border-radius: 10px;
+    padding: 5px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: none;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+}
+
+.tab-btn.active {
+    background: white;
+    border-radius: 8px;
+    color: var(--primary);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* --- ADMIN ENHANCEMENT --- */
+.admin-search-bar {
+    padding: 10px 20px;
+    background: white;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+.btn-banned {
+    background: #000;
+    color: white;
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.btn-unban {
+    background: #ff9800;
+    color: white;
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.admin-stats-bar {
+    display: flex;
+    gap: 10px;
+    padding: 10px 20px;
+}
+
+.stat-item {
+    flex: 1;
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 11px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.stat-item b {
+    display: block;
+    font-size: 14px;
+    color: var(--primary);
+}
+
+
+/* --- ADMIN EDIT USER MODAL --- */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 2000; 
+    left: 0; top: 0; 
+    width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.5);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.admin-input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+
+
+/* --- LOGIN & REGISTER STYLES --- */
+.auth-container {
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    justify-content: center;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.auth-header h1 {
+    font-size: 28px;
+    color: var(--primary);
+    font-weight: 900;
+}
+
+.auth-card {
+    background: white;
+    padding: 30px;
+    border-radius: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 15px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.auth-input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(139, 0, 0, 0.1);
+}
+
+.btn-auth {
+    width: 100%;
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: 0.3s;
+}
+
+.btn-auth:active {
+    transform: scale(0.98);
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.auth-footer a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+
+/* --- AUTH & REGISTER EXTRA STYLES --- */
+.ref-info-badge {
+    background: #f1f5f9;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    color: #475569;
+    border-left: 4px solid var(--primary);
+}
+
+.ref-info-badge b {
+    color: var(--primary);
+}
+
+
+/* --- FORGOT PASSWORD STYLES --- */
+.instruction-text {
+    font-size: 13px;
+    color: #64748b;
+    text-align: center;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+.success-box {
+    background: #f0fdf4;
+    color: #166534;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 13px;
+    margin-bottom: 20px;
+    border: 1px solid #bbf7d0;
+    display: none; /* Akan ditunjukkan selepas emel dihantar */
+}
+
+
+/* --- DASHBOARD STYLES --- */
+.wallet-section {
+    background: linear-gradient(135deg, #8b0000, #4a0000);
+    margin: 20px;
+    padding: 25px;
+    border-radius: 25px;
+    color: white;
+    box-shadow: 0 10px 20px rgba(139, 0, 0, 0.2);
+}
+
+.wallet-balance h3 {
+    font-size: 14px;
+    opacity: 0.8;
+    font-weight: 400;
+}
+
+.wallet-balance h2 {
+    font-size: 32px;
+    font-weight: 900;
+    margin: 5px 0;
+}
+
+.quick-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-around;
+    padding: 0 20px;
+    margin-top: -10px;
+}
+
+.action-btn {
+    background: white;
+    width: 65px;
+    height: 65px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    color: #8b0000;
+    font-size: 20px;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.action-btn:active { transform: scale(0.9); }
+
+.action-label {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    margin-top: 8px;
+}
+
+.section-title {
+    padding: 0 20px;
+    margin: 25px 0 15px;
+    font-size: 16px;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+
+/* --- MINING / INVESTMENT CARD --- */
+.mining-card {
+    background: white;
+    margin: 15px 20px;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border-left: 6px solid #8b0000;
+}
+
+.mining-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.mining-title {
+    font-weight: 800;
+    color: #1e293b;
+    font-size: 15px;
+}
+
+.status-active {
+    background: #f0fdf4;
+    color: #16a34a;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.pulse-dot {
+    width: 6px;
+    height: 6px;
+    background: #16a34a;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.mining-progress-bg {
+    background: #f1f5f9;
+    height: 8px;
+    border-radius: 10px;
+    margin: 15px 0;
+    overflow: hidden;
+}
+
+.mining-progress-bar {
+    background: linear-gradient(90deg, #8b0000, #ff4d4d);
+    height: 100%;
+    width: 45%; /* Ini akan berubah ikut logic */
+    border-radius: 10px;
+    transition: width 0.5s;
+}
+
+.mining-stats-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.mining-stat-box {
+    font-size: 11px;
+    color: #64748b;
+}
+
+.mining-stat-box b {
+    display: block;
+    color: #1e293b;
+    font-size: 13px;
+    margin-top: 2px;
+}
+
+/* --- CLAIM PROFIT STYLES --- */
+.claim-card {
+    background: white;
+    margin: 20px;
+    padding: 30px;
+    border-radius: 30px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.profit-amount {
+    font-size: 42px;
+    font-weight: 900;
+    color: #8b0000;
+    margin: 10px 0;
+}
+
+.claim-circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ff4d4d, #8b0000);
+    margin: 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-direction: column;
+    box-shadow: 0 0 20px rgba(139, 0, 0, 0.4);
+    cursor: pointer;
+    transition: 0.3s;
+    border: 8px solid rgba(255,255,255,0.2);
+}
+
+.claim-circle:active {
+    transform: scale(0.9);
+    box-shadow: 0 0 5px rgba(139, 0, 0, 0.2);
+}
+
+.claim-circle i {
+    font-size: 40px;
+    margin-bottom: 5px;
+}
+
+.disabled-claim {
+    background: #cbd5e1 !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
+}
+
+/* --- WITHDRAW PAGE STYLES --- */
+.withdraw-card {
+    background: white;
+    margin: 20px;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.withdraw-input-group {
+    margin-bottom: 20px;
+}
+
+.withdraw-input-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    color: #64748b;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.withdraw-field {
+    width: 100%;
+    padding: 15px;
+    border: 1.5px solid #f1f5f9;
+    border-radius: 12px;
+    background: #f8fafc;
+    font-size: 16px;
+    font-weight: bold;
+    color: #1e293b;
+    outline: none;
+}
+
+.withdraw-field:focus {
+    border-color: #8b0000;
+    background: white;
+}
+
+.fee-info {
+    background: #fff1f2;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    color: #be123c;
+    margin-top: 10px;
+    border-left: 4px solid #e11d48;
+}
+
+.btn-withdraw-now {
+    width: 100%;
+    background: #8b0000;
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 15px;
+    font-weight: 800;
+    font-size: 16px;
+    margin-top: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(139, 0, 0, 0.2);
+}
+
+/* --- TEAM PAGE STYLES --- */
+.team-stats-grid {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 15px;
+    padding: 20px;
+    margin-top: -30px;
+}
+
+.stat-card {
+    flex: 1;
+    background: white;
+    padding: 20px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.stat-card i {
+    font-size: 20px;
+    color: #8b0000;
+    margin-bottom: 8px;
+}
+
+.stat-card span {
+    display: block;
+    font-size: 11px;
+    color: #64748b;
+    font-weight: bold;
+}
+
+.stat-card h2 {
+    font-size: 20px;
+    margin-top: 5px;
+    color: #1e293b;
+}
+
+.referral-box {
+    background: white;
+    margin: 0 20px 20px;
+    padding: 20px;
+    border-radius: 20px;
+    border: 1px dashed #cbd5e1;
+}
+
+.copy-area {
+    display: flex;
+    background: #f1f5f9;
+    padding: 10px;
+    border-radius: 12px;
+    margin-top: 10px;
+    align-items: center;
+}
+
+.copy-area input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 12px;
+    color: #475569;
+    outline: none;
+    padding: 5px;
+}
+
+.btn-copy {
+    background: #8b0000;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+}
+

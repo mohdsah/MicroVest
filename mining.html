@@ -3,102 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mining Centre - MicroVest</title>
+    <title>Mining Aktif - MicroVest</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root { --primary: #800000; --gold: #f59e0b; }
-        body { background: #f1f5f9; font-family: sans-serif; }
-        .mining-header { background: var(--primary); color: white; padding: 30px 20px; text-align: center; border-radius: 0 0 30px 30px; }
-        .mining-card { background: white; margin: 15px; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .claim-btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-ready { background: var(--gold); color: white; animation: pulse 1.5s infinite; }
-        .btn-waiting { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
-    </style>
 </head>
-<body>
+<body style="background: #f8fafc;">
 
-    <div class="mining-header">
-        <i class="fas fa-microchip fa-3x" style="margin-bottom: 10px; color: var(--gold);"></i>
-        <h2>Pusat Perlombongan</h2>
-        <p>Kutip hasil pelaburan anda setiap 24 jam</p>
-    </div>
-
-    <div id="miningList" style="padding-bottom: 100px;">
+    <div class="app-shell">
+        <div class="team-header" style="background: #8b0000; color: white; padding: 30px 20px; text-align: center; border-radius: 0 0 25px 25px;">
+            <h2 style="font-size: 20px;">Mining Saya</h2>
+            <p style="font-size: 12px; opacity: 0.8;">Mesin pelaburan sedang bekerja</p>
         </div>
 
-    <nav class="bottom-nav">
-        <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
-        <a href="mining.html" class="nav-item active"><i class="fas fa-hammer"></i><span>Mining</span></a>
-        <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><span>Profil</span></a>
-    </nav>
+        <div style="display: flex; gap: 10px; padding: 20px;">
+            <div style="flex: 1; background: white; padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.03);">
+                <span style="font-size: 10px; color: #64748b;">TOTAL MESIN</span>
+                <b id="totalMachines" style="display: block; font-size: 18px; color: #8b0000;">0</b>
+            </div>
+            <div style="flex: 1; background: white; padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.03);">
+                <span style="font-size: 10px; color: #64748b;">EST. PROFIT</span>
+                <b id="estProfit" style="display: block; font-size: 18px; color: #16a34a;">RM 0.00</b>
+            </div>
+        </div>
+
+        <div id="miningList">
+            <p style="text-align: center; padding: 40px; color: #94a3b8; font-size: 13px;">Mencari mesin aktif...</p>
+        </div>
+
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="nav-item">
+                <i class="fas fa-home"></i><span>Home</span>
+            </a>
+            <a href="product_list.html" class="nav-item">
+                <i class="fas fa-chart-line"></i><span>Produk</span>
+            </a>
+            <a href="mining.html" class="nav-item active">
+                <i class="fas fa-microchip"></i><span>Mining</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user-circle"></i><span>Profil</span>
+            </a>
+        </nav>
+    </div>
 
     <script src="app.js"></script>
     <script>
-        async function loadMiningMachines() {
+        async function loadMining() {
             const { data: { user } } = await client.auth.getUser();
-            if (!user) return;
+            if (!user) { window.location.href = 'login.html'; return; }
 
-            const { data: machines, error } = await client
+            // Ambil data pelaburan user
+            const { data: investments, error } = await client
                 .from('user_investments')
                 .select('*')
                 .eq('user_id', user.id)
                 .eq('status', 'active');
 
-            const list = document.getElementById('miningList');
-            if (!machines || machines.length === 0) {
-                list.innerHTML = `<div style="text-align:center; margin-top:50px; color:#666;">
-                    <i class="fas fa-exclamation-circle fa-2x"></i>
-                    <p>Tiada mesin aktif. Sila beli pakej di menu Produk.</p>
-                </div>`;
-                return;
-            }
+            const container = document.getElementById('miningList');
+            
+            if (investments && investments.length > 0) {
+                container.innerHTML = '';
+                document.getElementById('totalMachines').innerText = investments.length;
+                let totalProfit = 0;
 
-            list.innerHTML = '';
-            machines.forEach(m => {
-                const now = new Date();
-                const lastClaim = new Date(m.last_claim);
-                const diff = now - lastClaim;
-                const hoursLeft = 24 - (diff / (1000 * 60 * 60));
-                const canClaim = hoursLeft <= 0;
-
-                list.innerHTML += `
-                    <div class="mining-card">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                            <h3 style="margin:0; color:var(--primary); font-size:16px;">${m.plan_name}</h3>
-                            <span style="color:#10b981; font-weight:bold;">+ RM ${m.daily_profit.toFixed(2)}</span>
+                investments.forEach(inv => {
+                    totalProfit += inv.daily_profit;
+                    container.innerHTML += `
+                        <div class="mining-card">
+                            <div class="mining-header">
+                                <span class="mining-title">${inv.product_name}</span>
+                                <div class="status-active">
+                                    <div class="pulse-dot"></div> SEDANG BEKERJA
+                                </div>
+                            </div>
+                            <div class="mining-progress-bg">
+                                <div class="mining-progress-bar" style="width: 70%;"></div>
+                            </div>
+                            <div class="mining-stats-row">
+                                <div class="mining-stat-box">
+                                    UNTUNG HARIAN
+                                    <b>RM ${inv.daily_profit.toFixed(2)}</b>
+                                </div>
+                                <div class="mining-stat-box" style="text-align: right;">
+                                    MODAL
+                                    <b>RM ${inv.amount.toFixed(2)}</b>
+                                </div>
+                            </div>
                         </div>
-                        
-                        <p style="font-size:12px; color:#666; margin-bottom:15px;">
-                            <i class="fas fa-clock"></i> ${canClaim ? 'Hasil sedia untuk dikutip!' : 'Tunggu: ' + hoursLeft.toFixed(1) + ' jam lagi'}
-                        </p>
-
-                        <button class="claim-btn ${canClaim ? 'btn-ready' : 'btn-waiting'}" 
-                                onclick="${canClaim ? `claimProfit('${m.id}', ${m.daily_profit})` : ''}">
-                            ${canClaim ? 'CLAIM HASIL SEKARANG' : 'SEDANG MELOMBONG...'}
-                        </button>
+                    `;
+                });
+                document.getElementById('estProfit').innerText = `RM ${totalProfit.toFixed(2)}`;
+            } else {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 50px 20px;">
+                        <i class="fas fa-box-open" style="font-size: 40px; color: #cbd5e1; margin-bottom: 15px;"></i>
+                        <p style="color: #94a3b8; font-size: 14px;">Tiada mesin aktif. Sila beli pakej di menu Produk.</p>
+                        <a href="product_list.html" style="display: inline-block; margin-top: 15px; background: #8b0000; color: white; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 13px;">MULA MELABUR</a>
                     </div>
                 `;
-            });
+            }
         }
 
-        async function claimProfit(id, profit) {
-            const { data: { user } } = await client.auth.getUser();
-            
-            // 1. Tambah baki user
-            const { data: p } = await client.from('profiles').select('balance').eq('id', user.id).single();
-            await client.from('profiles').update({ balance: p.balance + profit }).eq('id', user.id);
-
-            // 2. Kemaskini last_claim ke waktu sekarang
-            await client.from('user_investments').update({ last_claim: new Date() }).eq('id', id);
-
-            alert("Tahniah! RM " + profit.toFixed(2) + " telah dimasukkan ke baki anda.");
-            loadMiningMachines();
-        }
-
-        window.onload = loadMiningMachines;
+        window.onload = loadMining;
     </script>
 </body>
 </html>

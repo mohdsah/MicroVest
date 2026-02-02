@@ -3,214 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Admin - MicroVest</title>
+    <title>Master Admin - MicroVest</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root { --primary: #800000; --success: #10b981; --danger: #ef4444; --blue: #2196F3; --warning: #f59e0b; }
-        body { background: #f1f5f9; font-family: 'Inter', sans-serif; margin: 0; }
-
-        /* Header Section */
-        .admin-nav { background: var(--primary); color: white; padding: 20px; text-align: center; border-radius: 0 0 20px 20px; position: sticky; top: 0; z-index: 100; }
-        
-        /* Stats */
-        .stat-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; margin-top: -25px; }
-        .stat-box { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); text-align: center; }
-        .stat-box small { font-size: 10px; color: #64748b; text-transform: uppercase; }
-        .stat-box div { font-size: 18px; font-weight: bold; color: var(--primary); margin-top: 5px; }
-
-        /* Search Bar */
-        .search-area { padding: 0 15px; margin-bottom: 10px; }
-        .search-input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; outline: none; }
-
-        /* Tab Navigation - Horizontal Fix */
-        .tabs { display: flex; background: #e2e8f0; margin: 10px 15px; padding: 5px; border-radius: 12px; gap: 5px; }
-        .tab-item { flex: 1; padding: 10px; border: none; background: none; font-weight: bold; font-size: 12px; border-radius: 8px; cursor: pointer; color: #64748b; transition: 0.2s; }
-        .tab-item.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-
-        /* Content Cards */
-        .content-body { padding: 10px 15px 100px 15px; }
-        .card { background: white; padding: 15px; border-radius: 15px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .user-info h4 { margin: 0; font-size: 14px; color: #1e293b; }
-        .user-info p { margin: 5px 0; font-size: 12px; color: #64748b; }
-        
-        /* Action Buttons */
-        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-        .btn-sm { padding: 8px; border: none; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; color: white; }
-        .btn-edit { background: var(--blue); }
-        .btn-ban { background: var(--danger); }
-        .btn-unban { background: var(--success); }
-        .btn-pass { background: var(--warning); grid-column: span 2; }
-        
-        /* Ban Status Badge */
-        .banned { border: 2px solid var(--danger); opacity: 0.7; }
-        .status-tag { font-size: 9px; padding: 2px 6px; border-radius: 4px; float: right; }
-    </style>
 </head>
-<body>
+<body style="background: #f1f5f9;">
 
-    <div class="admin-nav">
-        <h2 style="margin:0; font-size: 18px;">Admin Console</h2>
+<div class="app-shell" style="padding: 0;">
+    <div style="background: #1e293b; color: white; padding: 30px 20px; border-radius: 0 0 25px 25px;">
+        <h2 style="font-size: 20px;">Master Dashboard</h2>
+        <p style="font-size: 12px; opacity: 0.7;">Pengurusan Transaksi & Pengguna</p>
     </div>
 
-    <div class="stat-container">
-        <div class="stat-box">
-            <small>Deposit Appr.</small>
-            <div id="statD">RM 0</div>
+    <div class="admin-stats-bar">
+        <div class="stat-item">DEPOSIT APPR. <b id="totalDepo">0</b></div>
+        <div class="stat-item">WITHDRAW APPR. <b id="totalWith">0</b></div>
+    </div>
+
+    <div class="admin-search-bar">
+        <input type="text" id="adminSearch" class="search-input" placeholder="Cari emel atau ID pengguna..." onkeyup="filterData()">
+    </div>
+
+    <div class="tab-admin" style="display: flex; margin: 10px 20px; background: #e2e8f0; border-radius: 10px; padding: 5px;">
+        <button class="tab-btn active" onclick="switchTab('recharge', this)">DEPOSIT</button>
+        <button class="tab-btn" onclick="switchTab('withdraw', this)">WITHDRAW</button>
+        <button class="tab-btn" onclick="switchTab('users', this)">USERS</button>
+    </div>
+
+    <div id="adminContent" style="padding-bottom: 50px;">
+        <p style="text-align: center; padding: 50px; color: #94a3b8;">Tiada rekod buat masa ini.</p>
+    </div>
+</div>
+
+<div id="editModal" class="modal" style="display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center;">
+    <div class="modal-content" style="background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+        <div class="modal-header" style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+            <h3 style="color: #1e293b;">Kemas Kini Baki User</h3>
         </div>
-        <div class="stat-box">
-            <small>Withdraw Appr.</small>
-            <div id="statW">RM 0</div>
+        
+        <input type="hidden" id="editUserId">
+        
+        <div style="margin-bottom: 15px;">
+            <label style="font-size: 11px; color: #64748b; font-weight: bold;">EMEL PENGGUNA</label>
+            <input type="text" id="editEmail" class="admin-input" readonly style="background: #f1f5f9; border: 1px solid #ddd; width: 100%; padding: 12px; border-radius: 10px; margin-top: 5px; color: #666;">
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label style="font-size: 11px; color: #64748b; font-weight: bold;">BAKI BARU (RM)</label>
+            <input type="number" id="editBalance" class="admin-input" step="0.01" style="width: 100%; padding: 12px; border: 2px solid #8b0000; border-radius: 10px; margin-top: 5px; font-size: 18px; font-weight: bold; color: #8b0000;">
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <button onclick="closeModal()" style="flex:1; padding:12px; border:none; border-radius:10px; background:#e2e8f0; font-weight:bold; cursor:pointer;">BATAL</button>
+            <button onclick="saveUserEdit()" style="flex:1; padding:12px; border:none; border-radius:10px; background:#8b0000; color:white; font-weight:bold; cursor:pointer;">SIMPAN PERUBAHAN</button>
         </div>
     </div>
+</div>
 
-    <div class="search-area">
-        <input type="text" id="searchInput" class="search-input" placeholder="Cari email atau ID user..." onkeyup="filterList()">
-    </div>
 
-    <div class="tabs">
-        <button id="t-recharge" class="tab-item active" onclick="switchTab('recharge')">DEPOSIT</button>
-        <button id="t-withdraw" class="tab-item" onclick="switchTab('withdraw')">WITHDRAW</button>
-        <button id="t-users" class="tab-item" onclick="switchTab('users')">USERS</button>
-    </div>
+<script src="app.js"></script>
+<script>
+    let currentTab = 'recharge';
+    let allData = [];
 
-    <div id="mainList" class="content-body">
-        </div>
+    async function loadData() // Fungsi 1: Buka Modal dan Masukkan Data User
+function openEditModal(id, email, balance) {
+    document.getElementById('editUserId').value = id;
+    document.getElementById('editEmail').value = email;
+    document.getElementById('editBalance').value = balance;
+    
+    // Tunjukkan modal dengan gaya flex
+    document.getElementById('editModal').style.display = 'flex';
+}
 
-    <script src="app.js"></script>
-    <script>
-        let currentMode = 'recharge';
-        let allData = [];
+// Fungsi 2: Tutup Modal
+function closeModal() {
+    document.getElementById('editModal').style.display = 'none';
+}
 
-        async function init() {
-            const { data: { user } } = await client.auth.getUser();
-            // Optional: Tambah sekatan email admin di sini
-            loadStats();
-            loadMainData();
-        }
+// Fungsi 3: Simpan Data yang diedit ke Supabase
+async function saveUserEdit() {
+    const userId = document.getElementById('editUserId').value;
+    const newBalance = parseFloat(document.getElementById('editBalance').value);
 
-        async function loadStats() {
-            const { data: d } = await client.from('recharge_requests').select('amount').eq('status', 'approved');
-            const { data: w } = await client.from('withdrawals').select('amount').eq('status', 'approved');
-            
-            const totalD = d ? d.reduce((a, b) => a + b.amount, 0) : 0;
-            const totalW = w ? w.reduce((a, b) => a + b.amount, 0) : 0;
-            
-            document.getElementById('statD').innerText = `RM ${totalD.toFixed(0)}`;
-            document.getElementById('statW').innerText = `RM ${totalW.toFixed(0)}`;
-        }
+    if (isNaN(newBalance)) {
+        alert("Sila masukkan jumlah baki yang betul.");
+        return;
+    }
 
-        async function loadMainData() {
-            const list = document.getElementById('mainList');
-            list.innerHTML = 'Memuatkan...';
+    // Tunjukkan loading sekejap
+    const saveBtn = event.target;
+    saveBtn.innerText = "Menyimpan...";
+    saveBtn.disabled = true;
 
-            let query;
-            if(currentMode === 'users') {
-                query = client.from('profiles').select('*').order('created_at', {ascending: false});
-            } else {
-                const table = currentMode === 'recharge' ? 'recharge_requests' : 'withdrawals';
-                query = client.from(table).select('*').eq('status', 'pending').order('created_at', {ascending: false});
-            }
+    // Update di Database Supabase
+    const { error } = await client
+        .from('profiles')
+        .update({ balance: newBalance })
+        .eq('id', userId);
 
-            const { data, error } = await query;
+    if (error) {
+        alert("Gagal mengemaskini baki: " + error.message);
+    } else {
+        alert("Baki berjaya dikemas kini!");
+        closeModal();
+        loadData(); // Panggil semula data untuk refresh senarai
+    }
+    
+    saveBtn.innerText = "SIMPAN PERUBAHAN";
+    saveBtn.disabled = false;
+}
+{
+        const container = document.getElementById('adminContent');
+        container.innerHTML = '<p style="text-align:center; padding:50px;">Memuatkan...</p>';
+
+        if (currentTab === 'users') {
+            const { data } = await client.from('profiles').select('*').order('created_at', { ascending: false });
             allData = data || [];
-            renderList(allData);
+        } else {
+            const table = currentTab === 'recharge' ? 'recharge_requests' : 'withdrawals';
+            const { data } = await client.from(table).select('*, profiles(email)').eq('status', 'pending');
+            allData = data || [];
+        }
+        
+        renderList(allData);
+        updateStats();
+    }
+
+    function renderList(list) {
+        const container = document.getElementById('adminContent');
+        if (list.length === 0) {
+            container.innerHTML = '<p style="text-align:center; padding:50px; color:#94a3b8;">Tiada rekod ditemui.</p>';
+            return;
         }
 
-        function renderList(items) {
-            const list = document.getElementById('mainList');
-            list.innerHTML = '';
-
-            if(items.length === 0) {
-                list.innerHTML = '<center style="margin-top:20px; color:#888;">Tiada rekod dijumpai</center>';
-                return;
-            }
-
-            items.forEach(item => {
-                if(currentMode === 'users') {
-                    const isBanned = item.status === 'banned';
-                    list.innerHTML += `
-                        <div class="card ${isBanned ? 'banned' : ''}" data-search="${item.email}">
-                            <div class="user-info">
-                                <span class="status-tag" style="background:${isBanned ? '#ef4444':'#10b981'}; color:white">
-                                    ${isBanned ? 'BANNED' : 'ACTIVE'}
-                                </span>
-                                <h4>${item.email}</h4>
-                                <p>Baki: <b>RM ${item.balance.toFixed(2)}</b></p>
-                            </div>
-                            <div class="actions">
-                                <button class="btn-sm btn-edit" onclick="editBal('${item.id}', ${item.balance})">EDIT BAKI</button>
-                                ${isBanned ? 
-                                    `<button class="btn-sm btn-unban" onclick="toggleBan('${item.id}', 'active')">UN-BAN</button>` : 
-                                    `<button class="btn-sm btn-ban" onclick="toggleBan('${item.id}', 'banned')">BAN USER</button>`
-                                }
-                                <button class="btn-sm btn-pass" onclick="resetPass('${item.email}')">TUKAR PASSWORD (EMAIL RECOVERY)</button>
-                            </div>
-                        </div>`;
-                } else {
-                    list.innerHTML += `
-                        <div class="card" data-search="${item.user_id}">
-                            <small>ID: ${item.user_id.substring(0,8)}</small>
-                            <h2 style="margin:5px 0; color:var(--primary);">RM ${item.amount.toFixed(2)}</h2>
-                            <div class="actions">
-                                <button class="btn-sm btn-unban" onclick="approveReq('${item.id}', '${item.user_id}', ${item.amount})">LULUS</button>
-                                <button class="btn-sm btn-ban" onclick="rejectReq('${item.id}')">TOLAK</button>
-                            </div>
-                        </div>`;
-                }
-            });
-        }
-
-        function filterList() {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allData.filter(i => 
-                (i.email && i.email.toLowerCase().includes(term)) || 
-                (i.user_id && i.user_id.toLowerCase().includes(term))
-            );
-            renderList(filtered);
-        }
-
-        async function editBal(id, old) {
-            const val = prompt("Jumlah baki baru (RM):", old);
-            if(!val) return;
-            await client.from('profiles').update({ balance: parseFloat(val) }).eq('id', id);
-            loadMainData();
-        }
-
-        async function toggleBan(id, newStatus) {
-            if(!confirm(`Tukar status user kepada ${newStatus}?`)) return;
-            await client.from('profiles').update({ status: newStatus }).eq('id', id);
-            loadMainData();
-        }
-
-        async function resetPass(email) {
-            if(!confirm("Hantar email pemulihan kata laluan kepada user ini?")) return;
-            const { error } = await client.auth.resetPasswordForEmail(email);
-            if(!error) alert("Email reset telah dihantar ke " + email);
-        }
-
-        async function approveReq(id, uid, amt) {
-            if(!confirm("Luluskan RM" + amt + "?")) return;
-            if(currentMode === 'recharge') {
-                const { data: p } = await client.from('profiles').select('balance').eq('id', uid).single();
-                await client.from('profiles').update({ balance: p.balance + amt }).eq('id', uid);
-                await client.from('recharge_requests').update({ status: 'approved' }).eq('id', id);
+        container.innerHTML = '';
+        list.forEach(item => {
+            if (currentTab === 'users') {
+                const statusBan = item.is_banned ? '<span style="color:red">BANNED</span>' : '<span style="color:green">ACTIVE</span>';
+                container.innerHTML += `
+                    <div class="admin-list-card">
+                        <div style="font-size:12px;"><b>EMAIL:</b> ${item.email}</div>
+                        <div style="font-size:12px;"><b>BAL:</b> RM ${item.balance.toFixed(2)} | <b>STATUS:</b> ${statusBan}</div>
+                        <div class="admin-actions">
+                            <button class="${item.is_banned ? 'btn-unban' : 'btn-banned'}" onclick="toggleBan('${item.id}', ${item.is_banned})">
+                                ${item.is_banned ? 'BUKA BAND' : 'EDIT USER BAND'}
+                            </button>
+                        </div>
+                    </div>`;
             } else {
-                await client.from('withdrawals').update({ status: 'approved' }).eq('id', id);
+                container.innerHTML += `
+                    <div class="admin-list-card">
+                        <div style="font-size:11px;">DARI: ${item.profiles?.email}</div>
+                        <div style="font-size:18px; font-weight:800; margin:5px 0;">RM ${item.amount.toFixed(2)}</div>
+                        <div style="font-size:11px; color:#666;">${currentTab === 'withdraw' ? 'Info: '+item.bank_info : 'Topup Wallet'}</div>
+                        <div class="admin-actions">
+                            <button class="btn-approve" onclick="approveTx('${item.id}', '${item.user_id}', ${item.amount})">APPROVE</button>
+                            <button class="btn-reject" onclick="rejectTx('${item.id}')">REJECT</button>
+                        </div>
+                    </div>`;
             }
-            alert("Berjaya!"); loadMainData(); loadStats();
-        }
+        });
+    }
 
-        function switchTab(m) {
-            currentMode = m;
-            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-            document.getElementById('t-' + m).classList.add('active');
-            document.getElementById('searchInput').value = '';
-            loadMainData();
-        }
+    function filterData() {
+        const term = document.getElementById('adminSearch').value.toLowerCase();
+        const filtered = allData.filter(i => {
+            const email = i.email || (i.profiles && i.profiles.email) || "";
+            return email.toLowerCase().includes(term);
+        });
+        renderList(filtered);
+    }
 
-        window.onload = init;
-    </script>
+    async function toggleBan(uid, currentStatus) {
+        const msg = currentStatus ? "Buka band user ini?" : "Band user ini?";
+        if(!confirm(msg)) return;
+        await client.from('profiles').update({ is_banned: !currentStatus }).eq('id', uid);
+        alert("Status dikemaskini!");
+        loadData();
+    }
+
+    async function approveTx(tid, uid, amt) {
+        if(!confirm("Luluskan transaksi?")) return;
+        const table = currentTab === 'recharge' ? 'recharge_requests' : 'withdrawals';
+        
+        if(currentTab === 'recharge') {
+            const { data } = await client.from('profiles').select('balance').eq('id', uid).single();
+            await client.from('profiles').update({ balance: data.balance + amt }).eq('id', uid);
+        }
+        
+        await client.from(table).update({ status: 'approved' }).eq('id', tid);
+        alert("Transaksi Berjaya!");
+        loadData();
+    }
+
+    async function updateStats() {
+        const { count: rCount } = await client.from('recharge_requests').select('*', { count: 'exact', head: true }).eq('status', 'approved');
+        const { count: wCount } = await client.from('withdrawals').select('*', { count: 'exact', head: true }).eq('status', 'approved');
+        document.getElementById('totalDepo').innerText = rCount || 0;
+        document.getElementById('totalWith').innerText = wCount || 0;
+    }
+
+    function switchTab(tab, btn) {
+        currentTab = tab;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadData();
+    }
+
+    window.onload = loadData;
+    
+    <div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 style="color: #1e293b;">Edit Maklumat User</h3>
+        </div>
+        <input type="hidden" id="editUserId">
+        <label style="font-size: 12px; color: #666;">EMEL USER</label>
+        <input type="text" id="editEmail" class="admin-input" readonly style="background: #f1f5f9;">
+        
+        <label style="font-size: 12px; color: #666;">KEMASKINI BAKI (RM)</label>
+        <input type="number" id="editBalance" class="admin-input" step="0.01">
+        
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button onclick="closeModal()" style="flex:1; padding:12px; border:none; border-radius:10px; background:#e2e8f0;">BATAL</button>
+            <button onclick="saveUserEdit()" style="flex:1; padding:12px; border:none; border-radius:10px; background:#1e293b; color:white; font-weight:bold;">SIMPAN</button>
+        </div>
+    </div>
+</div>
+
+</script>
 </body>
 </html>

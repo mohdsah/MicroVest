@@ -6,60 +6,82 @@
     <title>Log Masuk - MicroVest</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body style="background-color: var(--primary-dark);">
+<body style="background: #f8fafc;">
 
-    <div class="app-shell" style="background-color: var(--primary); display: flex; align-items: center;">
-        <div class="auth-container" style="width: 100%; padding: 40px 25px; text-align: center;">
+    <div class="app-shell auth-container">
+        <div class="auth-header">
+            <h1>MicroVest</h1>
+            <p style="color: #64748b;">Log masuk untuk mula melabur</p>
+        </div>
+
+        <div class="auth-card">
+            <div class="input-group">
+                <label><i class="fas fa-envelope"></i> Emel</label>
+                <input type="email" id="email" class="auth-input" placeholder="contoh@gmail.com">
+            </div>
+
+            <div class="input-group">
+                <label><i class="fas fa-lock"></i> Kata Laluan</label>
+                <input type="password" id="password" class="auth-input" placeholder="Masukkan kata laluan">
+            </div>
+
+            <button class="btn-auth" id="loginBtn" onclick="handleLogin()">LOG MASUK</button>
             
-            <div class="brand-icon" style="background: white; color: var(--primary); width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; font-size: 35px; font-weight: 800; box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
-                M
-            </div>
-
-            <h1 style="color: white; font-size: 30px; margin-bottom: 8px; letter-spacing: -1px;">MicroVest</h1>
-            <p style="color: rgba(255,255,255,0.7); margin-bottom: 35px; font-size: 15px;">Selamat kembali! Sila log masuk.</p>
-
-            <form id="loginForm">
-                <div class="form-group" style="margin-bottom: 15px;">
-                    <div style="position: relative;">
-                        <i class="fas fa-envelope" style="position: absolute; left: 15px; top: 18px; color: var(--primary);"></i>
-                        <input type="email" id="loginEmail" placeholder="Alamat Emel" required style="padding-left: 45px; margin-bottom: 0;">
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <div style="position: relative;">
-                        <i class="fas fa-lock" style="position: absolute; left: 15px; top: 18px; color: var(--primary);"></i>
-                        <input type="password" id="loginPassword" placeholder="Kata Laluan" required style="padding-left: 45px; margin-bottom: 0;">
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-main" style="background: white; color: var(--primary); font-size: 16px; letter-spacing: 1px; padding: 16px;">
-                    LOG MASUK SEKARANG
-                </button>
-            </form>
-
-            <div style="margin-top: 30px; color: white; font-size: 14px;">
-                Belum mempunyai akaun? 
-                <a href="register.html" style="color: white; font-weight: 800; text-decoration: none; border-bottom: 2px solid white; padding-bottom: 2px; margin-left: 5px;">Daftar Sini</a>
-            </div>
-
-            <div style="margin-top: 20px;">
-                <a href="#" style="color: rgba(255,255,255,0.6); font-size: 13px; text-decoration: none;">Lupa kata laluan?</a>
+            <div class="auth-footer">
+                Belum ada akaun? <a href="register.html">Daftar Sekarang</a>
             </div>
         </div>
     </div>
 
     <script src="app.js"></script>
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            // Fungsi loginSupabase(email, password) dipanggil dari app.js
-            console.log("Percubaan log masuk...");
-        });
+        async function handleLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('loginBtn');
+
+            if (!email || !password) {
+                alert("Sila isi semua ruangan!");
+                return;
+            }
+
+            btn.innerText = "Sila Tunggu...";
+            btn.disabled = true;
+
+            try {
+                // 1. Log masuk Supabase
+                const { data, error } = await client.auth.signInWithPassword({
+                    email: email,
+                    password: password,
+                });
+
+                if (error) throw error;
+
+                // 2. Semak jika user kena BANNED
+                const { data: profile, error: profileErr } = await client
+                    .from('profiles')
+                    .select('is_banned')
+                    .eq('id', data.user.id)
+                    .single();
+
+                if (profile && profile.is_banned) {
+                    await client.auth.signOut();
+                    alert("Akaun anda telah disekat (BANNED). Sila hubungi admin.");
+                    window.location.reload();
+                    return;
+                }
+
+                // Jika berjaya
+                window.location.href = 'dashboard.html';
+
+            } catch (error) {
+                alert("Gagal Log Masuk: " + error.message);
+                btn.innerText = "LOG MASUK";
+                btn.disabled = false;
+            }
+        }
     </script>
 </body>
 </html>
-

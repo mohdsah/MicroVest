@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tuntut Keuntungan - MicroVest</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body style="background: #f8fafc;">
+
+    <div class="app-shell">
+        <div class="team-header" style="background: #8b0000; color: white; padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px;">
+            <h2 style="font-size: 22px;">Ganjaran Harian</h2>
+            <p style="font-size: 13px; opacity: 0.8;">Tuntut keuntungan mining anda sekarang</p>
+        </div>
+
+        <div class="claim-card">
+            <p style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">Keuntungan Tersedia</p>
+            <div class="profit-amount" id="pendingProfit">RM 0.00</div>
+            
+            <div id="claimBtn" class="claim-circle" onclick="processClaim()">
+                <i class="fas fa-hand-holding-usd"></i>
+                <span style="font-weight: 800; font-size: 14px;">TUNTUT</span>
+            </div>
+
+            <p id="claimStatus" style="font-size: 12px; color: #94a3b8; margin-top: 15px;">
+                Klik butang di atas untuk masukkan ke dompet
+            </p>
+        </div>
+
+        <div style="padding: 0 20px;">
+            <div style="background: #fffbeb; border: 1px solid #fef3c7; padding: 15px; border-radius: 15px; display: flex; gap: 10px; align-items: center;">
+                <i class="fas fa-info-circle" style="color: #d97706;"></i>
+                <p style="font-size: 11px; color: #92400e;">Keuntungan dijana berdasarkan mesin aktif anda. Tuntutan boleh dibuat sekali setiap 24 jam.</p>
+            </div>
+        </div>
+
+        <nav class="bottom-nav">
+            <a href="dashboard.html" class="nav-item">
+                <i class="fas fa-home"></i><span>Home</span>
+            </a>
+            <a href="product_list.html" class="nav-item">
+                <i class="fas fa-chart-line"></i><span>Produk</span>
+            </a>
+            <a href="claim-profit.html" class="nav-item active">
+                <i class="fas fa-coins"></i><span>Claim</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user-circle"></i><span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        let availableProfit = 0;
+
+        async function checkProfit() {
+            const { data: { user } } = await client.auth.getUser();
+            if (!user) return window.location.href = 'login.html';
+
+            // 1. Kira jumlah daily_profit dari semua mesin aktif
+            const { data: machines } = await client
+                .from('user_investments')
+                .select('daily_profit')
+                .eq('user_id', user.id)
+                .eq('status', 'active');
+
+            if (machines) {
+                availableProfit = machines.reduce((sum, m) => sum + m.daily_profit, 0);
+                document.getElementById('pendingProfit').innerText = `RM ${availableProfit.toFixed(2)}`;
+            }
+
+            // 2. Semak jika sudah claim hari ini (Logic database diperlukan)
+            // Sila pastikan anda ada table 'claims' untuk simpan tarikh claim terakhir
+        }
+
+        async function processClaim() {
+            if (availableProfit <= 0) {
+                alert("Tiada keuntungan untuk dituntut. Sila beli mesin dahulu!");
+                return;
+            }
+
+            const btn = document.getElementById('claimBtn');
+            btn.classList.add('disabled-claim');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            const { data: { user } } = await client.auth.getUser();
+
+            // Logic: Tambah baki ke Profile
+            const { data: profile } = await client.from('profiles').select('balance').eq('id', user.id).single();
+            const newBalance = profile.balance + availableProfit;
+
+            const { error } = await client.from('profiles').update({ balance: newBalance }).eq('id', user.id);
+
+            if (!error) {
+                alert(`Tahniah! RM ${availableProfit.toFixed(2)} telah dimasukkan ke dompet anda.`);
+                window.location.href = 'dashboard.html';
+            } else {
+                alert("Gagal menuntut: " + error.message);
+                btn.classList.remove('disabled-claim');
+                btn.innerHTML = '<i class="fas fa-hand-holding-usd"></i><span>TUNTUT</span>';
+            }
+        }
+
+        window.onload = checkProfit;
+    </script>
+</body>
+</html>

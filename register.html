@@ -3,61 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar - MicroVest</title>
+    <title>Daftar Akaun - MicroVest</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
+<body style="background: #f8fafc;">
 
-    <div class="app-shell" style="background-color: var(--primary);">
-        <div class="auth-container">
-            <div class="brand-icon" style="background: white; color: var(--primary); width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; font-weight: 800; box-shadow: var(--shadow);">
-                M
+    <div class="app-shell auth-container">
+        <div class="auth-header">
+            <h1>Sertai Kami</h1>
+            <p style="color: #64748b;">Mula melabur dan jana pendapatan harian</p>
+        </div>
+
+        <div class="auth-card">
+            <div id="refBadge" class="ref-info-badge" style="display: none;">
+                <i class="fas fa-users"></i> Anda dijemput oleh: <b id="refName">...</b>
             </div>
 
-            <h1 style="color: white; font-size: 28px; margin-bottom: 10px;">Daftar Akaun</h1>
-            <p style="color: rgba(255,255,255,0.8); margin-bottom: 30px;">Sertai komuniti pelabur MicroVest hari ini.</p>
+            <div class="input-group">
+                <label><i class="fas fa-envelope"></i> Alamat Emel</label>
+                <input type="email" id="email" class="auth-input" placeholder="contoh@gmail.com">
+            </div>
 
-            <form id="registerForm">
-                <div class="form-group">
-                    <input type="email" id="regEmail" placeholder="Alamat Emel" required>
-                </div>
+            <div class="input-group">
+                <label><i class="fas fa-lock"></i> Kata Laluan</label>
+                <input type="password" id="password" class="auth-input" placeholder="Minima 6 aksara">
+            </div>
 
-                <div class="form-group">
-                    <input type="password" id="regPassword" placeholder="Kata Laluan (min 6 aksara)" required>
-                </div>
+            <div class="input-group">
+                <label><i class="fas fa-lock"></i> Sahkan Kata Laluan</label>
+                <input type="password" id="confirmPassword" class="auth-input" placeholder="Ulang kata laluan">
+            </div>
 
-                <div class="form-group">
-                    <input type="text" id="referredBy" placeholder="Kod Jemputan (Jika ada)">
-                </div>
-
-                <button type="submit" class="btn-auth" style="background: white; color: var(--primary); width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 800; font-size: 16px; cursor: pointer; margin-top: 10px; transition: 0.3s;">
-                    DAFTAR SEKARANG
-                </button>
-            </form>
-
-            <div class="auth-footer" style="margin-top: 25px; color: white; font-size: 14px;">
-                Sudah mempunyai akaun? 
-                <a href="login.html" style="color: white; font-weight: 800; text-decoration: underline; margin-left: 5px;">Log Masuk</a>
+            <button class="btn-auth" id="regBtn" onclick="handleRegister()">DAFTAR AKAUN</button>
+            
+            <div class="auth-footer">
+                Sudah ada akaun? <a href="login.html">Log Masuk</a>
             </div>
         </div>
     </div>
 
     <script src="app.js"></script>
     <script>
-        // Contoh ringkas pengendalian form (Pastikan logik sebenar ada dalam app.js)
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPassword').value;
-            const refCode = document.getElementById('referredBy').value;
+        // Ambil ID Referral dari URL (Contoh: register.html?ref=ABC123)
+        const urlParams = new URLSearchParams(window.location.search);
+        const refId = urlParams.get('ref');
 
-            // Panggil fungsi pendaftaran dari app.js anda di sini
-            console.log("Mendaftar dengan:", email, refCode);
-            // alert("Sila pastikan logik Supabase anda dalam app.js berfungsi!");
-        });
+        if (refId) {
+            document.getElementById('refBadge').style.display = 'block';
+            document.getElementById('refName').innerText = refId;
+        }
+
+        async function handleRegister() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPw = document.getElementById('confirmPassword').value;
+            const btn = document.getElementById('regBtn');
+
+            if (!email || !password || !confirmPw) {
+                alert("Sila lengkapkan semua ruangan!");
+                return;
+            }
+
+            if (password !== confirmPw) {
+                alert("Kata laluan tidak sepadan!");
+                return;
+            }
+
+            btn.innerText = "Mendaftar...";
+            btn.disabled = true;
+
+            try {
+                // 1. Daftar di Supabase Auth
+                const { data, error } = await client.auth.signUp({
+                    email: email,
+                    password: password,
+                });
+
+                if (error) throw error;
+
+                // 2. Simpan profil awal di table 'profiles'
+                // referred_by akan disimpan jika ada refId dalam URL
+                const { error: profileErr } = await client
+                    .from('profiles')
+                    .insert([{ 
+                        id: data.user.id, 
+                        email: email, 
+                        balance: 0, 
+                        referred_by: refId || null,
+                        is_banned: false
+                    }]);
+
+                if (profileErr) throw profileErr;
+
+                alert("Pendaftaran Berjaya! Sila log masuk.");
+                window.location.href = 'login.html';
+
+            } catch (error) {
+                alert("Ralat: " + error.message);
+                btn.innerText = "DAFTAR AKAUN";
+                btn.disabled = false;
+            }
+        }
     </script>
 </body>
 </html>
