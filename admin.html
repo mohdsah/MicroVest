@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - MicroVest</title>
+    <title>Panel Admin - MicroVest</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,159 +11,151 @@
 <body style="background: #f1f5f9;">
 
     <div class="app-shell">
-        <div style="background: #1e293b; color: white; padding: 20px; text-align: center;">
-            <h2 style="font-size: 18px;">Pusat Kawalan Admin</h2>
+        <div class="product-page-header">
+            <h2>Pusat Kawalan Admin</h2>
+            <p>Urus Deposit & Baki Pengguna</p>
         </div>
 
-        <div style="display: flex; padding: 10px;">
-            <div class="admin-card" style="flex:1; text-align: center;">
-                <span style="font-size: 10px; color: #64748b;">PENDING DEPOSIT</span>
-                <h3 id="statDepo" style="color: #d97706;">0</h3>
+        <div class="content-area" style="padding: 20px; margin-top: -20px;">
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <div class="recharge-card" style="flex: 1; text-align: center; padding: 15px;">
+                    <small style="color: #64748b;">PENDING DEPOSIT</small>
+                    <h2 id="countPending" style="color: #f59e0b;">0</h2>
+                </div>
             </div>
-            <div class="admin-card" style="flex:1; text-align: center;">
-                <span style="font-size: 10px; color: #64748b;">PENDING WITHDRAW</span>
-                <h3 id="statWith" style="color: #dc2626;">0</h3>
+
+            <div class="recharge-card">
+                <h4 style="margin-bottom: 15px; color: #1e293b; border-left: 4px solid #10b981; padding-left: 10px;">
+                    Deposit Perlu Disahkan
+                </h4>
+                <div id="depositList">
+                    <p style="text-align: center; color: #94a3b8; font-size: 13px;">Memuatkan data...</p>
+                </div>
             </div>
-        </div>
 
-        <div class="admin-card">
-            <h4 style="font-size: 14px; border-left: 4px solid #16a34a; padding-left: 10px;">Deposit Perlu Disahkan</h4>
-            <table class="table-admin" id="tableDepo">
-                <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Jumlah</th>
-                        <th>Tindakan</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-
-        <div class="admin-card">
-            <h4 style="font-size: 14px; border-left: 4px solid #dc2626; padding-left: 10px;">Pengeluaran Perlu Disahkan</h4>
-            <table class="table-admin" id="tableWith">
-                <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Jumlah</th>
-                        <th>Tindakan</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-
-        <div class="admin-card">
-            <h4 style="font-size: 14px;">Urus Baki Pengguna</h4>
-            <input type="text" id="searchEmail" placeholder="Emel User..." class="withdraw-field" style="margin-top:10px; font-size: 12px;">
-            <input type="number" id="adjustAmount" placeholder="Jumlah (Cth: 100 atau -100)" class="withdraw-field" style="margin-top:10px; font-size: 12px;">
-            <button onclick="updateBalance()" class="btn-auth" style="margin-top: 10px; background: #1e293b;">UPDATE BAKI</button>
+            <div class="recharge-card" style="margin-top: 20px;">
+                <h4 style="margin-bottom: 15px; color: #1e293b;">Urus Baki Pengguna</h4>
+                <div class="input-group">
+                    <input type="email" id="manualEmail" class="auth-input" placeholder="Emel User...">
+                </div>
+                <div class="input-group">
+                    <input type="number" id="manualAmount" class="auth-input" placeholder="Jumlah (Cth: 100 atau -100)">
+                </div>
+                <button onclick="manualUpdate()" class="btn-auth" style="background: #1e293b;">UPDATE BAKI</button>
+            </div>
         </div>
     </div>
 
-    <script src="app.js"></script>
     <script>
-        // FUNGSI UNTUK LOAD DATA PENDING
-        async function loadAdminData() {
-            // 1. Ambil Pending Deposit
-            const { data: depos } = await client.from('recharges').select('*').eq('status', 'pending');
-            const tableDepo = document.querySelector('#tableDepo tbody');
-            tableDepo.innerHTML = '';
-            document.getElementById('statDepo').innerText = depos?.length || 0;
+        // 1. KONFIGURASI SUPABASE
+        const SUPABASE_URL = 'https://mgvjwgbjccgsjkjhddru.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // TAMPAL KEY PENUH ANDA DI SINI
+        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-            depos?.forEach(d => {
-                tableDepo.innerHTML += `
-                    <tr>
-                        <td>${d.user_email}</td>
-                        <td>RM ${d.amount}</td>
-                        <td>
-                            <button class="btn-sm btn-approve" onclick="approveDeposit('${d.id}', '${d.user_id}', ${d.amount})">✔</button>
-                            <button class="btn-sm btn-reject" onclick="updateStatus('recharges', '${d.id}', 'rejected')">✖</button>
-                        </td>
-                    </tr>
-                `;
-            });
+        // 2. FUNGSI LOAD DEPOSIT PENDING
+        async function loadPendingDeposits() {
+            try {
+                const { data, error } = await client
+                    .from('recharges')
+                    .select('*, profiles(email, full_name)')
+                    .eq('status', 'pending');
 
-            // 2. Ambil Pending Withdraw
-            const { data: withs } = await client.from('withdrawals').select('*').eq('status', 'pending');
-            const tableWith = document.querySelector('#tableWith tbody');
-            tableWith.innerHTML = '';
-            document.getElementById('statWith').innerText = withs?.length || 0;
+                if (error) throw error;
 
-            withs?.forEach(w => {
-                tableWith.innerHTML += `
-                    <tr>
-                        <td>${w.user_id.substring(0,8)}...</td>
-                        <td>RM ${w.amount}</td>
-                        <td>
-                            <button class="btn-sm btn-approve" onclick="updateStatus('withdrawals', '${w.id}', 'success')">✔</button>
-                            <button class="btn-sm btn-reject" onclick="refundWithdraw('${w.id}', '${w.user_id}', ${w.amount})">✖</button>
-                        </td>
-                    </tr>
-                `;
-            });
+                const container = document.getElementById('depositList');
+                document.getElementById('countPending').innerText = data.length;
+
+                if (data.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #94a3b8;">Tiada deposit pending.</p>';
+                    return;
+                }
+
+                container.innerHTML = data.map(item => `
+                    <div style="padding: 15px; border-bottom: 1px solid #eee; margin-bottom: 10px; background: #fafafa; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <b style="font-size: 14px;">${item.profiles?.email || 'User'}</b><br>
+                                <span style="color: #10b981; font-weight: bold;">RM ${item.amount.toFixed(2)}</span>
+                            </div>
+                            <button onclick="approveDeposit('${item.id}', '${item.user_id}', ${item.amount})" 
+                                    style="background: #10b981; color: white; border: none; padding: 5px 12px; border-radius: 5px; cursor: pointer; font-size: 12px;">
+                                APPROVE
+                            </button>
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <a href="${SUPABASE_URL}/storage/v1/object/public/receipts/${item.proof_img}" target="_blank" style="font-size: 11px; color: #3b82f6;">
+                                <i class="fas fa-image"></i> Lihat Resit
+                            </a>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                console.error(err);
+            }
         }
 
-        // FUNGSI APPROVE DEPOSIT (Tambah baki & tukar status)
-        async function approveDeposit(id, userId, amount) {
-            if(!confirm("Approve deposit ini?")) return;
-            
-            // Ambil baki lama
-            const { data: p } = await client.from('profiles').select('balance').eq('id', userId).single();
-            // Update baki
-            await client.from('profiles').update({ balance: p.balance + amount }).eq('id', userId);
-            // Update status recharge
-            await updateStatus('recharges', id, 'success');
+        // 3. FUNGSI APPROVE (UPDATE STATUS & TAMBAH BAKI)
+        async function approveDeposit(depositId, userId, amount) {
+            if (!confirm(`Approve deposit RM ${amount}?`)) return;
+
+            try {
+                // A. Kemaskini status deposit
+                const { error: updateError } = await client
+                    .from('recharges')
+                    .update({ status: 'success' })
+                    .eq('id', depositId);
+
+                if (updateError) throw updateError;
+
+                // B. Ambil baki semasa pengguna
+                const { data: profile, error: profileError } = await client
+                    .from('profiles')
+                    .select('balance')
+                    .eq('id', userId)
+                    .single();
+
+                if (profileError) throw profileError;
+
+                // C. Kira baki baru dan simpan
+                const newBalance = (profile.balance || 0) + parseFloat(amount);
+                const { error: balanceError } = await client
+                    .from('profiles')
+                    .update({ balance: newBalance })
+                    .eq('id', userId);
+
+                if (balanceError) throw balanceError;
+
+                alert("Berjaya! Status dikemaskini dan baki ditambah.");
+                loadPendingDeposits();
+
+            } catch (err) {
+                alert("Ralat: " + err.message);
+            }
         }
 
-        // FUNGSI UMUM UPDATE STATUS
-        async function updateStatus(table, id, newStatus) {
-            await client.from(table).update({ status: newStatus }).eq('id', id);
-            alert("Status Dikemaskini!");
-            loadAdminData();
-        }
-
-        // FUNGSI REFUND (Jika withdraw reject, pulangkan duit ke baki user)
-        async function refundWithdraw(id, userId, amount) {
-            const { data: p } = await client.from('profiles').select('balance').eq('id', userId).single();
-            await client.from('profiles').update({ balance: p.balance + amount }).eq('id', userId);
-            await updateStatus('withdrawals', id, 'rejected');
-        }
-
-        // FUNGSI UPDATE BAKI MANUAL
+        // 4. UPDATE BAKI MANUAL
         async function manualUpdate() {
-    const email = document.getElementById('userEmailInput').value;
-    const amount = document.getElementById('amountInput').value;
+            const email = document.getElementById('manualEmail').value;
+            const amount = document.getElementById('manualAmount').value;
+            if (!email || !amount) return alert("Sila isi emel dan jumlah");
 
-    const { error } = await client
-        .from('profiles')
-        .update({ balance: parseFloat(amount) })
-        .eq('email', email);
+            try {
+                const { data: profile } = await client.from('profiles').select('id, balance').eq('email', email).single();
+                if (!profile) return alert("User tidak dijumpai");
 
-    if (error) alert("Gagal: " + error.message);
-    else alert("Baki Berjaya Dikemaskini!");
-}
+                const newBal = (profile.balance || 0) + parseFloat(amount);
+                await client.from('profiles').update({ balance: newBal }).eq('id', profile.id);
 
+                alert("Baki berjaya dikemaskini!");
+                location.reload();
+            } catch (err) {
+                alert("Ralat: " + err.message);
+            }
         }
 
-        window.onload = loadAdminData;
-        
-        <nav class="bottom-nav">
-    <a href="dashboard.html" class="nav-item active">
-        <i class="fas fa-home"></i><span>Home</span>
-    </a>
-    <a href="product_list.html" class="nav-item">
-        <i class="fas fa-chart-line"></i><span>Produk</span>
-    </a>
-    <a href="records.html" class="nav-item">
-        <i class="fas fa-history"></i><span>Rekod</span>
-    </a>
-    <a href="profile.html" class="nav-item">
-        <i class="fas fa-user-circle"></i><span>Profil</span>
-    </a>
-</nav>
-
+        document.addEventListener('DOMContentLoaded', loadPendingDeposits);
     </script>
 </body>
 </html>
