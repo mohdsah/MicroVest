@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recharge - MicroVest</title>
+    <title>Deposit - MicroVest</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -12,74 +12,107 @@
 
     <div class="app-shell">
         <div class="product-page-header">
-            <h2>Tambah Baki (Recharge)</h2>
-            <p>Sila buat pindahan bank mengikut maklumat di bawah</p>
+            <button onclick="history.back()" style="position: absolute; left: 20px; top: 40px; background: none; border: none; color: white; font-size: 20px;">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h2>Tambah Nilai</h2>
+            <p>Sila buat bayaran ke akaun di bawah</p>
         </div>
 
-        <div class="product-container">
-            <div class="product-card" style="display: block; padding: 20px; border-left: 5px solid #007aff;">
-    <h4 style="color: #007aff; margin-bottom: 10px;">Langkah Pembayaran TNG:</h4>
-    <ol style="font-size: 13px; padding-left: 20px; color: #555;">
-        <li>Buka aplikasi TNG eWallet anda.</li>
-        <li>Pilih 'Transfer' atau 'Scan'.</li>
-        <li>Masukkan nombor telefon di bawah:</li>
-    </ol>
-    
-    <div style="background: #f1f5f9; padding: 15px; border-radius: 12px; margin-top: 15px; text-align: center;">
-        <span style="font-size: 12px; color: #64748b; display: block;">NOMBOR TNG EWALLET ADMIN</span>
-        <strong style="font-size: 20px; color: #1e293b;" id="adminTng">012-3456789</strong>
-        <button onclick="copyTng()" style="display: block; margin: 10px auto 0; background: #007aff; color: white; border: none; padding: 5px 15px; border-radius: 20px; font-size: 11px;">
-            Salin Nombor
-        </button>
-    </div>
-</div>
+        <div class="content-area" style="padding: 20px; margin-top: -30px;">
+            <div class="recharge-card">
+                <div class="bank-details">
+                    <p>Nama Bank:</p>
+                    <b>MAYBANK (MBB)</b>
+                    <p style="margin-top:10px;">No. Akaun:</p>
+                    <b id="accNo">123456789012</b> 
+                    <button onclick="copyAcc()" style="font-size:10px; padding:2px 5px; margin-left:10px;">Salin</button>
+                    <p style="margin-top:10px;">Nama Penerima:</p>
+                    <b>MICROVEST GLOBAL SERVICES</b>
+                </div>
 
+                <div class="input-group">
+                    <label>Jumlah Deposit (RM)</label>
+                    <input type="number" id="amount" class="auth-input" placeholder="Min: RM 30.00">
+                </div>
 
-        <nav class="bottom-nav">
-            <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
-            <a href="product_list.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Produk</span></a>
-            <a href="profile.html" class="nav-item"><i class="fas fa-user-circle"></i><span>Profil</span></a>
-        </nav>
+                <div class="input-group">
+                    <label>Muat Naik Resit (Gambar)</label>
+                    <div class="upload-area" onclick="document.getElementById('receipt').click()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p id="uploadText" style="font-size: 12px; color: #64748b;">Klik untuk pilih gambar resit</p>
+                        <img id="imagePreview" src="" alt="Preview">
+                    </div>
+                    <input type="file" id="receipt" hidden accept="image/*" onchange="previewImage(this)">
+                </div>
+
+                <button onclick="submitRecharge()" id="btnSubmit" class="btn-auth" style="margin-top: 20px;">HANTAR REKOD</button>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>
     <script>
-    	function copyTng() {
-    const tngNum = document.getElementById('adminTng').innerText;
-    navigator.clipboard.writeText(tngNum);
-    alert("Nombor TNG Admin telah disalin! Sila buat bayaran di aplikasi TNG eWallet anda.");
-}
-
-        function setAmount(val) {
-            document.getElementById('rechargeAmount').value = val;
-        }
-
-        function copyAcc() {
-            navigator.clipboard.writeText("123456789012");
-            alert("No. akaun disalin!");
+        function previewImage(input) {
+            const preview = document.getElementById('imagePreview');
+            const text = document.getElementById('uploadText');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    text.style.display = 'none';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
         }
 
         async function submitRecharge() {
-            const amount = document.getElementById('rechargeAmount').value;
-            if (amount < 5) {
-                alert("Jumlah minimum ialah RM 5.00");
-                return;
-            }
+            const amount = document.getElementById('amount').value;
+            const file = document.getElementById('receipt').files[0];
+            const btn = document.getElementById('btnSubmit');
 
-            const { data: { user } } = await client.auth.getUser();
-            if (!user) return;
+            if (!amount || amount < 30) return alert("Minimum deposit adalah RM 30");
+            if (!file) return alert("Sila muat naik resit pembayaran");
 
-            // Logik: Simpan permohonan ke dalam table 'recharge_requests'
-            const { error } = await client.from('recharge_requests').insert([
-                { user_id: user.id, amount: parseFloat(amount), status: 'pending' }
-            ]);
+            btn.innerText = "PROSES...";
+            btn.disabled = true;
 
-            if (error) {
+            try {
+                const user = (await client.auth.getUser()).data.user;
+
+                // 1. Upload Gambar ke Storage Supabase
+                const fileName = `${user.id}/${Date.now()}.png`;
+                const { data: uploadData, error: uploadError } = await client.storage
+                    .from('receipts')
+                    .upload(fileName, file);
+
+                if (uploadError) throw uploadError;
+
+                // 2. Simpan Data ke Table Recharges
+                const { error: dbError } = await client.from('recharges').insert([{
+                    user_id: user.id,
+                    amount: parseFloat(amount),
+                    proof_img: fileName,
+                    status: 'pending'
+                }]);
+
+                if (dbError) throw dbError;
+
+                alert("Deposit berjaya dihantar! Sila tunggu pengesahan admin.");
+                window.location.href = 'records.html';
+
+            } catch (error) {
                 alert("Ralat: " + error.message);
-            } else {
-                alert("Permohonan anda telah dihantar! Sila tunggu admin sahkan.");
-                window.location.href = 'dashboard.html';
+                btn.innerText = "HANTAR REKOD";
+                btn.disabled = false;
             }
+        }
+
+        function copyAcc() {
+            const acc = document.getElementById('accNo').innerText;
+            navigator.clipboard.writeText(acc);
+            alert("No. Akaun disalin!");
         }
     </script>
 </body>
