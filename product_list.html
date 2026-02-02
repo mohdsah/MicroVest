@@ -8,139 +8,112 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
+<body style="background: #f8fafc;">
 
     <div class="app-shell">
-        <div class="product-page-header">
-    <h2>Pakej Pelaburan</h2>
-    <p>Pilih pakej yang sesuai untuk mula menjana pendapatan</p>
-</div>
-
-<div class="product-container" style="padding-bottom: 100px;">
-    <div class="product-grid">
-        
-        <div class="product-card-modern">
-            <span class="product-badge">Hot Selling</span>
-            <h3 class="product-title">Pakej Starter</h3>
-            <div class="product-price">RM 50.00</div>
-            
-            <div class="product-features">
-                <div class="feature-item"><span>Untung Harian</span> <b>RM 2.50</b></div>
-                <div class="feature-item"><span>Tempoh Kontrak</span> <b>30 Hari</b></div>
-                <div class="feature-item"><span>Total Pulangan</span> <b>RM 75.00</b></div>
-            </div>
-
-            <button class="btn-buy-modern" onclick="buyPlan('Starter', 50.00, 2.50)">
-                <i class="fas fa-shopping-cart"></i> Beli Sekarang
-            </button>
+        <div style="background: #8b0000; color: white; padding: 30px 20px; text-align: center; border-radius: 0 0 25px 25px;">
+            <h2 style="font-size: 20px;">Pakej Pelaburan</h2>
+            <p style="font-size: 12px; opacity: 0.8;">Pilih mesin mining anda sekarang</p>
         </div>
 
-        <div class="product-card-modern">
-            <span class="product-badge" style="background: #fff9db; color: #fab005;">Premium</span>
-            <h3 class="product-title">Pakej VIP</h3>
-            <div class="product-price">RM 200.00</div>
-            
-            <div class="product-features">
-                <div class="feature-item"><span>Untung Harian</span> <b>RM 12.00</b></div>
-                <div class="feature-item"><span>Tempoh Kontrak</span> <b>30 Hari</b></div>
-                <div class="feature-item"><span>Total Pulangan</span> <b>RM 360.00</b></div>
-            </div>
-
-            <button class="btn-buy-modern" onclick="buyPlan('VIP', 200.00, 12.00)">
-                <i class="fas fa-gem"></i> Beli Sekarang
-            </button>
+        <div style="margin: 15px 20px; padding: 10px 20px; background: white; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <span style="font-size: 11px; color: #64748b; font-weight: bold;">BAKI DOMPET</span>
+            <b id="quickBalance" style="color: #8b0000;">RM 0.00</b>
         </div>
 
-    </div>
-</div>
+        <div class="product-grid" id="productGrid">
+            <div class="product-card">
+                <div class="hot-tag">POPULAR</div>
+                <div class="product-image"><i class="fas fa-microchip"></i></div>
+                <div class="product-info">
+                    <div class="product-name">Basic Miner V1</div>
+                    <div class="product-price">RM 30.00</div>
+                    <div class="product-detail">Untung Harian: <b>RM 1.50</b></div>
+                    <div class="product-detail">Tempoh: <b>30 Hari</b></div>
+                    <button class="btn-buy" onclick="buyProduct('Basic Miner V1', 30, 1.50, 30)">BELI SEKARANG</button>
+                </div>
+            </div>
 
+            <div class="product-card">
+                <div class="product-image" style="color: #d4af37;"><i class="fas fa-server"></i></div>
+                <div class="product-info">
+                    <div class="product-name">Gold Server X</div>
+                    <div class="product-price">RM 100.00</div>
+                    <div class="product-detail">Untung Harian: <b>RM 6.00</b></div>
+                    <div class="product-detail">Tempoh: <b>30 Hari</b></div>
+                    <button class="btn-buy" onclick="buyProduct('Gold Server X', 100, 6.00, 30)">BELI SEKARANG</button>
+                </div>
+            </div>
+            
+            </div>
 
         <nav class="bottom-nav">
             <a href="dashboard.html" class="nav-item">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
+                <i class="fas fa-home"></i><span>Home</span>
             </a>
             <a href="product_list.html" class="nav-item active">
-                <i class="fas fa-chart-line"></i>
-                <span>Produk</span>
+                <i class="fas fa-chart-line"></i><span>Produk</span>
+            </a>
+            <a href="mining.html" class="nav-item">
+                <i class="fas fa-microchip"></i><span>Mining</span>
             </a>
             <a href="profile.html" class="nav-item">
-                <i class="fas fa-user-circle"></i>
-                <span>Profil</span>
+                <i class="fas fa-user-circle"></i><span>Profil</span>
             </a>
         </nav>
     </div>
 
     <script src="app.js"></script>
     <script>
-async function buyProduct(planName, price, dailyProfit) {
-    // 1. Dapatkan user semasa
-    const { data: { user } } = await client.auth.getUser();
-    
-    if (!user) {
-        alert("Sila log masuk terlebih dahulu.");
-        window.location.href = 'login.html';
-        return;
-    }
+        let currentBalance = 0;
 
-    // 2. Sahkan pembelian
-    if (!confirm(`Adakah anda pasti mahu melabur dalam ${planName} (RM ${price})?`)) {
-        return;
-    }
+        async function initProducts() {
+            const { data: { user } } = await client.auth.getUser();
+            if (!user) return window.location.href = 'login.html';
 
-    // 3. Semak baki pengguna di table 'profiles'
-    const { data: profile, error: profileErr } = await client
-        .from('profiles')
-        .select('balance')
-        .eq('id', user.id)
-        .single();
-
-    if (profileErr || !profile) {
-        alert("Ralat mendapatkan data profil.");
-        return;
-    }
-
-    if (profile.balance < price) {
-        alert("Baki anda tidak mencukupi (RM " + profile.balance.toFixed(2) + "). Sila topup dahulu.");
-        window.location.href = 'recharge.html';
-        return;
-    }
-
-    // 4. Proses Pembelian
-    const newBalance = profile.balance - price;
-
-    // A. Tolak baki pengguna
-    const { error: updateErr } = await client
-        .from('profiles')
-        .update({ balance: newBalance })
-        .eq('id', user.id);
-
-    if (updateErr) {
-        alert("Gagal mengemaskini baki.");
-        return;
-    }
-
-    // B. Masukkan rekod pelaburan baharu
-    const { error: investErr } = await client
-        .from('user_investments')
-        .insert([
-            { 
-                user_id: user.id, 
-                plan_name: planName, 
-                daily_profit: dailyProfit, 
-                status: 'active',
-                last_claim: new Date() // Set waktu sekarang sebagai permulaan
+            const { data: profile } = await client.from('profiles').select('balance').eq('id', user.id).single();
+            if (profile) {
+                currentBalance = profile.balance;
+                document.getElementById('quickBalance').innerText = `RM ${currentBalance.toFixed(2)}`;
             }
-        ]);
+        }
 
-    if (investErr) {
-        alert("Baki ditolak tetapi gagal mendaftar pelaburan. Sila hubungi Admin.");
-    } else {
-        alert("Pembelian Berjaya! Sila semak di halaman Dashboard atau Mining.");
-        window.location.href = 'dashboard.html';
-    }
-}
-</script>
+        async function buyProduct(name, price, daily, days) {
+            if (currentBalance < price) {
+                alert("Baki tidak mencukupi! Sila recharge dahulu.");
+                window.location.href = 'recharge.html';
+                return;
+            }
 
+            if (!confirm(`Adakah anda mahu melabur dalam ${name} dengan harga RM ${price}?`)) return;
+
+            const { data: { user } } = await client.auth.getUser();
+
+            // 1. Tolak baki user
+            const { error: balanceError } = await client
+                .from('profiles')
+                .update({ balance: currentBalance - price })
+                .eq('id', user.id);
+
+            if (balanceError) return alert("Ralat transaksi!");
+
+            // 2. Simpan dalam user_investments
+            const { error: invError } = await client.from('user_investments').insert([{
+                user_id: user.id,
+                product_name: name,
+                amount: price,
+                daily_profit: daily,
+                expiry_days: days,
+                status: 'active'
+            }]);
+
+            if (!invError) {
+                alert("Pembelian Berjaya! Mesin mining anda telah mula bekerja.");
+                window.location.href = 'mining.html';
+            }
+        }
+
+        window.onload = initProducts;
+    </script>
 </body>
 </html>
