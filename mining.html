@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mining Aktif - MicroVest</title>
+    <title>Mining Saya - MicroVest</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,24 +11,29 @@
 <body style="background: #f8fafc;">
 
     <div class="app-shell">
-        <div class="team-header" style="background: #8b0000; color: white; padding: 30px 20px; text-align: center; border-radius: 0 0 25px 25px;">
-            <h2 style="font-size: 20px;">Mining Saya</h2>
-            <p style="font-size: 12px; opacity: 0.8;">Mesin pelaburan sedang bekerja</p>
+        <div class="product-page-header">
+            <h2>Mining Saya</h2>
+            <p>Mesin pelaburan sedang bekerja</p>
         </div>
 
-        <div style="display: flex; gap: 10px; padding: 20px;">
-            <div style="flex: 1; background: white; padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.03);">
-                <span style="font-size: 10px; color: #64748b;">TOTAL MESIN</span>
-                <b id="totalMachines" style="display: block; font-size: 18px; color: #8b0000;">0</b>
+        <div class="content-area" style="padding: 20px; padding-bottom: 100px;">
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <div class="recharge-card" style="flex: 1; text-align: center; padding: 15px;">
+                    <small style="color: #64748b;">TOTAL MESIN</small>
+                    <h2 id="totalMachines" style="color: #1e293b;">0</h2>
+                </div>
+                <div class="recharge-card" style="flex: 1; text-align: center; padding: 15px;">
+                    <small style="color: #64748b;">EST. PROFIT</small>
+                    <h2 id="totalProfit" style="color: #10b981;">RM 0.00</h2>
+                </div>
             </div>
-            <div style="flex: 1; background: white; padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.03);">
-                <span style="font-size: 10px; color: #64748b;">EST. PROFIT</span>
-                <b id="estProfit" style="display: block; font-size: 18px; color: #16a34a;">RM 0.00</b>
-            </div>
-        </div>
 
-        <div id="miningList">
-            <p style="text-align: center; padding: 40px; color: #94a3b8; font-size: 13px;">Mencari mesin aktif...</p>
+            <div id="miningList">
+                <div style="text-align: center; padding: 40px 0;">
+                    <i class="fas fa-box-open" style="font-size: 50px; color: #cbd5e1; margin-bottom: 15px;"></i>
+                    <p style="color: #94a3b8;">Tiada mesin aktif. Sila beli pakej di menu Produk.</p>
+                </div>
+            </div>
         </div>
 
         <nav class="bottom-nav">
@@ -49,63 +54,55 @@
 
     <script src="app.js"></script>
     <script>
-        async function loadMining() {
+        async function loadActiveMining() {
             const { data: { user } } = await client.auth.getUser();
-            if (!user) { window.location.href = 'login.html'; return; }
+            if (!user) return;
 
-            // Ambil data pelaburan user
-            const { data: investments, error } = await client
-                .from('user_investments')
-                .select('*')
-                .eq('user_id', user.id)
-                .eq('status', 'active');
+            try {
+                // Ambil data dari table investments
+                const { data: investments, error } = await client
+                    .from('investments')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .eq('status', 'active');
 
-            const container = document.getElementById('miningList');
-            
-            if (investments && investments.length > 0) {
-                container.innerHTML = '';
-                document.getElementById('totalMachines').innerText = investments.length;
-                let totalProfit = 0;
+                if (error) throw error;
 
-                investments.forEach(inv => {
-                    totalProfit += inv.daily_profit;
-                    container.innerHTML += `
-                        <div class="mining-card">
-                            <div class="mining-header">
-                                <span class="mining-title">${inv.product_name}</span>
-                                <div class="status-active">
-                                    <div class="pulse-dot"></div> SEDANG BEKERJA
+                const container = document.getElementById('miningList');
+                let totalDaily = 0;
+
+                if (investments.length > 0) {
+                    document.getElementById('totalMachines').innerText = investments.length;
+                    
+                    container.innerHTML = investments.map(item => {
+                        totalDaily += parseFloat(item.daily_profit);
+                        return `
+                            <div class="recharge-card" style="margin-bottom: 15px; border-left: 5px solid #10b981;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <h4 style="margin: 0;">${item.product_name}</h4>
+                                        <small style="color: #64748b;">Mula: ${new Date(item.created_at).toLocaleDateString()}</small>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <b style="color: #10b981;">+ RM ${parseFloat(item.daily_profit).toFixed(2)}</b><br>
+                                        <small style="color: #94a3b8;">Harian</small>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 15px; background: #f1f5f9; height: 8px; border-radius: 10px; overflow: hidden;">
+                                    <div class="mining-progress-bar" style="width: 45%; height: 100%; background: #10b981;"></div>
                                 </div>
                             </div>
-                            <div class="mining-progress-bg">
-                                <div class="mining-progress-bar" style="width: 70%;"></div>
-                            </div>
-                            <div class="mining-stats-row">
-                                <div class="mining-stat-box">
-                                    UNTUNG HARIAN
-                                    <b>RM ${inv.daily_profit.toFixed(2)}</b>
-                                </div>
-                                <div class="mining-stat-box" style="text-align: right;">
-                                    MODAL
-                                    <b>RM ${inv.amount.toFixed(2)}</b>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                document.getElementById('estProfit').innerText = `RM ${totalProfit.toFixed(2)}`;
-            } else {
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 50px 20px;">
-                        <i class="fas fa-box-open" style="font-size: 40px; color: #cbd5e1; margin-bottom: 15px;"></i>
-                        <p style="color: #94a3b8; font-size: 14px;">Tiada mesin aktif. Sila beli pakej di menu Produk.</p>
-                        <a href="product_list.html" style="display: inline-block; margin-top: 15px; background: #8b0000; color: white; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 13px;">MULA MELABUR</a>
-                    </div>
-                `;
+                        `;
+                    }).join('');
+
+                    document.getElementById('totalProfit').innerText = `RM ${totalDaily.toFixed(2)}`;
+                }
+            } catch (err) {
+                console.error("Ralat memuatkan mining:", err.message);
             }
         }
 
-        window.onload = loadMining;
+        document.addEventListener('DOMContentLoaded', loadActiveMining);
     </script>
 </body>
 </html>
