@@ -1,112 +1,64 @@
+/* RESET UTAMA */
 :root {
     --primary: #8b0000;
     --primary-dark: #660000;
-    --text-muted: #64748b;
+    --bg: #f8fafc;
     --white: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
 
-body { background: #f1f5f9; font-family: 'Inter', sans-serif; display: flex; justify-content: center; }
+body { background: #f1f5f9; display: flex; justify-content: center; min-height: 100vh; }
 
-/* SHELL UTAMA */
 .app-shell {
     width: 100%;
     max-width: 450px;
-    background: #f8fafc;
+    background: var(--bg);
     min-height: 100vh;
-    padding: 20px;
-    padding-bottom: 90px;
+    position: relative;
+    padding-bottom: 80px; /* Ruang untuk Bottom Nav */
 }
 
-/* TOP NAV MENDATAR */
-.top-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
+/* HEADER & CARD */
+.top-nav { display: flex; justify-content: space-between; align-items: center; padding: 20px; }
+.profile-info { display: flex; align-items: center; gap: 12px; }
+.user-avatar { width: 45px; height: 45px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
 
-.profile-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.user-avatar {
-    width: 40px; height: 40px;
-    background: var(--primary);
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-}
-
-/* KAD BAKI */
 .main-card {
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    margin: 0 20px 25px;
     padding: 25px;
-    border-radius: 20px;
+    border-radius: 24px;
     color: white;
-    margin-bottom: 25px;
     box-shadow: 0 10px 20px rgba(139, 0, 0, 0.2);
 }
 
-.main-card h2 { font-size: 32px; margin: 10px 0; }
-
-/* MENU GRID MENDATAR (Fix Gambar Anda) */
-.quick-actions {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+/* GRID MENU (FIX MENDATAR) */
+.quick-actions, .menu-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
     gap: 15px;
-    margin-bottom: 30px;
+    padding: 0 20px;
+    margin-bottom: 25px;
 }
 
-.action-item {
-    text-align: center;
-    cursor: pointer;
-}
-
+.action-item { text-align: center; text-decoration: none; color: var(--text-main); }
 .icon-box {
-    width: 55px; height: 55px;
-    background: white;
-    color: var(--primary);
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 8px;
-    font-size: 20px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    width: 60px; height: 60px; background: white; color: var(--primary);
+    border-radius: 18px; display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 8px; font-size: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-.action-item span { font-size: 12px; font-weight: 600; color: #333; }
-
-/* NAVIGASI BAWAH MENDATAR */
+/* BOTTOM NAVIGATION (FIX MENDATAR) */
 .bottom-nav {
-    position: fixed;
-    bottom: 0; left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 450px;
-    height: 70px;
-    background: white;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    border-top: 1px solid #eee;
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 450px; height: 70px;
+    background: white; display: flex !important; justify-content: space-around;
+    align-items: center; border-top: 1px solid #e2e8f0; z-index: 1000;
 }
 
-.nav-item {
-    text-decoration: none;
-    color: #94a3b8;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-size: 11px;
-}
-
+.nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; font-size: 11px; }
 .nav-item.active { color: var(--primary); }
-.nav-item i { font-size: 20px; margin-bottom: 4px; }
+.nav-item i { font-size: 22px; margin-bottom: 4px; }
