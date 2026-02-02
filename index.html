@@ -3,46 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MicroVest - Memuatkan...</title>
+    <title>MicroVest - Pelaburan Digital Masa Depan</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body style="background-color: var(--primary);">
+<body style="background: #f8fafc;">
 
-    <div class="app-shell" style="display: flex; align-items: center; justify-content: center; background-color: var(--primary);">
-        <div style="text-align: center; color: white;">
-            <div class="brand-icon" style="background: white; color: var(--primary); width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 35px; font-weight: 800; animation: pulse 1.5s infinite;">
-                M
+    <div class="app-shell">
+        <div class="hero-section">
+            <div style="font-size: 50px; margin-bottom: 20px;">🚀</div>
+            <h1>Gandakan Wang Anda Dengan Bijak</h1>
+            <p>Sertai ribuan pelabur yang menjana pendapatan harian secara automatik melalui sistem mining digital tercanggih.</p>
+            <a href="register.html" class="btn-get-started">MULA SEKARANG</a>
+        </div>
+
+        <div style="display: flex; justify-content: space-around; margin-top: -20px; padding: 0 20px;">
+            <div style="background: white; padding: 15px; border-radius: 15px; text-align: center; flex: 1; margin: 0 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                <b style="color: #8b0000; font-size: 18px;">10K+</b>
+                <span style="display: block; font-size: 10px; color: #64748b;">PENGGUNA</span>
             </div>
-            <p style="font-size: 14px; opacity: 0.8;">Menyemak status akaun...</p>
+            <div style="background: white; padding: 15px; border-radius: 15px; text-align: center; flex: 1; margin: 0 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                <b style="color: #8b0000; font-size: 18px;">RM 5M+</b>
+                <span style="display: block; font-size: 10px; color: #64748b;">TOTAL PAYOUT</span>
+            </div>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <i class="fas fa-shield-alt"></i>
+                <h4 style="font-size: 12px;">Selamat</h4>
+                <p style="font-size: 10px; color: #64748b;">Sistem enkripsi gred bank.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-bolt"></i>
+                <h4 style="font-size: 12px;">Pantas</h4>
+                <p style="font-size: 10px; color: #64748b;">Withdraw dalam masa 24 jam.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-chart-line"></i>
+                <h4 style="font-size: 12px;">Stabil</h4>
+                <p style="font-size: 10px; color: #64748b;">Keuntungan tetap setiap hari.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-users"></i>
+                <h4 style="font-size: 12px;">Komisen</h4>
+                <p style="font-size: 10px; color: #64748b;">Bonus rujukan sehingga 3 level.</p>
+            </div>
+        </div>
+
+        <div style="text-align: center; padding: 20px; padding-bottom: 40px;">
+            <p style="font-size: 12px; color: #94a3b8;">Sudah mempunyai akaun? <a href="login.html" style="color: #8b0000; font-weight: bold; text-decoration: none;">Log Masuk</a></p>
         </div>
     </div>
 
-    <style>
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-    </style>
-
-    <script src="app.js"></script>
-    <script>
-        async function checkSession() {
-            // Tunggu client Supabase sedia dari app.js
-            const { data: { session }, error } = await client.auth.getSession();
-
-            if (session) {
-                // Jika user dah login, pergi ke Dashboard
-                window.location.href = 'dashboard.html';
-            } else {
-                // Jika belum login, pergi ke Login
-                window.location.href = 'login.html';
-            }
-        }
-
-        // Jalankan semakan sebaik sahaja halaman dimuatkan
-        window.onload = checkSession;
-    </script>
 </body>
 </html>

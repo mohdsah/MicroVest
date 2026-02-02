@@ -3,236 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Admin - MicroVest</title>
+    <title>Admin Panel - MicroVest</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body style="background: #f1f5f9;">
 
-<div class="app-shell" style="padding: 0;">
-    <div style="background: #1e293b; color: white; padding: 30px 20px; border-radius: 0 0 25px 25px;">
-        <h2 style="font-size: 20px;">Master Dashboard</h2>
-        <p style="font-size: 12px; opacity: 0.7;">Pengurusan Transaksi & Pengguna</p>
-    </div>
-
-    <div class="admin-stats-bar">
-        <div class="stat-item">DEPOSIT APPR. <b id="totalDepo">0</b></div>
-        <div class="stat-item">WITHDRAW APPR. <b id="totalWith">0</b></div>
-    </div>
-
-    <div class="admin-search-bar">
-        <input type="text" id="adminSearch" class="search-input" placeholder="Cari emel atau ID pengguna..." onkeyup="filterData()">
-    </div>
-
-    <div class="tab-admin" style="display: flex; margin: 10px 20px; background: #e2e8f0; border-radius: 10px; padding: 5px;">
-        <button class="tab-btn active" onclick="switchTab('recharge', this)">DEPOSIT</button>
-        <button class="tab-btn" onclick="switchTab('withdraw', this)">WITHDRAW</button>
-        <button class="tab-btn" onclick="switchTab('users', this)">USERS</button>
-    </div>
-
-    <div id="adminContent" style="padding-bottom: 50px;">
-        <p style="text-align: center; padding: 50px; color: #94a3b8;">Tiada rekod buat masa ini.</p>
-    </div>
-</div>
-
-<div id="editModal" class="modal" style="display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center;">
-    <div class="modal-content" style="background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-        <div class="modal-header" style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-            <h3 style="color: #1e293b;">Kemas Kini Baki User</h3>
+    <div class="app-shell">
+        <div style="background: #1e293b; color: white; padding: 20px; text-align: center;">
+            <h2 style="font-size: 18px;">Pusat Kawalan Admin</h2>
         </div>
-        
-        <input type="hidden" id="editUserId">
-        
-        <div style="margin-bottom: 15px;">
-            <label style="font-size: 11px; color: #64748b; font-weight: bold;">EMEL PENGGUNA</label>
-            <input type="text" id="editEmail" class="admin-input" readonly style="background: #f1f5f9; border: 1px solid #ddd; width: 100%; padding: 12px; border-radius: 10px; margin-top: 5px; color: #666;">
+
+        <div style="display: flex; padding: 10px;">
+            <div class="admin-card" style="flex:1; text-align: center;">
+                <span style="font-size: 10px; color: #64748b;">PENDING DEPOSIT</span>
+                <h3 id="statDepo" style="color: #d97706;">0</h3>
+            </div>
+            <div class="admin-card" style="flex:1; text-align: center;">
+                <span style="font-size: 10px; color: #64748b;">PENDING WITHDRAW</span>
+                <h3 id="statWith" style="color: #dc2626;">0</h3>
+            </div>
         </div>
-        
-        <div style="margin-bottom: 20px;">
-            <label style="font-size: 11px; color: #64748b; font-weight: bold;">BAKI BARU (RM)</label>
-            <input type="number" id="editBalance" class="admin-input" step="0.01" style="width: 100%; padding: 12px; border: 2px solid #8b0000; border-radius: 10px; margin-top: 5px; font-size: 18px; font-weight: bold; color: #8b0000;">
+
+        <div class="admin-card">
+            <h4 style="font-size: 14px; border-left: 4px solid #16a34a; padding-left: 10px;">Deposit Perlu Disahkan</h4>
+            <table class="table-admin" id="tableDepo">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Jumlah</th>
+                        <th>Tindakan</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
-        
-        <div style="display: flex; gap: 10px;">
-            <button onclick="closeModal()" style="flex:1; padding:12px; border:none; border-radius:10px; background:#e2e8f0; font-weight:bold; cursor:pointer;">BATAL</button>
-            <button onclick="saveUserEdit()" style="flex:1; padding:12px; border:none; border-radius:10px; background:#8b0000; color:white; font-weight:bold; cursor:pointer;">SIMPAN PERUBAHAN</button>
+
+        <div class="admin-card">
+            <h4 style="font-size: 14px; border-left: 4px solid #dc2626; padding-left: 10px;">Pengeluaran Perlu Disahkan</h4>
+            <table class="table-admin" id="tableWith">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Jumlah</th>
+                        <th>Tindakan</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="admin-card">
+            <h4 style="font-size: 14px;">Urus Baki Pengguna</h4>
+            <input type="text" id="searchEmail" placeholder="Emel User..." class="withdraw-field" style="margin-top:10px; font-size: 12px;">
+            <input type="number" id="adjustAmount" placeholder="Jumlah (Cth: 100 atau -100)" class="withdraw-field" style="margin-top:10px; font-size: 12px;">
+            <button onclick="updateBalance()" class="btn-auth" style="margin-top: 10px; background: #1e293b;">UPDATE BAKI</button>
         </div>
     </div>
-</div>
 
+    <script src="app.js"></script>
+    <script>
+        // FUNGSI UNTUK LOAD DATA PENDING
+        async function loadAdminData() {
+            // 1. Ambil Pending Deposit
+            const { data: depos } = await client.from('recharges').select('*').eq('status', 'pending');
+            const tableDepo = document.querySelector('#tableDepo tbody');
+            tableDepo.innerHTML = '';
+            document.getElementById('statDepo').innerText = depos?.length || 0;
 
-<script src="app.js"></script>
-<script>
-    let currentTab = 'recharge';
-    let allData = [];
+            depos?.forEach(d => {
+                tableDepo.innerHTML += `
+                    <tr>
+                        <td>${d.user_email}</td>
+                        <td>RM ${d.amount}</td>
+                        <td>
+                            <button class="btn-sm btn-approve" onclick="approveDeposit('${d.id}', '${d.user_id}', ${d.amount})">✔</button>
+                            <button class="btn-sm btn-reject" onclick="updateStatus('recharges', '${d.id}', 'rejected')">✖</button>
+                        </td>
+                    </tr>
+                `;
+            });
 
-    async function loadData() // Fungsi 1: Buka Modal dan Masukkan Data User
-function openEditModal(id, email, balance) {
-    document.getElementById('editUserId').value = id;
-    document.getElementById('editEmail').value = email;
-    document.getElementById('editBalance').value = balance;
-    
-    // Tunjukkan modal dengan gaya flex
-    document.getElementById('editModal').style.display = 'flex';
-}
+            // 2. Ambil Pending Withdraw
+            const { data: withs } = await client.from('withdrawals').select('*').eq('status', 'pending');
+            const tableWith = document.querySelector('#tableWith tbody');
+            tableWith.innerHTML = '';
+            document.getElementById('statWith').innerText = withs?.length || 0;
 
-// Fungsi 2: Tutup Modal
-function closeModal() {
-    document.getElementById('editModal').style.display = 'none';
-}
-
-// Fungsi 3: Simpan Data yang diedit ke Supabase
-async function saveUserEdit() {
-    const userId = document.getElementById('editUserId').value;
-    const newBalance = parseFloat(document.getElementById('editBalance').value);
-
-    if (isNaN(newBalance)) {
-        alert("Sila masukkan jumlah baki yang betul.");
-        return;
-    }
-
-    // Tunjukkan loading sekejap
-    const saveBtn = event.target;
-    saveBtn.innerText = "Menyimpan...";
-    saveBtn.disabled = true;
-
-    // Update di Database Supabase
-    const { error } = await client
-        .from('profiles')
-        .update({ balance: newBalance })
-        .eq('id', userId);
-
-    if (error) {
-        alert("Gagal mengemaskini baki: " + error.message);
-    } else {
-        alert("Baki berjaya dikemas kini!");
-        closeModal();
-        loadData(); // Panggil semula data untuk refresh senarai
-    }
-    
-    saveBtn.innerText = "SIMPAN PERUBAHAN";
-    saveBtn.disabled = false;
-}
-{
-        const container = document.getElementById('adminContent');
-        container.innerHTML = '<p style="text-align:center; padding:50px;">Memuatkan...</p>';
-
-        if (currentTab === 'users') {
-            const { data } = await client.from('profiles').select('*').order('created_at', { ascending: false });
-            allData = data || [];
-        } else {
-            const table = currentTab === 'recharge' ? 'recharge_requests' : 'withdrawals';
-            const { data } = await client.from(table).select('*, profiles(email)').eq('status', 'pending');
-            allData = data || [];
-        }
-        
-        renderList(allData);
-        updateStats();
-    }
-
-    function renderList(list) {
-        const container = document.getElementById('adminContent');
-        if (list.length === 0) {
-            container.innerHTML = '<p style="text-align:center; padding:50px; color:#94a3b8;">Tiada rekod ditemui.</p>';
-            return;
+            withs?.forEach(w => {
+                tableWith.innerHTML += `
+                    <tr>
+                        <td>${w.user_id.substring(0,8)}...</td>
+                        <td>RM ${w.amount}</td>
+                        <td>
+                            <button class="btn-sm btn-approve" onclick="updateStatus('withdrawals', '${w.id}', 'success')">✔</button>
+                            <button class="btn-sm btn-reject" onclick="refundWithdraw('${w.id}', '${w.user_id}', ${w.amount})">✖</button>
+                        </td>
+                    </tr>
+                `;
+            });
         }
 
-        container.innerHTML = '';
-        list.forEach(item => {
-            if (currentTab === 'users') {
-                const statusBan = item.is_banned ? '<span style="color:red">BANNED</span>' : '<span style="color:green">ACTIVE</span>';
-                container.innerHTML += `
-                    <div class="admin-list-card">
-                        <div style="font-size:12px;"><b>EMAIL:</b> ${item.email}</div>
-                        <div style="font-size:12px;"><b>BAL:</b> RM ${item.balance.toFixed(2)} | <b>STATUS:</b> ${statusBan}</div>
-                        <div class="admin-actions">
-                            <button class="${item.is_banned ? 'btn-unban' : 'btn-banned'}" onclick="toggleBan('${item.id}', ${item.is_banned})">
-                                ${item.is_banned ? 'BUKA BAND' : 'EDIT USER BAND'}
-                            </button>
-                        </div>
-                    </div>`;
+        // FUNGSI APPROVE DEPOSIT (Tambah baki & tukar status)
+        async function approveDeposit(id, userId, amount) {
+            if(!confirm("Approve deposit ini?")) return;
+            
+            // Ambil baki lama
+            const { data: p } = await client.from('profiles').select('balance').eq('id', userId).single();
+            // Update baki
+            await client.from('profiles').update({ balance: p.balance + amount }).eq('id', userId);
+            // Update status recharge
+            await updateStatus('recharges', id, 'success');
+        }
+
+        // FUNGSI UMUM UPDATE STATUS
+        async function updateStatus(table, id, newStatus) {
+            await client.from(table).update({ status: newStatus }).eq('id', id);
+            alert("Status Dikemaskini!");
+            loadAdminData();
+        }
+
+        // FUNGSI REFUND (Jika withdraw reject, pulangkan duit ke baki user)
+        async function refundWithdraw(id, userId, amount) {
+            const { data: p } = await client.from('profiles').select('balance').eq('id', userId).single();
+            await client.from('profiles').update({ balance: p.balance + amount }).eq('id', userId);
+            await updateStatus('withdrawals', id, 'rejected');
+        }
+
+        // FUNGSI UPDATE BAKI MANUAL
+        async function updateBalance() {
+            const email = document.getElementById('searchEmail').value;
+            const amount = parseFloat(document.getElementById('adjustAmount').value);
+            
+            const { data: u } = await client.from('profiles').select('id, balance').eq('email', email).single();
+            if(u) {
+                await client.from('profiles').update({ balance: u.balance + amount }).eq('id', u.id);
+                alert("Baki berjaya dikemaskini!");
             } else {
-                container.innerHTML += `
-                    <div class="admin-list-card">
-                        <div style="font-size:11px;">DARI: ${item.profiles?.email}</div>
-                        <div style="font-size:18px; font-weight:800; margin:5px 0;">RM ${item.amount.toFixed(2)}</div>
-                        <div style="font-size:11px; color:#666;">${currentTab === 'withdraw' ? 'Info: '+item.bank_info : 'Topup Wallet'}</div>
-                        <div class="admin-actions">
-                            <button class="btn-approve" onclick="approveTx('${item.id}', '${item.user_id}', ${item.amount})">APPROVE</button>
-                            <button class="btn-reject" onclick="rejectTx('${item.id}')">REJECT</button>
-                        </div>
-                    </div>`;
+                alert("User tidak ditemui!");
             }
-        });
-    }
-
-    function filterData() {
-        const term = document.getElementById('adminSearch').value.toLowerCase();
-        const filtered = allData.filter(i => {
-            const email = i.email || (i.profiles && i.profiles.email) || "";
-            return email.toLowerCase().includes(term);
-        });
-        renderList(filtered);
-    }
-
-    async function toggleBan(uid, currentStatus) {
-        const msg = currentStatus ? "Buka band user ini?" : "Band user ini?";
-        if(!confirm(msg)) return;
-        await client.from('profiles').update({ is_banned: !currentStatus }).eq('id', uid);
-        alert("Status dikemaskini!");
-        loadData();
-    }
-
-    async function approveTx(tid, uid, amt) {
-        if(!confirm("Luluskan transaksi?")) return;
-        const table = currentTab === 'recharge' ? 'recharge_requests' : 'withdrawals';
-        
-        if(currentTab === 'recharge') {
-            const { data } = await client.from('profiles').select('balance').eq('id', uid).single();
-            await client.from('profiles').update({ balance: data.balance + amt }).eq('id', uid);
         }
-        
-        await client.from(table).update({ status: 'approved' }).eq('id', tid);
-        alert("Transaksi Berjaya!");
-        loadData();
-    }
 
-    async function updateStats() {
-        const { count: rCount } = await client.from('recharge_requests').select('*', { count: 'exact', head: true }).eq('status', 'approved');
-        const { count: wCount } = await client.from('withdrawals').select('*', { count: 'exact', head: true }).eq('status', 'approved');
-        document.getElementById('totalDepo').innerText = rCount || 0;
-        document.getElementById('totalWith').innerText = wCount || 0;
-    }
-
-    function switchTab(tab, btn) {
-        currentTab = tab;
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        loadData();
-    }
-
-    window.onload = loadData;
-    
-    <div id="editModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 style="color: #1e293b;">Edit Maklumat User</h3>
-        </div>
-        <input type="hidden" id="editUserId">
-        <label style="font-size: 12px; color: #666;">EMEL USER</label>
-        <input type="text" id="editEmail" class="admin-input" readonly style="background: #f1f5f9;">
-        
-        <label style="font-size: 12px; color: #666;">KEMASKINI BAKI (RM)</label>
-        <input type="number" id="editBalance" class="admin-input" step="0.01">
-        
-        <div style="display: flex; gap: 10px; margin-top: 20px;">
-            <button onclick="closeModal()" style="flex:1; padding:12px; border:none; border-radius:10px; background:#e2e8f0;">BATAL</button>
-            <button onclick="saveUserEdit()" style="flex:1; padding:12px; border:none; border-radius:10px; background:#1e293b; color:white; font-weight:bold;">SIMPAN</button>
-        </div>
-    </div>
-</div>
-
-</script>
+        window.onload = loadAdminData;
+    </script>
 </body>
 </html>
