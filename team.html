@@ -35,64 +35,54 @@
             </div>
         </div>
 
-        <div style="padding: 20px 15px;">
-            <h4 style="margin-bottom: 15px; color: #333;">Senarai Ahli (Level 1)</h4>
-            <div id="downlineList">
-                <p style="text-align: center; color: #999; font-size: 13px; margin-top: 30px;">Tiada ahli pasukan lagi.</p>
-            </div>
-        </div>
-
-        <nav class="bottom-nav">
-            <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
-            <a href="product_list.html" class="nav-item"><i class="fas fa-box"></i><span>Produk</span></a>
-            <a href="profile.html" class="nav-item active"><i class="fas fa-user"></i><span>Profil</span></a>
-        </nav>
+        <div style="padding: 10px 15px 100px 15px;">
+    <h4 style="margin-bottom: 15px; color: #333;">Sejarah Komisen</h4>
+    <div id="commissionList">
+        <p style="text-align: center; color: #999; font-size: 12px; margin-top: 20px;">Tiada sejarah komisen lagi.</p>
     </div>
+</div>
 
-    <script src="app.js"></script>
-    <script>
-        async function loadTeamData() {
-            const { data: { user } } = await client.auth.getUser();
-            if (!user) return;
+<script>
+    // Tambahkan kod ini di dalam fungsi loadTeamData() yang sedia ada
+    async function loadCommissionHistory(userId) {
+        const { data: history, error } = await client
+            .from('commission_history')
+            .select('*')
+            .eq('referrer_id', userId)
+            .order('created_at', { ascending: false });
 
-            // 1. Set Pautan Jemputan (Guna ID User)
-            const refUrl = window.location.origin + "/register.html?ref=" + user.id;
-            document.getElementById('referralLink').value = refUrl;
+        if (history && history.length > 0) {
+            const list = document.getElementById('commissionList');
+            list.innerHTML = '';
+            
+            let totalComm = 0;
 
-            // 2. Tarik senarai downline dari table 'profiles'
-            const { data: downline, error } = await client
-                .from('profiles')
-                .select('email, created_at')
-                .eq('referred_by', user.id);
-
-            if (downline && downline.length > 0) {
-                document.getElementById('teamCount').innerText = downline.length;
-                const list = document.getElementById('downlineList');
-                list.innerHTML = '';
-
-                downline.forEach(member => {
-                    const date = new Date(member.created_at).toLocaleDateString();
-                    list.innerHTML += `
-                        <div style="background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+            history.forEach(item => {
+                totalComm += item.commission_amount;
+                const date = new Date(item.created_at).toLocaleDateString();
+                list.innerHTML += `
+                    <div style="background: #f0fdf4; padding: 12px; border-radius: 10px; margin-bottom: 8px; border-left: 4px solid #10b981;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <p style="margin:0; font-weight: bold; font-size: 13px;">${member.email.split('@')[0]}***</p>
-                                <p style="margin:0; font-size: 10px; color: #999;">Sertai: ${date}</p>
+                                <p style="margin:0; font-size: 12px; font-weight: bold; color: #1e293b;">Bonus Deposit: ${item.downline_email.split('@')[0]}***</p>
+                                <p style="margin:0; font-size: 10px; color: #64748b;">${date}</p>
                             </div>
-                            <span style="font-size: 10px; color: #10b981; font-weight: bold;">AKTIF</span>
+                            <div style="text-align: right;">
+                                <p style="margin:0; font-size: 13px; font-weight: 800; color: #10b981;">+ RM ${item.commission_amount.toFixed(2)}</p>
+                            </div>
                         </div>
-                    `;
-                });
-            }
+                    </div>
+                `;
+            });
+            
+            // Kemaskini jumlah besar komisen di kad atas
+            document.getElementById('totalCommission').innerText = `RM ${totalComm.toFixed(2)}`;
         }
+    }
 
-        function copyReferral() {
-            const copyText = document.getElementById("referralLink");
-            copyText.select();
-            navigator.clipboard.writeText(copyText.value);
-            alert("Pautan jemputan berjaya disalin!");
-        }
+    // Panggil fungsi ini dalam window.onload selepas dapat user.id
+    // Contoh: loadCommissionHistory(user.id);
+</script>
 
-        window.onload = loadTeamData;
-    </script>
 </body>
 </html>
