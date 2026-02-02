@@ -1,7 +1,11 @@
 // 1. KONFIGURASI SUPABASE
-const _url = 'https://mgvjwgbjccgsjkjhddru.supabase.co';
-const _key = 'sb_publishable_a6cCADb5e4fYyl6csE27oQ_EB-iQxHF';
+const SUPABASE_URL = 'https://mgvjwgbjccgsjkjhddru.supabase.co';
+// Pastikan anda tampal key eyJh... yang baru di sini
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ndmp3Z2JqY2Nnc2pramhkZHJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwMzQxNzcsImV4cCI6MjA4NTYxMDE3N30.JJ03f7HO4bKiCF2g0eY3HzrT2KHKUzjpYgBALYHeYa0'; 
+
+// Inisialisasi client
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 
 // 2. FUNGSI AUTH & SESI
 async function checkUserSession() {
