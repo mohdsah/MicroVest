@@ -7,30 +7,88 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Gaya Tambahan untuk Kecantikan Ekstra */
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .auth-card {
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255,255,255,0.8);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+        }
+        .auth-header h1 {
+            background: linear-gradient(to right, #800000, #b91c1c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+        .input-group label {
+            font-weight: 600;
+            color: #475569;
+            font-size: 13px;
+        }
+        .auth-input {
+            border: 2px solid #f1f5f9;
+            transition: all 0.3s ease;
+        }
+        .auth-input:focus {
+            border-color: #800000;
+            box-shadow: 0 0 0 4px rgba(128, 0, 0, 0.1);
+            background: white;
+        }
+        .btn-auth {
+            background: linear-gradient(to right, #800000, #b91c1c);
+            border: none;
+            height: 50px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(128, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+        .btn-auth:active {
+            transform: scale(0.98);
+        }
+    </style>
 </head>
-<body style="background: #f8fafc;">
+<body>
 
-    <div class="app-shell auth-container">
-        <div class="auth-header">
+    <div class="app-shell auth-container" style="width: 100%; max-width: 400px; padding: 20px;">
+        <div class="auth-header" style="text-align: center; margin-bottom: 30px;">
+            <div style="width: 60px; height: 60px; background: #800000; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                <i class="fas fa-chart-pie" style="color: white; font-size: 24px;"></i>
+            </div>
             <h1>MicroVest</h1>
-            <p style="color: #64748b;">Log masuk untuk mula melabur</p>
+            <p style="color: #64748b; font-size: 14px;">Akses akaun pelaburan anda</p>
         </div>
 
-        <div class="auth-card">
-            <div class="input-group">
-                <label><i class="fas fa-envelope"></i> Emel</label>
-                <input type="email" id="email" class="auth-input" placeholder="contoh@gmail.com">
+        <div class="auth-card" style="background: white;">
+            <div class="input-group" style="margin-bottom: 20px;">
+                <label><i class="fas fa-envelope" style="color: #94a3b8; margin-right: 8px;"></i> Emel</label>
+                <input type="email" id="email" class="auth-input" placeholder="contoh@gmail.com" style="width: 100%; padding: 12px; border-radius: 10px; margin-top: 8px;">
             </div>
 
-            <div class="input-group">
-                <label><i class="fas fa-lock"></i> Kata Laluan</label>
-                <input type="password" id="password" class="auth-input" placeholder="Masukkan kata laluan">
+            <div class="input-group" style="margin-bottom: 15px;">
+                <label><i class="fas fa-lock" style="color: #94a3b8; margin-right: 8px;"></i> Kata Laluan</label>
+                <input type="password" id="password" class="auth-input" placeholder="Masukkan kata laluan" style="width: 100%; padding: 12px; border-radius: 10px; margin-top: 8px;">
             </div>
 
-            <button class="btn-auth" id="loginBtn" onclick="handleLogin()">LOG MASUK</button>
+            <div style="text-align: right; margin-bottom: 25px;">
+                <a href="forgot-password.html" style="font-size: 12px; color: #800000; text-decoration: none; font-weight: 600;">Lupa Kata Laluan?</a>
+            </div>
+
+            <button class="btn-auth" id="loginBtn" onclick="handleLogin()" style="width: 100%; color: white; border-radius: 12px; cursor: pointer;">LOG MASUK</button>
             
-            <div class="auth-footer">
-                Belum ada akaun? <a href="register.html">Daftar Sekarang</a>
+            <div class="auth-footer" style="text-align: center; margin-top: 25px; font-size: 14px; color: #64748b;">
+                Belum ada akaun? <a href="register.html" style="color: #800000; font-weight: 700; text-decoration: none;">Daftar Sekarang</a>
             </div>
         </div>
     </div>
@@ -43,15 +101,14 @@
             const btn = document.getElementById('loginBtn');
 
             if (!email || !password) {
-                alert("Sila isi semua ruangan!");
+                alert("Sila masukkan emel dan kata laluan!");
                 return;
             }
 
-            btn.innerText = "Sila Tunggu...";
+            btn.innerText = "Mengesahkan...";
             btn.disabled = true;
 
             try {
-                // 1. Log masuk Supabase
                 const { data, error } = await client.auth.signInWithPassword({
                     email: email,
                     password: password,
@@ -59,8 +116,7 @@
 
                 if (error) throw error;
 
-                // 2. Semak jika user kena BANNED
-                const { data: profile, error: profileErr } = await client
+                const { data: profile } = await client
                     .from('profiles')
                     .select('is_banned')
                     .eq('id', data.user.id)
@@ -68,16 +124,15 @@
 
                 if (profile && profile.is_banned) {
                     await client.auth.signOut();
-                    alert("Akaun anda telah disekat (BANNED). Sila hubungi admin.");
+                    alert("Akaun anda telah disekat. Hubungi admin.");
                     window.location.reload();
                     return;
                 }
 
-                // Jika berjaya
                 window.location.href = 'dashboard.html';
 
             } catch (error) {
-                alert("Gagal Log Masuk: " + error.message);
+                alert("Ralat: " + error.message);
                 btn.innerText = "LOG MASUK";
                 btn.disabled = false;
             }

@@ -17,7 +17,7 @@
         </div>
 
         <div class="auth-card">
-            <div id="refBadge" class="ref-info-badge" style="display: none;">
+            <div id="refBadge" class="ref-info-badge" style="display: none; background: #f0fdf4; border: 1px solid #10b981; padding: 10px; border-radius: 8px; margin-bottom: 15px; color: #15803d; font-size: 13px;">
                 <i class="fas fa-users"></i> Anda dijemput oleh: <b id="refName">...</b>
             </div>
 
@@ -38,21 +38,21 @@
 
             <button class="btn-auth" id="regBtn" onclick="handleRegister()">DAFTAR AKAUN</button>
             
-            <div class="auth-footer">
-                Sudah ada akaun? <a href="login.html">Log Masuk</a>
+            <div class="auth-footer" style="text-align: center; margin-top: 15px; font-size: 14px;">
+                Sudah ada akaun? <a href="login.html" style="color: #800000; font-weight: bold; text-decoration: none;">Log Masuk</a>
             </div>
         </div>
     </div>
 
     <script src="app.js"></script>
     <script>
-        // Ambil ID Referral dari URL (Contoh: register.html?ref=ABC123)
+        // 1. Ambil kod referral dari URL (?ref=ABC123)
         const urlParams = new URLSearchParams(window.location.search);
-        const refId = urlParams.get('ref');
+        const refCode = urlParams.get('ref');
 
-        if (refId) {
+        if (refCode) {
             document.getElementById('refBadge').style.display = 'block';
-            document.getElementById('refName').innerText = refId;
+            document.getElementById('refName').innerText = refCode;
         }
 
         async function handleRegister() {
@@ -75,7 +75,21 @@
             btn.disabled = true;
 
             try {
-                // 1. Daftar di Supabase Auth
+                // A. Cari ID Upline (Tuan Kod) berdasarkan kod referral
+                let uplineId = null;
+                if (refCode) {
+                    const { data: uplineProfile } = await client
+                        .from('profiles')
+                        .select('id')
+                        .eq('referral_code', refCode)
+                        .single();
+                    
+                    if (uplineProfile) {
+                        uplineId = uplineProfile.id;
+                    }
+                }
+
+                // B. Daftar akaun di Supabase Auth
                 const { data, error } = await client.auth.signUp({
                     email: email,
                     password: password,
@@ -83,15 +97,18 @@
 
                 if (error) throw error;
 
-                // 2. Simpan profil awal di table 'profiles'
-                // referred_by akan disimpan jika ada refId dalam URL
+                // C. Simpan profil ke table 'profiles'
+                // Kita guna 'invited_by' supaya selari dengan database
+                const myNewRefCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                
                 const { error: profileErr } = await client
                     .from('profiles')
                     .insert([{ 
                         id: data.user.id, 
                         email: email, 
                         balance: 0, 
-                        referred_by: refId || null,
+                        referral_code: myNewRefCode,
+                        invited_by: uplineId, // HUBUNGAN LEVEL 1
                         is_banned: false
                     }]);
 

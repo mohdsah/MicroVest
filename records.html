@@ -11,19 +11,20 @@
 <body style="background: #f8fafc;">
 
     <div class="app-shell">
-        <div style="background: #8b0000; color: white; padding: 30px 20px; text-align: center; border-radius: 0 0 25px 25px;">
-            <h2 style="font-size: 20px;">Rekod Transaksi</h2>
-            <p style="font-size: 12px; opacity: 0.8;">Jejak aliran tunai anda</p>
+        <div class="product-page-header">
+            <h2>Rekod Transaksi</h2>
+            <p>Pantau sejarah kewangan anda</p>
         </div>
 
-        <div class="tab-container" style="margin-top: 20px;">
-            <div class="tab-item active" onclick="switchTab('recharge', this)">RECHARGE</div>
-            <div class="tab-item" onclick="switchTab('withdraw', this)">WITHDRAW</div>
-            <div class="tab-item" onclick="switchTab('profit', this)">PROFIT</div>
+        <div style="display: flex; background: white; padding: 10px; margin-bottom: 10px;">
+            <button onclick="showTab('deposit')" id="tab-dep" class="tab-btn active">Deposit</button>
+            <button onclick="showTab('withdraw')" id="tab-wit" class="tab-btn">Withdraw</button>
         </div>
 
-        <div id="recordList" style="margin-top: 20px; padding-bottom: 100px;">
-            <p style="text-align: center; color: #94a3b8; padding: 40px;">Memuatkan rekod...</p>
+        <div class="content-area" style="padding: 15px; padding-bottom: 100px;">
+            <div id="recordList">
+                <p style="text-align: center; color: #94a3b8;">Memuatkan rekod...</p>
+            </div>
         </div>
 
         <nav class="bottom-nav">
@@ -44,59 +45,84 @@
 
     <script src="app.js"></script>
     <script>
-        let currentUserId = '';
+        let currentTab = 'deposit';
 
-        async function initRecords() {
+        async function loadRecords(type) {
             const { data: { user } } = await client.auth.getUser();
-            if (!user) return window.location.href = 'login.html';
-            currentUserId = user.id;
-            loadData('recharge'); // Default tab
-        }
-
-        async function loadData(type) {
+            const table = (type === 'deposit') ? 'recharges' : 'withdrawals';
             const container = document.getElementById('recordList');
-            container.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 40px;">Mencari rekod...</p>';
-
-            let tableName = (type === 'recharge') ? 'recharges' : (type === 'withdraw' ? 'withdrawals' : 'profit_logs');
             
-            const { data, error } = await client
-                .from(tableName)
-                .select('*')
-                .eq('user_id', currentUserId)
-                .order('created_at', { ascending: false });
+            container.innerHTML = '<p style="text-align: center; color: #94a3b8;">Memproses...</p>';
 
-            if (data && data.length > 0) {
-                container.innerHTML = '';
-                data.forEach(item => {
-                    let amountClass = (type === 'withdraw') ? 'amount-minus' : 'amount-plus';
-                    let prefix = (type === 'withdraw') ? '-' : '+';
-                    let status = item.status || 'success';
+            try {
+                const { data, error } = await client
+                    .from(table)
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .order('created_at', { ascending: false });
 
-                    container.innerHTML += `
-                        <div class="record-card" style="border-left-color: ${status === 'pending' ? '#f59e0b' : '#16a34a'}">
-                            <div class="record-info">
-                                <h4>${type.toUpperCase()}</h4>
-                                <p>${new Date(item.created_at).toLocaleString()}</p>
+                if (error) throw error;
+
+                if (data.length === 0) {
+                    container.innerHTML = `<p style="text-align: center; color: #94a3b8; margin-top: 50px;">Tiada rekod ${type} lagi.</p>`;
+                    return;
+                }
+
+                container.innerHTML = data.map(item => `
+                    <div class="recharge-card" style="margin-bottom: 10px; border-radius: 12px; padding: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <small style="color: #94a3b8; font-size: 10px;">${new Date(item.created_at).toLocaleString()}</small>
+                                <h4 style="margin: 5px 0 0 0; color: #1e293b;">RM ${parseFloat(item.amount).toFixed(2)}</h4>
                             </div>
-                            <div class="record-amount">
-                                <div class="${amountClass}">${prefix} RM ${item.amount.toFixed(2)}</div>
-                                <span class="status-badge status-${status}">${status}</span>
+                            <div>
+                                <span class="status-badge ${item.status}">
+                                    ${item.status.toUpperCase()}
+                                </span>
                             </div>
                         </div>
-                    `;
-                });
-            } else {
-                container.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 40px;">Tiada rekod ditemui.</p>';
+                    </div>
+                `).join('');
+            } catch (err) {
+                container.innerHTML = `<p style="color:red;">Ralat: ${err.message}</p>`;
             }
         }
 
-        function switchTab(type, el) {
-            document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
-            el.classList.add('active');
-            loadData(type);
+        function showTab(type) {
+            currentTab = type;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            if(type === 'deposit') document.getElementById('tab-dep').classList.add('active');
+            else document.getElementById('tab-wit').classList.add('active');
+            loadRecords(type);
         }
 
-        window.onload = initRecords;
+        document.addEventListener('DOMContentLoaded', () => loadRecords('deposit'));
     </script>
+
+    <style>
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: none;
+            color: #94a3b8;
+            font-weight: bold;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        .tab-btn.active {
+            color: #800000;
+            border-bottom: 2px solid #800000;
+        }
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        .status-badge.success { background: #dcfce7; color: #15803d; }
+        .status-badge.failed { background: #fee2e2; color: #b91c1c; }
+    </style>
 </body>
 </html>

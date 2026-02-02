@@ -31,9 +31,9 @@
         </div>
 
         <div class="menu-list">
-            <a href="bank.html" class="menu-item">
+            <a href="withdraw.html" class="menu-item">
                 <i class="fas fa-university"></i>
-                <div class="menu-text">Maklumat Bank</div>
+                <div class="menu-text">Maklumat Bank & Withdraw</div>
                 <i class="fas fa-chevron-right chevron"></i>
             </a>
             <a href="records.html" class="menu-item">
@@ -41,12 +41,7 @@
                 <div class="menu-text">Rekod Transaksi</div>
                 <i class="fas fa-chevron-right chevron"></i>
             </a>
-            <a href="team.html" class="menu-item">
-                <i class="fas fa-users"></i>
-                <div class="menu-text">Pasukan Saya</div>
-                <i class="fas fa-chevron-right chevron"></i>
-            </a>
-            <a href="support.html" class="menu-item">
+            <a href="#" onclick="contactSupport()" class="menu-item">
                 <i class="fas fa-headset"></i>
                 <div class="menu-text">Bantuan Pelanggan</div>
                 <i class="fas fa-chevron-right chevron"></i>
@@ -64,6 +59,9 @@
             <a href="product_list.html" class="nav-item">
                 <i class="fas fa-chart-line"></i><span>Produk</span>
             </a>
+            <a href="mining.html" class="nav-item">
+                <i class="fas fa-microchip"></i><span>Mining</span>
+            </a>
             <a href="profile.html" class="nav-item active">
                 <i class="fas fa-user-circle"></i><span>Profil</span>
             </a>
@@ -73,32 +71,53 @@
     <script src="app.js"></script>
     <script>
         async function loadProfile() {
+            // Pastikan guna getUser() untuk data paling tepat
             const { data: { user } } = await client.auth.getUser();
             if (!user) return window.location.href = 'login.html';
 
             document.getElementById('userEmailDisplay').innerText = user.email;
-            document.getElementById('userJoinDate').innerText = new Date(user.created_at).toLocaleDateString('ms-MY');
+            
+            // Format tarikh sertai
+            const joinedDate = new Date(user.created_at).toLocaleDateString('ms-MY', {
+                year: 'numeric', month: '2-digit', day: '2-digit'
+            });
+            document.getElementById('userJoinDate').innerText = joinedDate;
 
-            // Ambil baki dari profiles
-            const { data: profile } = await client
+            // Ambil baki terbaru dari table profiles
+            const { data: profile, error } = await client
                 .from('profiles')
                 .select('balance')
                 .eq('id', user.id)
                 .single();
 
-            if (profile) {
-                document.getElementById('userBalanceDisplay').innerText = `RM ${profile.balance.toFixed(2)}`;
+            if (error) {
+                console.error("Gagal ambil baki:", error.message);
+                return;
             }
+
+            if (profile) {
+                // Gunakan formatRM dari app.js jika ada, atau format manual
+                const balance = parseFloat(profile.balance || 0);
+                document.getElementById('userBalanceDisplay').innerText = `RM ${balance.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            }
+        }
+
+        function contactSupport() {
+            const phone = "60123456789"; // Ganti dengan no anda
+            const msg = "Hi Admin, saya perlukan bantuan bantuan berkaitan akaun MicroVest saya.";
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
         async function handleLogout() {
             if (confirm("Adakah anda pasti mahu log keluar?")) {
-                const { error } = await client.auth.signOut();
+                await client.auth.signOut();
+                localStorage.clear();
                 window.location.href = 'login.html';
             }
         }
 
-        window.onload = loadProfile;
+        // Jalankan fungsi loadProfile apabila halaman sedia
+        document.addEventListener('DOMContentLoaded', loadProfile);
     </script>
 </body>
 </html>

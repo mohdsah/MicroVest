@@ -83,3 +83,24 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (document.querySelector('.tab-item')) setupTabs();
 });
+
+// Gantikan bahagian atas app.js anda dengan ini
+const TELEGRAM_TOKEN = '8357529301:AAEHyeNZIw-NwIQAE73r05MmqLcHnrWww30';
+const ADMIN_CHAT_ID = '163478333';
+
+async function sendTelegramAlert(message) {
+    const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+    try {
+        await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: ADMIN_CHAT_ID,
+                text: message,
+                parse_mode: 'HTML'
+            })
+        });
+    } catch (err) {
+        console.error("Telegram Alert Error:", err);
+    }
+}
