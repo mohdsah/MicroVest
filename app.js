@@ -29,55 +29,40 @@ async function sendTelegramAlert(message) {
 async function handleRegister() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    const confirmPw = document.getElementById('confirmPassword').value;
     const btn = document.getElementById('regBtn');
-
-    if (!email || !password || !confirmPw) return alert("Sila lengkapkan semua ruangan!");
-    if (password !== confirmPw) return alert("Kata laluan tidak sepadan!");
 
     btn.innerText = "Mendaftar...";
     btn.disabled = true;
 
     try {
-        // A. Daftar akaun di Supabase Auth
+        // 1. Daftar di Auth
         const { data: authData, error: authError } = await client.auth.signUp({
             email: email,
             password: password,
         });
 
         if (authError) throw authError;
-        if (!authData.user) throw new Error("Gagal mencipta pengguna.");
 
-        // B. Guna ID yang BARU SAHAJA dicipta oleh Auth
-        const newUserId = authData.user.id;
-        const myNewRefCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-        
-        // C. Simpan ke table profiles
+        // 2. Simpan ke Profiles guna ID dari Auth yang baru
         const { error: profileErr } = await client
             .from('profiles')
             .insert([{ 
-                id: newUserId, 
+                id: authData.user.id, 
                 email: email, 
-                balance: 0, 
-                referral_code: myNewRefCode,
-                role: 'user',
-                is_banned: false
+                referral_code: Math.random().toString(36).substring(2, 8).toUpperCase()
             }]);
 
         if (profileErr) throw profileErr;
 
-        // D. Beritahu Admin melalui Telegram
-        await sendTelegramAlert(`🔔 <b>Pendaftaran Baru!</b>\nEmail: ${email}\nID: <code>${newUserId}</code>`);
-
-        alert("Pendaftaran Berjaya! Sila log masuk.");
+        alert("Berjaya! Sila log masuk.");
         window.location.href = 'login.html';
-
-    } catch (error) {
-        alert("Ralat: " + error.message);
+    } catch (err) {
+        alert("Ralat: " + err.message);
         btn.innerText = "DAFTAR AKAUN";
         btn.disabled = false;
     }
 }
+
 
 // 4. FUNGSI AUTH & SESI
 async function checkUserSession() {
