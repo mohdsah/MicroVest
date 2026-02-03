@@ -78,17 +78,38 @@
         let financeChart;
 
         async function checkAdminAccess() {
-            const { data: { user } } = await client.auth.getUser();
-            if (!user) { window.location.href = 'login.html'; return; }
-            const { data: profile } = await client.from('profiles').select('role').eq('id', user.id).single();
-            if (profile && profile.role === 'admin') {
-                document.getElementById('adminDashboard').style.display = 'block';
-                document.getElementById('currentAdminEmail').innerText = user.email;
-                renderAllData();
-            } else {
-                alert("Akses Ditolak!"); window.location.href = 'dashboard.html';
-            }
-        }
+    // 1. Ambil sesi user yang sedang aktif
+    const { data: { session } } = await client.auth.getSession();
+    
+    if (!session) { 
+        window.location.href = 'login.html'; 
+        return; 
+    }
+
+    // 2. Ambil data role terus dari database (bukan dari cache)
+    const { data: profile, error } = await client
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .maybeSingle();
+
+    if (error) {
+        console.error("Ralat database:", error.message);
+        alert("Ralat teknikal berlaku.");
+        return;
+    }
+
+    // 3. Semak jika role benar-benar 'admin'
+    if (profile && profile.role === 'admin') {
+        document.getElementById('adminDashboard').style.display = 'block';
+        document.getElementById('currentAdminEmail').innerText = session.user.email;
+        renderAllData();
+    } else {
+        alert("Akses Ditolak! Role anda: " + (profile ? profile.role : 'Tiada'));
+        window.location.href = 'dashboard.html';
+    }
+}
+
 
         async function handleAdminLogout() { await client.auth.signOut(); window.location.href = 'login.html'; }
 
