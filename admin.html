@@ -156,8 +156,14 @@
     let usersData = [];
     let selectedUserId = null;
 
+    // 1. INISIALISASI UTAMA
     async function initAdmin() {
-        // Realtime Subscription
+        const { data: { session } } = await client.auth.getSession();
+        if (!session) {
+            window.location.href = 'login.html';
+            return;
+        }
+
         setupRealtime();
         loadStats();
         loadPending();
@@ -165,28 +171,28 @@
         initChart();
     }
 
+    // 2. REALTIME MONITORING
     function setupRealtime() {
         client.channel('any')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, payload => {
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
                 loadStats();
                 loadUsers();
             }).subscribe();
             
         client.channel('tx')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, payload => {
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => {
                 loadPending();
             }).subscribe();
     }
 
+    // 3. LOAD STATISTIK
     async function loadStats() {
         const { data: profiles } = await client.from('profiles').select('balance, total_deposit, total_withdraw');
-        
-        let totalB = 0, totalD = 0, totalW = 0;
-        profiles.forEach(p => {
-            totalB += p.balance || 0;
-            totalD += p.total_deposit || 0;
-            totalW += p.total_withdraw || 0;
-        });
+        if (!profiles) return;
+
+        let totalB = profiles.reduce((sum, p) => sum + (p.balance || 0), 0);
+        let totalD = profiles.reduce((sum, p) => sum + (p.total_deposit || 0), 0);
+        let totalW = profiles.reduce((sum, p) => sum + (p.total_withdraw || 0), 0);
 
         document.getElementById('totalDepo').innerText = `RM ${totalD.toFixed(2)}`;
         document.getElementById('totalWith').innerText = `RM ${totalW.toFixed(2)}`;
@@ -194,33 +200,70 @@
         document.getElementById('totalProfit').innerText = `RM ${totalB.toFixed(2)}`;
     }
 
+    // 4. PENGURUSAN TRANSAKSI PENDING (FIXED)
     async function loadPending() {
-        const { data: tx } = await client.from('transactions')
+        // Mengambil transaksi pending termasuk maklumat bank_account jika ada
+        const { data: tx, error } = await client.from('transactions')
             .select('*, profiles(email)')
             .eq('status', 'pending');
 
-        const container = document.getElementById('pendingQueue');
-        container.innerHTML = tx.length === 0 ? '<div style="text-align:center; padding:20px; opacity:0.3;">All protocols clear.</div>' : '';
+        if (error) console.error("Error loading TX:", error);
 
-        tx.forEach(item => {
+        const container = document.getElementById('pendingQueue');
+        container.innerHTML = (!tx || tx.length === 0) ? 
+            '<div style="text-align:center; padding:20px; opacity:0.3;">All protocols clear.</div>' : '';
+
+        tx?.forEach(item => {
+            // Nota: Pastikan kolum 'bank_account' sudah ditambah di Supabase Table Editor
+            const bankInfo = item.bank_account ? `<br><small style="color:var(--warning)">Bank: ${item.bank_account}</small>` : '';
+            
             container.innerHTML += `
                 <div class="action-row">
                     <div class="user-info">
                         <b>RM ${item.amount.toFixed(2)}</b>
-                        <span>${item.profiles.email} • ${item.type.toUpperCase()}</span>
+                        <span>${item.profiles?.email || 'Unknown'} • ${item.type.toUpperCase()} ${bankInfo}</span>
                     </div>
                     <div style="display:flex; gap:8px;">
-                        <button onclick="approveTx('${item.id}')" class="btn-action btn-approve">APPROVE</button>
+                        <button onclick="approveTx('${item.id}', '${item.user_id}', ${item.amount}, '${item.type}')" class="btn-action btn-approve">APPROVE</button>
                     </div>
                 </div>
             `;
         });
     }
 
+    // 5. FUNGSI APPROVE (NEW LOGIC)
+    async function approveTx(txId, userId, amount, type) {
+        if (!confirm("Sahkan kelulusan transaksi ini?")) return;
+
+        try {
+            // A. Update status transaksi
+            const { error: txError } = await client.from('transactions')
+                .update({ status: 'completed' })
+                .eq('id', txId);
+            if (txError) throw txError;
+
+            // B. Jika DEPOSIT, tambah baki user. Jika WITHDRAW, baki biasanya sudah ditolak semasa request.
+            if (type.toLowerCase() === 'deposit') {
+                const { data: profile } = await client.from('profiles').select('balance, total_deposit').eq('id', userId).single();
+                await client.from('profiles').update({ 
+                    balance: (profile.balance || 0) + amount,
+                    total_deposit: (profile.total_deposit || 0) + amount
+                }).eq('id', userId);
+            }
+
+            alert("Transaksi berjaya diluluskan!");
+            loadPending();
+            loadStats();
+        } catch (err) {
+            alert("Ralat: " + err.message);
+        }
+    }
+
+    // 6. DIRECTORY & SEARCH (FIXED)
     async function loadUsers() {
         const { data } = await client.from('profiles').select('*').order('created_at', { ascending: false });
-        usersData = data;
-        renderUsers(data);
+        usersData = data || [];
+        renderUsers(usersData);
     }
 
     function renderUsers(list) {
@@ -239,6 +282,16 @@
         });
     }
 
+    function filterUsers() {
+        const query = document.getElementById('searchUser').value.toLowerCase();
+        const filtered = usersData.filter(u => 
+            u.email.toLowerCase().includes(query) || 
+            (u.referral_code && u.referral_code.toLowerCase().includes(query))
+        );
+        renderUsers(filtered);
+    }
+
+    // 7. EDIT MODAL LOGIC
     function openEdit(id, email, balance) {
         selectedUserId = id;
         document.getElementById('editNodeId').innerText = email;
@@ -249,14 +302,18 @@
     function closeModal() { document.getElementById('editModal').style.display = 'none'; }
 
     async function saveUser() {
-        const bal = document.getElementById('newBalance').value;
+        const bal = parseFloat(document.getElementById('newBalance').value);
         const { error } = await client.from('profiles').update({ balance: bal }).eq('id', selectedUserId);
         if(!error) {
+            alert("Node berjaya dikemaskini.");
             closeModal();
             loadUsers();
+        } else {
+            alert("Ralat: " + error.message);
         }
     }
 
+    // 8. CHART & LOGOUT
     function initChart() {
         const ctx = document.getElementById('adminChart').getContext('2d');
         new Chart(ctx, {
@@ -286,5 +343,6 @@
 
     window.onload = initAdmin;
 </script>
+
 </body>
 </html>
