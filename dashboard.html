@@ -73,36 +73,70 @@
 
     <script src="app.js"></script>
     <script>
-        async function loadDashboard() {
-            const { data: { user } } = await client.auth.getUser();
-            if (!user) {
-                window.location.href = 'login.html';
-                return;
-            }
-
-            document.getElementById('userEmail').innerText = user.email.split('@')[0].toUpperCase();
-
-            // 1. Ambil data baki awal
-            fetchBalance(user.id);
-
-            // 2. SISTEM REAL-TIME: Dengar perubahan pada table profiles
-            client
-                .channel('public:profiles')
-                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` }, payload => {
-                    console.log('Baki dikemaskini secara live!');
-                    document.getElementById('userBalance').innerText = `RM ${payload.new.balance.toFixed(2)}`;
-                })
-                .subscribe();
+    async function loadDashboard() {
+        const { data: { user } } = await client.auth.getUser();
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
         }
 
-        async function fetchBalance(uid) {
-            const { data: profile } = await client.from('profiles').select('balance').eq('id', uid).single();
-            if (profile) {
-                document.getElementById('userBalance').innerText = `RM ${profile.balance.toFixed(2)}`;
-            }
-        }
+        // Papar nama ringkas dari emel
+        document.getElementById('userEmail').innerText = user.email.split('@')[0].toUpperCase();
 
-        window.onload = loadDashboard;
-    </script>
+        // 1. Ambil baki & pelaburan
+        fetchBalance(user.id);
+        fetchInvestments(user.id);
+
+        // 2. Real-time Baki
+        client
+            .channel('public:profiles')
+            .on('postgres_changes', { 
+                event: 'UPDATE', 
+                schema: 'public', 
+                table: 'profiles', 
+                filter: `id=eq.${user.id}` 
+            }, payload => {
+                document.getElementById('userBalance').innerText = `RM ${payload.new.balance.toFixed(2)}`;
+            })
+            .subscribe();
+    }
+
+    async function fetchBalance(uid) {
+        const { data: profile } = await client.from('profiles').select('balance').eq('id', uid).single();
+        if (profile) {
+            document.getElementById('userBalance').innerText = `RM ${profile.balance.toFixed(2)}`;
+        }
+    }
+
+    async function fetchInvestments(uid) {
+        const { data: invests, error } = await client
+            .from('user_investments')
+            .select('*')
+            .eq('user_id', uid)
+            .eq('status', 'active');
+
+        const container = document.getElementById('activeInvestments');
+
+        if (invests && invests.length > 0) {
+            container.innerHTML = ''; // Kosongkan placeholder "Tiada pelaburan"
+            invests.forEach(inv => {
+                container.innerHTML += `
+                    <div style="background: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                        <div>
+                            <h4 style="margin: 0; font-size: 14px;">${inv.product_name}</h4>
+                            <small style="color: #64748b;">Untung: RM ${inv.daily_profit.toFixed(2)} / hari</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="background: #ecfdf5; color: #059669; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: bold;">AKTIF</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    }
+
+    window.onload = loadDashboard;
+</script>
+
 </body>
 </html>
