@@ -79,6 +79,14 @@
             window.location.href = 'login.html';
             return;
         }
+        
+        const { data: profile } = await client.from('profiles').select('role').eq('id', user.id).single();
+
+if (profile.role === 'admin') {
+    alert("Selamat datang, Bos! Anda adalah Admin.");
+    // Anda boleh paparkan butang "Admin Panel" di sini jika mahu
+}
+
 
         // Papar nama ringkas dari emel
         document.getElementById('userEmail').innerText = user.email.split('@')[0].toUpperCase();
