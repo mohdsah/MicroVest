@@ -93,7 +93,7 @@
         async function handleAdminLogout() { await client.auth.signOut(); window.location.href = 'login.html'; }
 
         async function renderAllData() {
-            const { count: uCount } = await client.from('profiles').select('*', { count: 'exact', head: true });
+            const { count: uCount } = await client.from('profiles').select('id', { count: 'exact', head: true });
             const { data: dep } = await client.from('recharges').select('*');
             const { data: wit } = await client.from('withdrawals').select('*');
             
