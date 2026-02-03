@@ -53,40 +53,71 @@
         </nav>
     </div>
 
-    <script src="app.js"></script>
+        <script src="app.js"></script>
     <script>
         let fullLink = "";
 
         async function initInvitation() {
             const { data: { user } } = await client.auth.getUser();
-            if (!user) return;
+            if (!user) return window.location.href = 'login.html';
 
-            // Kita guna 6 digit terakhir ID user sebagai kod
-            const shortCode = user.id.substring(0, 6).toUpperCase();
-            document.getElementById('refCode').innerText = shortCode;
+            try {
+                // 1. Ambil kod rujukan sebenar dari database
+                const { data: profile, error } = await client
+                    .from('profiles')
+                    .select('referral_code')
+                    .eq('id', user.id)
+                    .single();
 
-            // Bina URL pautan rujukan
-            fullLink = `${window.location.origin}/register.html?ref=${shortCode}`;
+                if (error) throw error;
 
-            // Jana QR Code
-            new QRCode(document.getElementById("qrcode"), {
-                text: fullLink,
-                width: 160,
-                height: 160
-            });
+                const myCode = profile.referral_code || "TIADA";
+                document.getElementById('refCode').innerText = myCode;
+
+                // 2. Bina URL pautan rujukan (Pastikan point ke register.html)
+                fullLink = `${window.location.origin}/register.html?ref=${myCode}`;
+
+                // 3. Jana QR Code secara dinamik
+                const qrContainer = document.getElementById("qrcode");
+                qrContainer.innerHTML = ""; // Bersihkan placeholder
+                
+                new QRCode(qrContainer, {
+                    text: fullLink,
+                    width: 180,
+                    height: 180,
+                    colorDark: "#800000", // Warna merah mengikut tema anda
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+            } catch (err) {
+                console.error("Gagal menjana QR:", err.message);
+                document.getElementById('refCode').innerText = "RALAT";
+            }
         }
 
         function copyLink() {
+            if (!fullLink) return;
             navigator.clipboard.writeText(fullLink);
-            alert("Pautan rujukan telah disalin!");
+            
+            // UI Feedback yang lebih cantik daripada alert biasa
+            const btn = document.querySelector('.btn-copy');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> DISALIN!';
+            setTimeout(() => { btn.innerHTML = originalText; }, 2000);
         }
 
         function shareWhatsapp() {
-            const text = encodeURIComponent(`Jom buat duit sampingan dengan MicroVest! Daftar sekarang menggunakan pautan saya: ${fullLink}`);
+            const text = encodeURIComponent(
+                `🚀 *Peluang Pendapatan Pasif MicroVest*\n\n` +
+                `Jom mula melabur dan jana keuntungan harian secara automatik. Daftar sekarang melalui pautan saya:\n\n` +
+                `${fullLink}`
+            );
             window.open(`https://wa.me/?text=${text}`);
         }
 
-        window.onload = initInvitation;
+        document.addEventListener('DOMContentLoaded', initInvitation);
     </script>
+
 </body>
 </html>
