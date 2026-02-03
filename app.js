@@ -1,6 +1,6 @@
 // 1. KONFIGURASI SUPABASE
 const SUPABASE_URL = 'https://mgvjwgbjccgsjkjhddru.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Gunakan key anda
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ndmp3Z2JqY2Nnc2pramhkZHJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwMzQxNzcsImV4cCI6MjA4NTYxMDE3N30.JJ03f7HO4bKiCF2g0eY3HzrT2KHKUzjpYgBALYHeYa0'; // Gunakan key anda
 
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
