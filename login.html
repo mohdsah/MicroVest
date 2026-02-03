@@ -105,52 +105,69 @@
 
     <script src="app.js"></script>
     <script>
-        async function handleLogin() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const btn = document.getElementById('loginBtn');
+    async function handleLogin() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const btn = document.getElementById('loginBtn');
 
-            if (!email || !password) return alert("Sila isi semua ruangan.");
+        if (!email || !password) return alert("Sila isi semua ruangan.");
 
-            btn.innerText = "Log Masuk...";
-            btn.disabled = true;
+        btn.innerText = "Log Masuk...";
+        btn.disabled = true;
 
-            try {
-                // 1. Login ke Supabase Auth
-                const { data, error } = await client.auth.signInWithPassword({ email, password });
-                if (error) throw error;
+        try {
+            // 1. Login ke Supabase Auth
+            const { data, error } = await client.auth.signInWithPassword({ email, password });
+            if (error) throw error;
 
-                // 2. Ambil data Profile untuk check Role dan Status Banned
-                const { data: profile, error: profileErr } = await client
+            // 2. Ambil data Profile
+            let { data: profile, error: profileErr } = await client
+                .from('profiles')
+                .select('*')
+                .eq('id', data.user.id)
+                .single();
+
+            // FIX: Jika profil tidak wujud, cipta satu sekarang!
+            if (profileErr || !profile) {
+                console.log("Profil tiada, sedang mencipta profil baru...");
+                const { data: newProfile, error: createErr } = await client
                     .from('profiles')
-                    .select('role, is_banned')
-                    .eq('id', data.user.id)
+                    .insert([{ 
+                        id: data.user.id, 
+                        email: email, 
+                        balance: 0,
+                        role: 'user'
+                    }])
+                    .select()
                     .single();
-
-                if (profileErr) throw new Error("Gagal memuatkan data profil.");
-
-                // 3. Check jika kena Banned
-                if (profile.is_banned) {
-                    alert("Akaun anda telah disekat. Sila hubungi Admin.");
-                    await client.auth.signOut();
-                    window.location.reload();
-                    return;
-                }
-
-                // 4. Logik Hala Tuju (Redirect)
-                if (profile.role === 'admin') {
-                    const goAdmin = confirm("Selamat kembali Boss! Adakah anda mahu masuk ke Panel Admin?\n\n(Klik 'OK' untuk Admin Panel, 'Cancel' untuk Dashboard Pelaburan)");
-                    window.location.href = goAdmin ? 'admin.html' : 'dashboard.html';
-                } else {
-                    window.location.href = 'dashboard.html';
-                }
-
-            } catch (err) {
-                alert("Ralat: " + err.message);
-                btn.innerText = "LOG MASUK";
-                btn.disabled = false;
+                
+                if (createErr) throw new Error("Gagal mencipta data profil automatik.");
+                profile = newProfile;
             }
+
+            // 3. Check jika kena Banned
+            if (profile.is_banned) {
+                alert("Akaun anda telah disekat. Sila hubungi Admin.");
+                await client.auth.signOut();
+                window.location.reload();
+                return;
+            }
+
+            // 4. Redirect
+            if (profile.role === 'admin') {
+                const goAdmin = confirm("Selamat kembali Boss! Masuk ke Panel Admin?");
+                window.location.href = goAdmin ? 'admin.html' : 'dashboard.html';
+            } else {
+                window.location.href = 'dashboard.html';
+            }
+
+        } catch (err) {
+            alert("Ralat: " + err.message);
+            btn.innerText = "LOG MASUK";
+            btn.disabled = false;
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
