@@ -1,422 +1,290 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Elite Panel - MicroVest</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MicroVest | Quantum-Commander v10.0</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { 
+            --accent: #00ff88; 
+            --warning: #fbbf24;
+            --danger: #ff4d4d;
+            --primary: #800000; 
+            --dark-deep: #020617;
+            --card-bg: rgba(15, 23, 42, 0.8);
+        }
 
-<style>
-:root { --primary:#800000; --secondary:#0f172a; --accent:#fbbf24; }
+        body { 
+            margin:0; background: var(--dark-deep); font-family: 'Plus Jakarta Sans', sans-serif; 
+            color: #f8fafc; -webkit-font-smoothing: antialiased; padding-bottom: 50px;
+        }
 
-body {
-  background:#f8fafc;
-  font-family:'Inter',sans-serif;
-  margin:0;
-}
+        /* COMMAND HEADER */
+        .admin-nav {
+            background: linear-gradient(to bottom, #1e293b, var(--dark-deep));
+            padding: 25px 20px; border-bottom: 1px solid rgba(255,255,255,0.05);
+            position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(15px);
+        }
 
-/* Loader */
-#loader{
- position:fixed; top:0; left:0; width:100%; height:100%;
- background:rgba(0,0,0,0.7);
- display:none;
- align-items:center; justify-content:center;
- color:white; font-size:18px;
- z-index:9999;
-}
+        /* GRID STATS v10 */
+        .grid-stats { 
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 20px; 
+        }
+        .stat-card {
+            background: var(--card-bg); padding: 20px; border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.03); position: relative; overflow: hidden;
+        }
+        .stat-card::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px;
+            background: var(--primary); opacity: 0.5;
+        }
+        .stat-card small { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: #94a3b8; }
+        .stat-card h2 { margin: 8px 0 0; font-size: 18px; font-weight: 800; color: var(--accent); }
 
-/* Layout */
-#adminDashboard{display:none; padding:20px;}
+        /* LIVE TERMINAL SECTION */
+        .section-label { padding: 10px 25px; font-size: 11px; font-weight: 800; color: var(--accent); letter-spacing: 2px; }
+        
+        .action-row {
+            background: rgba(255,255,255,0.02); margin: 0 20px 10px; padding: 18px;
+            border-radius: 20px; display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid rgba(255,255,255,0.03); transition: 0.3s;
+        }
+        .action-row:hover { background: rgba(255,255,255,0.05); transform: translateX(5px); }
 
-.header-pro{
- background:var(--secondary);
- color:white;
- padding:25px;
- border-radius:20px;
- margin-bottom:25px;
- display:flex;
- justify-content:space-between;
- align-items:center;
-}
+        /* USER CHIP */
+        .user-info b { font-size: 14px; display: block; }
+        .user-info span { font-size: 10px; color: #64748b; }
 
-.grid-stats{
- display:grid;
- grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
- gap:15px;
- margin-bottom:25px;
-}
+        /* PULSING DOT */
+        .live-dot {
+            width: 8px; height: 8px; background: var(--accent); border-radius: 50%;
+            display: inline-block; margin-right: 5px; animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-.card-stat{
- background:white;
- padding:20px;
- border-radius:18px;
- border-left:5px solid var(--primary);
- box-shadow:0 4px 12px rgba(0,0,0,0.03);
-}
+        /* BUTTONS */
+        .btn-action {
+            padding: 10px 16px; border-radius: 12px; border: none; font-weight: 700;
+            font-size: 11px; cursor: pointer; transition: 0.2s;
+        }
+        .btn-approve { background: var(--accent); color: #000; }
+        .btn-reject { background: rgba(255, 77, 77, 0.1); color: var(--danger); border: 1px solid var(--danger); }
 
-.chart-container, .list-container{
- background:white;
- padding:20px;
- border-radius:20px;
- margin-bottom:20px;
- box-shadow:0 4px 12px rgba(0,0,0,0.03);
-}
+        /* MODAL */
+        .modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 10000;
+        }
+        .modal-content {
+            background: #1e293b; width: 90%; max-width: 400px; padding: 30px; border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
 
-.item-row{
- display:flex;
- justify-content:space-between;
- align-items:center;
- padding:15px;
- border-bottom:1px solid #f1f5f9;
-}
-
-.btn-status{
- padding:8px 12px;
- border-radius:8px;
- border:none;
- font-weight:600;
- cursor:pointer;
- font-size:11px;
- margin-left:5px;
-}
-</style>
+        .search-bar {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            color: white; padding: 15px; border-radius: 15px; width: 100%; box-sizing: border-box; margin-bottom: 20px;
+        }
+    </style>
 </head>
-
 <body>
 
-<div id="loader">⏳ Memproses data...</div>
-
-<div id="adminDashboard">
-
-<div class="header-pro">
- <div>
-  <h2 style="margin:0;">MicroVest HQ</h2>
-  <small id="currentAdminEmail" style="color:var(--accent)"></small>
- </div>
- <button onclick="handleAdminLogout()" class="btn-status" style="background:#ef4444;color:white;">LOGOUT</button>
+<div class="admin-nav">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <span style="font-size: 10px; letter-spacing: 2px; color: var(--accent); font-weight: bold;">COMMANDER MODE</span>
+            <h3 style="margin: 5px 0 0; font-weight: 800;">MicroVest Terminal</h3>
+        </div>
+        <button onclick="handleLogout()" class="btn-action btn-reject">OFFLINE</button>
+    </div>
 </div>
 
 <div class="grid-stats">
- <div class="card-stat"><small>Untung Bersih</small><h3 id="netProfit" style="color:var(--primary)">RM 0</h3></div>
- <div class="card-stat" style="border-color:#10b981"><small>Total User</small><h3 id="totalUsersCount">0</h3></div>
- <div class="card-stat" style="border-color:#3b82f6"><small>Depo Sukses</small><h3 id="totalDepDone">RM 0</h3></div>
- <div class="card-stat" style="border-color:#f59e0b"><small>Pending Task</small><h3 id="totalPending">0</h3></div>
+    <div class="stat-card">
+        <small>Total Deposits</small>
+        <h2 id="totalDepo">RM 0.00</h2>
+    </div>
+    <div class="stat-card">
+        <small>Pending Payouts</small>
+        <h2 id="totalWith" style="color: var(--warning);">RM 0.00</h2>
+    </div>
+    <div class="stat-card">
+        <small>Network Nodes</small>
+        <h2 id="totalUsers">0</h2>
+    </div>
+    <div class="stat-card">
+        <small>System Revenue</small>
+        <h2 id="totalProfit">RM 0.00</h2>
+    </div>
 </div>
 
-<div class="chart-container">
-<h4><i class="fas fa-chart-line"></i> Aliran Tunai</h4>
-<canvas id="financeChart" height="100"></canvas>
+<div class="section-label"><i class="fas fa-chart-area"></i> FLOW ANALYSIS</div>
+<div style="margin: 0 20px 25px; background: var(--card-bg); padding: 20px; border-radius: 25px;">
+    <canvas id="adminChart" height="180"></canvas>
 </div>
 
-<div class="list-container">
-<h4><i class="fas fa-history"></i> Aktiviti Terkini</h4>
-<div id="recentLogs">Memuatkan rekod...</div>
+<div class="section-label"><div class="live-dot"></div> PENDING PROTOCOLS</div>
+<div id="pendingQueue">
+    <div style="text-align: center; padding: 40px; opacity: 0.5; font-size: 12px;">Monitoring stream...</div>
 </div>
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
- <div class="list-container">
-  <h4><i class="fas fa-arrow-down" style="color:#10b981"></i> Deposit Pending</h4>
-  <div id="depositList"></div>
- </div>
-
- <div class="list-container">
-  <h4><i class="fas fa-arrow-up" style="color:#ef4444"></i> Withdraw Pending</h4>
-  <div id="withdrawList"></div>
- </div>
+<div class="section-label">NODE DIRECTORY</div>
+<div style="padding: 0 20px;">
+    <input type="text" class="search-bar" id="searchUser" placeholder="Search Node ID or Email..." oninput="filterUsers()">
+    <div id="userDirectory"></div>
 </div>
 
-<div class="list-container" style="margin-top:20px;">
-<h4><i class="fas fa-user-friends"></i> Pengurusan Pengguna</h4>
-<input id="searchUser" placeholder="Cari email..." oninput="filterUsers()" 
-style="width:100%;padding:10px;border-radius:12px;margin-bottom:10px;">
-<div id="userList"></div>
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <h3 id="editNodeId" style="margin-top: 0;">Edit Node</h3>
+        <label style="font-size: 10px; color: #64748b;">CREDIT BALANCE (RM)</label>
+        <input type="number" id="newBalance" class="search-bar" style="margin-top: 10px;">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button class="btn-action btn-approve" onclick="saveUser()">UPDATE</button>
+            <button class="btn-action btn-reject" onclick="closeModal()">CANCEL</button>
+        </div>
+    </div>
 </div>
 
-</div>
-
+<script src="app.js"></script>
 <script>
-const SUPABASE_URL = 'https://mwnowiracticxrlfsrin.supabase.co';
-const SUPABASE_KEY = 'YOUR_PUBLIC_ANON_KEY';   // <-- LETAK KEY ANDA DI SINI
-const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let usersData = [];
+    let selectedUserId = null;
 
-let financeChart;
-let allUsers = [];
+    async function initAdmin() {
+        // Realtime Subscription
+        setupRealtime();
+        loadStats();
+        loadPending();
+        loadUsers();
+        initChart();
+    }
 
-function showLoader(){ document.getElementById('loader').style.display='flex'; }
-function hideLoader(){ document.getElementById('loader').style.display='none'; }
+    function setupRealtime() {
+        client.channel('any')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, payload => {
+                loadStats();
+                loadUsers();
+            }).subscribe();
+            
+        client.channel('tx')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, payload => {
+                loadPending();
+            }).subscribe();
+    }
 
-async function logAdmin(action){
- const {data:{session}} = await client.auth.getSession();
- await client.from('admin_logs').insert({
-  admin_id: session.user.id,
-  action: action
- });
-}
+    async function loadStats() {
+        const { data: profiles } = await client.from('profiles').select('balance, total_deposit, total_withdraw');
+        
+        let totalB = 0, totalD = 0, totalW = 0;
+        profiles.forEach(p => {
+            totalB += p.balance || 0;
+            totalD += p.total_deposit || 0;
+            totalW += p.total_withdraw || 0;
+        });
 
-async function checkAdminAccess(){
- const {data:{session}} = await client.auth.getSession();
- if(!session){ window.location.href='login.html'; return; }
+        document.getElementById('totalDepo').innerText = `RM ${totalD.toFixed(2)}`;
+        document.getElementById('totalWith').innerText = `RM ${totalW.toFixed(2)}`;
+        document.getElementById('totalUsers').innerText = profiles.length;
+        document.getElementById('totalProfit').innerText = `RM ${totalB.toFixed(2)}`;
+    }
 
- const {data:profile} = await client
- .from('profiles')
- .select('role')
- .eq('id', session.user.id)
- .maybeSingle();
+    async function loadPending() {
+        const { data: tx } = await client.from('transactions')
+            .select('*, profiles(email)')
+            .eq('status', 'pending');
 
- if(profile?.role === 'admin'){
-  document.getElementById('adminDashboard').style.display='block';
-  document.getElementById('currentAdminEmail').innerText = session.user.email;
-  renderAllData();
- } else {
-  alert("Akses Ditolak!");
-  window.location.href='dashboard.html';
- }
-}
+        const container = document.getElementById('pendingQueue');
+        container.innerHTML = tx.length === 0 ? '<div style="text-align:center; padding:20px; opacity:0.3;">All protocols clear.</div>' : '';
 
-async function handleAdminLogout(){
- await client.auth.signOut();
- window.location.href='login.html';
-}
+        tx.forEach(item => {
+            container.innerHTML += `
+                <div class="action-row">
+                    <div class="user-info">
+                        <b>RM ${item.amount.toFixed(2)}</b>
+                        <span>${item.profiles.email} • ${item.type.toUpperCase()}</span>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button onclick="approveTx('${item.id}')" class="btn-action btn-approve">APPROVE</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
 
-async function renderAllData(){
- showLoader();
+    async function loadUsers() {
+        const { data } = await client.from('profiles').select('*').order('created_at', { ascending: false });
+        usersData = data;
+        renderUsers(data);
+    }
 
- const {count:uCount} = await client.from('profiles')
- .select('id',{count:'exact',head:true});
+    function renderUsers(list) {
+        const container = document.getElementById('userDirectory');
+        container.innerHTML = '';
+        list.forEach(u => {
+            container.innerHTML += `
+                <div class="action-row" onclick="openEdit('${u.id}', '${u.email}', ${u.balance})">
+                    <div class="user-info">
+                        <b>${u.email}</b>
+                        <span>Bal: RM ${u.balance.toFixed(2)} • Code: ${u.referral_code}</span>
+                    </div>
+                    <i class="fas fa-chevron-right" style="opacity:0.2;"></i>
+                </div>
+            `;
+        });
+    }
 
- const {data:dep} = await client.from('recharges').select('*');
- const {data:wit} = await client.from('withdrawals').select('*');
+    function openEdit(id, email, balance) {
+        selectedUserId = id;
+        document.getElementById('editNodeId').innerText = email;
+        document.getElementById('newBalance').value = balance;
+        document.getElementById('editModal').style.display = 'flex';
+    }
 
- const totalDep = dep.filter(x=>x.status==='success')
-  .reduce((a,b)=>a+parseFloat(b.amount),0);
+    function closeModal() { document.getElementById('editModal').style.display = 'none'; }
 
- const totalWit = wit.filter(x=>x.status==='success')
-  .reduce((a,b)=>a+parseFloat(b.amount),0);
+    async function saveUser() {
+        const bal = document.getElementById('newBalance').value;
+        const { error } = await client.from('profiles').update({ balance: bal }).eq('id', selectedUserId);
+        if(!error) {
+            closeModal();
+            loadUsers();
+        }
+    }
 
- const pendingCount =
-  dep.filter(x=>x.status==='pending').length +
-  wit.filter(x=>x.status==='pending').length;
+    function initChart() {
+        const ctx = document.getElementById('adminChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['01', '02', '03', '04', '05', '06'],
+                datasets: [{
+                    label: 'Deposit Flow',
+                    data: [1200, 1900, 3000, 2500, 4200, 3800],
+                    borderColor: '#00ff88',
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(0, 255, 136, 0.05)'
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: { x: { grid: { display: false } }, y: { display: false } }
+            }
+        });
+    }
 
- document.getElementById('totalUsersCount').innerText = uCount;
- document.getElementById('totalDepDone').innerText = `RM ${totalDep.toFixed(2)}`;
- document.getElementById('netProfit').innerText =
-  `RM ${(totalDep-totalWit).toFixed(2)}`;
- document.getElementById('totalPending').innerText = pendingCount;
+    async function handleLogout() {
+        await client.auth.signOut();
+        window.location.href = 'login.html';
+    }
 
- updateChart(totalDep,totalWit);
- await loadLists();
- await loadLogs();
-
- hideLoader();
-}
-
-function updateChart(dep,wit){
- const ctx = document.getElementById('financeChart').getContext('2d');
- if(financeChart) financeChart.destroy();
-
- financeChart = new Chart(ctx,{
-  type:'bar',
-  data:{
-   labels:['Deposit','Withdraw'],
-   datasets:[{
-    data:[dep,wit],
-    backgroundColor:['#10b981','#ef4444'],
-    borderRadius:10
-   }]
-  },
-  options:{responsive:true, scales:{y:{beginAtZero:true}}}
- });
-}
-
-async function loadLogs(){
- const {data:logs} = await client
- .from('transactions')
- .select('*, profiles(email)')
- .order('created_at',{ascending:false})
- .limit(10);
-
- document.getElementById('recentLogs').innerHTML =
- logs.map(l=>`
- <div style="display:flex;justify-content:space-between;padding:8px 0">
-  <span><b>${l.profiles?.email}</b>: ${l.description}</span>
-  <b style="color:${l.type==='withdraw'?'#ef4444':'#10b981'}">
-   ${l.type==='withdraw'?'-':'+'} RM ${l.amount.toFixed(2)}
-  </b>
- </div>
- `).join('') || 'Tiada rekod.';
-}
-
-async function loadLists(){
- const {data:dList} = await client.from('recharges')
- .select('*, profiles(email)')
- .eq('status','pending');
-
- document.getElementById('depositList').innerHTML =
- dList.map(i=>`
- <div class="item-row">
-  <span>${i.profiles?.email}<br><b>RM ${i.amount}</b></span>
-  <button class="btn-status" style="background:#10b981;color:white"
-   onclick="approveDep('${i.id}','${i.user_id}',${i.amount})">
-   APPROVE
-  </button>
- </div>
- `).join('') || '<small>Tiada pending</small>';
-
- const {data:wList} = await client.from('withdrawals')
- .select('*, profiles(email)')
- .eq('status','pending');
-
- document.getElementById('withdrawList').innerHTML =
- wList.map(i=>`
- <div class="item-row">
-  <span>${i.profiles?.email}<br><b>RM ${i.amount}</b></span>
-  <button class="btn-status" style="background:#ef4444;color:white"
-   onclick="approveWit('${i.id}','${i.user_id}',${i.amount})">
-   PAID
-  </button>
- </div>
- `).join('') || '<small>Tiada pending</small>';
-
- const {data:uList} = await client.from('profiles')
- .select('*')
- .order('created_at',{ascending:false});
-
- allUsers = uList;
- displayUsers(uList);
-}
-
-function displayUsers(list){
- document.getElementById('userList').innerHTML = list.map(u=>`
- <div class="item-row">
-  <span>${u.email} ${u.is_banned?'🔴':'🟢'}<br>
-  <b>RM ${u.balance.toFixed(2)}</b></span>
-  <div>
-   <button onclick="editBal('${u.id}',${u.balance})"
-    class="btn-status" style="background:#3b82f6;color:white">EDIT</button>
-
-   <button onclick="toggleBan('${u.id}',${u.is_banned})"
-    class="btn-status"
-    style="background:${u.is_banned?'#10b981':'#ef4444'};color:white">
-    ${u.is_banned?'UNBAN':'BAN'}
-   </button>
-  </div>
- </div>
- `).join('');
-}
-
-function filterUsers(){
- const q = document.getElementById('searchUser').value.toLowerCase();
- const filtered = allUsers.filter(u =>
-  u.email.toLowerCase().includes(q)
- );
- displayUsers(filtered);
-}
-
-async function approveDep(id,uid,amt){
- if(!confirm("Luluskan deposit RM "+amt+"?")) return;
- showLoader();
-
- const {data:check} = await client.from('recharges')
- .select('status')
- .eq('id',id)
- .single();
-
- if(check.status!=='pending'){
-  alert("Sudah diproses!");
-  hideLoader();
-  return;
- }
-
- const {data:userProfile} = await client.from('profiles')
- .select('balance, invited_by')
- .eq('id',uid)
- .single();
-
- await client.from('profiles')
- .update({balance:(userProfile.balance||0)+parseFloat(amt)})
- .eq('id',uid);
-
- await client.from('transactions').insert({
-  user_id:uid,
-  amount:amt,
-  type:'deposit',
-  description:'Deposit disahkan'
- });
-
- if(userProfile.invited_by){
-  const bonus = amt*0.10;
-  const {data:upline} = await client.from('profiles')
-   .select('balance')
-   .eq('id',userProfile.invited_by)
-   .single();
-
-  if(upline){
-   await client.from('profiles')
-    .update({balance:upline.balance+bonus})
-    .eq('id',userProfile.invited_by);
-
-   await client.from('transactions').insert({
-    user_id:userProfile.invited_by,
-    amount:bonus,
-    type:'bonus',
-    description:'Bonus referral'
-   });
-  }
- }
-
- await client.from('recharges')
- .update({status:'success'})
- .eq('id',id);
-
- await logAdmin("Approved deposit RM "+amt);
- await renderAllData();
- hideLoader();
-}
-
-async function approveWit(id,uid,amt){
- if(!confirm("Tanda sebagai sudah dibayar?")) return;
- showLoader();
-
- await client.from('withdrawals')
- .update({status:'success'})
- .eq('id',id);
-
- await client.from('transactions').insert({
-  user_id:uid,
-  amount:amt,
-  type:'withdraw',
-  description:'Pengeluaran berjaya'
- });
-
- await logAdmin("Paid withdrawal RM "+amt);
- await renderAllData();
- hideLoader();
-}
-
-async function toggleBan(uid,current){
- if(confirm("Tukar status sekatan user?")){
-  await client.from('profiles')
-   .update({is_banned:!current})
-   .eq('id',uid);
-  await renderAllData();
- }
-}
-
-async function editBal(id,old){
- const n = prompt("Baki baru:",old);
- if(n!==null){
-  await client.from('profiles')
-   .update({balance:parseFloat(n)})
-   .eq('id',id);
-  await renderAllData();
- }
-}
-
-document.addEventListener('DOMContentLoaded',checkAdminAccess);
+    window.onload = initAdmin;
 </script>
 </body>
 </html>
