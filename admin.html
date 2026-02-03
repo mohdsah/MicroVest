@@ -1,188 +1,422 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MicroVest Elite Admin</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root { --admin-red: #800000; --dark-bg: #0f172a; --glass: rgba(255, 255, 255, 0.95); }
-        body { background: #f1f5f9; font-family: 'Poppins', sans-serif; margin: 0; color: #1e293b; }
-        
-        /* Layout */
-        .sidebar-nav { background: var(--dark-bg); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--admin-red); }
-        .main-content { padding: 20px; max-width: 1200px; margin: auto; }
-        
-        /* Dashboard Cards */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .stat-card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border-top: 4px solid var(--admin-red); }
-        .stat-card h3 { font-size: 24px; margin: 5px 0; color: var(--dark-bg); }
-        .stat-card small { text-transform: uppercase; color: #64748b; font-size: 11px; letter-spacing: 1px; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Elite Panel - MicroVest</title>
 
-        /* Tables & Lists */
-        .data-section { background: white; border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #e2e8f0; }
-        .btn { padding: 8px 16px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; font-size: 12px; }
-        .btn-blue { background: #3b82f6; color: white; }
-        .btn-green { background: #10b981; color: white; }
-        .btn-red { background: #ef4444; color: white; }
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        /* Pop-up Modal */
-        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; }
-        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    </style>
+<style>
+:root { --primary:#800000; --secondary:#0f172a; --accent:#fbbf24; }
+
+body {
+  background:#f8fafc;
+  font-family:'Inter',sans-serif;
+  margin:0;
+}
+
+/* Loader */
+#loader{
+ position:fixed; top:0; left:0; width:100%; height:100%;
+ background:rgba(0,0,0,0.7);
+ display:none;
+ align-items:center; justify-content:center;
+ color:white; font-size:18px;
+ z-index:9999;
+}
+
+/* Layout */
+#adminDashboard{display:none; padding:20px;}
+
+.header-pro{
+ background:var(--secondary);
+ color:white;
+ padding:25px;
+ border-radius:20px;
+ margin-bottom:25px;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+}
+
+.grid-stats{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+ gap:15px;
+ margin-bottom:25px;
+}
+
+.card-stat{
+ background:white;
+ padding:20px;
+ border-radius:18px;
+ border-left:5px solid var(--primary);
+ box-shadow:0 4px 12px rgba(0,0,0,0.03);
+}
+
+.chart-container, .list-container{
+ background:white;
+ padding:20px;
+ border-radius:20px;
+ margin-bottom:20px;
+ box-shadow:0 4px 12px rgba(0,0,0,0.03);
+}
+
+.item-row{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ padding:15px;
+ border-bottom:1px solid #f1f5f9;
+}
+
+.btn-status{
+ padding:8px 12px;
+ border-radius:8px;
+ border:none;
+ font-weight:600;
+ cursor:pointer;
+ font-size:11px;
+ margin-left:5px;
+}
+</style>
 </head>
+
 <body>
 
-<div id="loadingOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:10000; display:flex; align-items:center; justify-content:center;">
-    <h3>Sila Tunggu...</h3>
+<div id="loader">⏳ Memproses data...</div>
+
+<div id="adminDashboard">
+
+<div class="header-pro">
+ <div>
+  <h2 style="margin:0;">MicroVest HQ</h2>
+  <small id="currentAdminEmail" style="color:var(--accent)"></small>
+ </div>
+ <button onclick="handleAdminLogout()" class="btn-status" style="background:#ef4444;color:white;">LOGOUT</button>
 </div>
 
-<div id="adminPanel" style="display:none;">
-    <div class="sidebar-nav">
-        <div><i class="fas fa-user-shield"></i> MICROVEST HQ</div>
-        <div id="adminMail" style="font-size:12px; opacity:0.8;"></div>
-        <button onclick="logout()" class="btn btn-red">KELUAR</button>
-    </div>
-
-    <div class="main-content">
-        <div class="stats-grid">
-            <div class="stat-card"><small>Baki Keseluruhan</small><h3 id="statProfit">RM 0</h3></div>
-            <div class="stat-card"><small>Ahli Berdaftar</small><h3 id="statUsers">0</h3></div>
-            <div class="stat-card"><small>Depo Pending</small><h3 id="statDepo" style="color:#f59e0b">0</h3></div>
-            <div class="stat-card"><small>Wd Pending</small><h3 id="statWd" style="color:#ef4444">0</h3></div>
-        </div>
-
-        <div class="data-section">
-            <h4><i class="fas fa-wallet" style="color:var(--admin-red)"></i> Kelulusan Deposit</h4>
-            <div id="listRecharge">Memuatkan...</div>
-        </div>
-
-        <div class="data-section">
-            <h4><i class="fas fa-users"></i> Urus Pelabur</h4>
-            <div id="listUsers">Memuatkan...</div>
-        </div>
-    </div>
+<div class="grid-stats">
+ <div class="card-stat"><small>Untung Bersih</small><h3 id="netProfit" style="color:var(--primary)">RM 0</h3></div>
+ <div class="card-stat" style="border-color:#10b981"><small>Total User</small><h3 id="totalUsersCount">0</h3></div>
+ <div class="card-stat" style="border-color:#3b82f6"><small>Depo Sukses</small><h3 id="totalDepDone">RM 0</h3></div>
+ <div class="card-stat" style="border-color:#f59e0b"><small>Pending Task</small><h3 id="totalPending">0</h3></div>
 </div>
 
-<div id="editModal" class="modal">
-    <div class="modal-content">
-        <h3 id="modalTitle">Edit User</h3>
-        <input type="hidden" id="editUserId">
-        <div id="modalBody">
-            <label>Baki Baru (RM):</label>
-            <input type="number" id="editVal" style="width:100%; padding:10px; margin:10px 0; border-radius:8px; border:1px solid #ddd;">
-            <label>Role:</label>
-            <select id="editRole" style="width:100%; padding:10px; margin:10px 0; border-radius:8px; border:1px solid #ddd;">
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-            </select>
-        </div>
-        <div style="display:flex; gap:10px; margin-top:20px;">
-            <button onclick="closeModal()" class="btn" style="flex:1; background:#ccc;">BATAL</button>
-            <button onclick="saveChanges()" class="btn btn-green" style="flex:1;">SIMPAN PERUBAHAN</button>
-        </div>
-    </div>
+<div class="chart-container">
+<h4><i class="fas fa-chart-line"></i> Aliran Tunai</h4>
+<canvas id="financeChart" height="100"></canvas>
+</div>
+
+<div class="list-container">
+<h4><i class="fas fa-history"></i> Aktiviti Terkini</h4>
+<div id="recentLogs">Memuatkan rekod...</div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+ <div class="list-container">
+  <h4><i class="fas fa-arrow-down" style="color:#10b981"></i> Deposit Pending</h4>
+  <div id="depositList"></div>
+ </div>
+
+ <div class="list-container">
+  <h4><i class="fas fa-arrow-up" style="color:#ef4444"></i> Withdraw Pending</h4>
+  <div id="withdrawList"></div>
+ </div>
+</div>
+
+<div class="list-container" style="margin-top:20px;">
+<h4><i class="fas fa-user-friends"></i> Pengurusan Pengguna</h4>
+<input id="searchUser" placeholder="Cari email..." oninput="filterUsers()" 
+style="width:100%;padding:10px;border-radius:12px;margin-bottom:10px;">
+<div id="userList"></div>
+</div>
+
 </div>
 
 <script>
-    // MASUKKAN API KEY ANDA DI SINI
-    const SUPABASE_URL = 'https://mgvjwgbjccgsjkjhddru.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; 
-    const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL = 'https://mwnowiracticxrlfsrin.supabase.co';
+const SUPABASE_KEY = 'YOUR_PUBLIC_ANON_KEY';   // <-- LETAK KEY ANDA DI SINI
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    async function checkSecurity() {
-        const { data: { user } } = await client.auth.getUser();
-        if (!user) { window.location.href = 'login.html'; return; }
+let financeChart;
+let allUsers = [];
 
-        const { data: profile, error } = await client.from('profiles').select('*').eq('id', user.id).single();
-        
-        if (error || profile.role !== 'admin') {
-            alert("Akses Ditolak! Anda bukan Admin.");
-            window.location.href = 'dashboard.html';
-        } else {
-            document.getElementById('loadingOverlay').style.display = 'none';
-            document.getElementById('adminPanel').style.display = 'block';
-            document.getElementById('adminMail').innerText = user.email;
-            loadStats();
-        }
-    }
+function showLoader(){ document.getElementById('loader').style.display='flex'; }
+function hideLoader(){ document.getElementById('loader').style.display='none'; }
 
-    async function loadStats() {
-        const { data: users } = await client.from('profiles').select('*');
-        const { data: depo } = await client.from('recharges').select('*').eq('status', 'pending');
-        const { data: wd } = await client.from('withdrawals').select('*').eq('status', 'pending');
+async function logAdmin(action){
+ const {data:{session}} = await client.auth.getSession();
+ await client.from('admin_logs').insert({
+  admin_id: session.user.id,
+  action: action
+ });
+}
 
-        const totalBal = users.reduce((a, b) => a + (b.balance || 0), 0);
-        document.getElementById('statProfit').innerText = `RM ${totalBal.toFixed(2)}`;
-        document.getElementById('statUsers').innerText = users.length;
-        document.getElementById('statDepo').innerText = depo ? depo.length : 0;
-        document.getElementById('statWd').innerText = wd ? wd.length : 0;
+async function checkAdminAccess(){
+ const {data:{session}} = await client.auth.getSession();
+ if(!session){ window.location.href='login.html'; return; }
 
-        renderUserList(users);
-        renderDepoList(depo);
-    }
+ const {data:profile} = await client
+ .from('profiles')
+ .select('role')
+ .eq('id', session.user.id)
+ .maybeSingle();
 
-    function renderUserList(users) {
-        let html = '';
-        users.forEach(u => {
-            html += `
-            <div class="item-row">
-                <div><b>${u.email}</b><br><small>Baki: RM ${u.balance || 0} | Role: ${u.role}</small></div>
-                <button onclick="openEdit('${u.id}', ${u.balance}, '${u.role}')" class="btn btn-blue">EDIT</button>
-            </div>`;
-        });
-        document.getElementById('listUsers').innerHTML = html;
-    }
+ if(profile?.role === 'admin'){
+  document.getElementById('adminDashboard').style.display='block';
+  document.getElementById('currentAdminEmail').innerText = session.user.email;
+  renderAllData();
+ } else {
+  alert("Akses Ditolak!");
+  window.location.href='dashboard.html';
+ }
+}
 
-    function renderDepoList(depo) {
-        if (!depo || depo.length === 0) { document.getElementById('listRecharge').innerHTML = 'Tiada permohonan.'; return; }
-        let html = '';
-        depo.forEach(d => {
-            html += `
-            <div class="item-row">
-                <div>RM ${d.amount}<br><small>ID: ${d.user_id}</small></div>
-                <button onclick="approveDepo('${d.id}', '${d.user_id}', ${d.amount})" class="btn btn-green">LULUS</button>
-            </div>`;
-        });
-        document.getElementById('listRecharge').innerHTML = html;
-    }
+async function handleAdminLogout(){
+ await client.auth.signOut();
+ window.location.href='login.html';
+}
 
-    // Modal Logic
-    function openEdit(id, bal, role) {
-        document.getElementById('editUserId').value = id;
-        document.getElementById('editVal').value = bal;
-        document.getElementById('editRole').value = role;
-        document.getElementById('editModal').style.display = 'flex';
-    }
+async function renderAllData(){
+ showLoader();
 
-    function closeModal() { document.getElementById('editModal').style.display = 'none'; }
+ const {count:uCount} = await client.from('profiles')
+ .select('id',{count:'exact',head:true});
 
-    async function saveChanges() {
-        const id = document.getElementById('editUserId').value;
-        const newBal = document.getElementById('editVal').value;
-        const newRole = document.getElementById('editRole').value;
+ const {data:dep} = await client.from('recharges').select('*');
+ const {data:wit} = await client.from('withdrawals').select('*');
 
-        const { error } = await client.from('profiles').update({ balance: parseFloat(newBal), role: newRole }).eq('id', id);
-        if (error) alert(error.message);
-        else { alert("Data dikemaskini!"); closeModal(); loadStats(); }
-    }
+ const totalDep = dep.filter(x=>x.status==='success')
+  .reduce((a,b)=>a+parseFloat(b.amount),0);
 
-    async function approveDepo(id, uid, amt) {
-        if (!confirm("Luluskan deposit ini?")) return;
-        const { data: p } = await client.from('profiles').select('balance').eq('id', uid).single();
-        await client.from('profiles').update({ balance: (p.balance || 0) + amt }).eq('id', uid);
-        await client.from('recharges').update({ status: 'success' }).eq('id', id);
-        alert("Berjaya!"); loadStats();
-    }
+ const totalWit = wit.filter(x=>x.status==='success')
+  .reduce((a,b)=>a+parseFloat(b.amount),0);
 
-    async function logout() { await client.auth.signOut(); window.location.href = 'login.html'; }
+ const pendingCount =
+  dep.filter(x=>x.status==='pending').length +
+  wit.filter(x=>x.status==='pending').length;
 
-    document.addEventListener('DOMContentLoaded', checkSecurity);
+ document.getElementById('totalUsersCount').innerText = uCount;
+ document.getElementById('totalDepDone').innerText = `RM ${totalDep.toFixed(2)}`;
+ document.getElementById('netProfit').innerText =
+  `RM ${(totalDep-totalWit).toFixed(2)}`;
+ document.getElementById('totalPending').innerText = pendingCount;
+
+ updateChart(totalDep,totalWit);
+ await loadLists();
+ await loadLogs();
+
+ hideLoader();
+}
+
+function updateChart(dep,wit){
+ const ctx = document.getElementById('financeChart').getContext('2d');
+ if(financeChart) financeChart.destroy();
+
+ financeChart = new Chart(ctx,{
+  type:'bar',
+  data:{
+   labels:['Deposit','Withdraw'],
+   datasets:[{
+    data:[dep,wit],
+    backgroundColor:['#10b981','#ef4444'],
+    borderRadius:10
+   }]
+  },
+  options:{responsive:true, scales:{y:{beginAtZero:true}}}
+ });
+}
+
+async function loadLogs(){
+ const {data:logs} = await client
+ .from('transactions')
+ .select('*, profiles(email)')
+ .order('created_at',{ascending:false})
+ .limit(10);
+
+ document.getElementById('recentLogs').innerHTML =
+ logs.map(l=>`
+ <div style="display:flex;justify-content:space-between;padding:8px 0">
+  <span><b>${l.profiles?.email}</b>: ${l.description}</span>
+  <b style="color:${l.type==='withdraw'?'#ef4444':'#10b981'}">
+   ${l.type==='withdraw'?'-':'+'} RM ${l.amount.toFixed(2)}
+  </b>
+ </div>
+ `).join('') || 'Tiada rekod.';
+}
+
+async function loadLists(){
+ const {data:dList} = await client.from('recharges')
+ .select('*, profiles(email)')
+ .eq('status','pending');
+
+ document.getElementById('depositList').innerHTML =
+ dList.map(i=>`
+ <div class="item-row">
+  <span>${i.profiles?.email}<br><b>RM ${i.amount}</b></span>
+  <button class="btn-status" style="background:#10b981;color:white"
+   onclick="approveDep('${i.id}','${i.user_id}',${i.amount})">
+   APPROVE
+  </button>
+ </div>
+ `).join('') || '<small>Tiada pending</small>';
+
+ const {data:wList} = await client.from('withdrawals')
+ .select('*, profiles(email)')
+ .eq('status','pending');
+
+ document.getElementById('withdrawList').innerHTML =
+ wList.map(i=>`
+ <div class="item-row">
+  <span>${i.profiles?.email}<br><b>RM ${i.amount}</b></span>
+  <button class="btn-status" style="background:#ef4444;color:white"
+   onclick="approveWit('${i.id}','${i.user_id}',${i.amount})">
+   PAID
+  </button>
+ </div>
+ `).join('') || '<small>Tiada pending</small>';
+
+ const {data:uList} = await client.from('profiles')
+ .select('*')
+ .order('created_at',{ascending:false});
+
+ allUsers = uList;
+ displayUsers(uList);
+}
+
+function displayUsers(list){
+ document.getElementById('userList').innerHTML = list.map(u=>`
+ <div class="item-row">
+  <span>${u.email} ${u.is_banned?'🔴':'🟢'}<br>
+  <b>RM ${u.balance.toFixed(2)}</b></span>
+  <div>
+   <button onclick="editBal('${u.id}',${u.balance})"
+    class="btn-status" style="background:#3b82f6;color:white">EDIT</button>
+
+   <button onclick="toggleBan('${u.id}',${u.is_banned})"
+    class="btn-status"
+    style="background:${u.is_banned?'#10b981':'#ef4444'};color:white">
+    ${u.is_banned?'UNBAN':'BAN'}
+   </button>
+  </div>
+ </div>
+ `).join('');
+}
+
+function filterUsers(){
+ const q = document.getElementById('searchUser').value.toLowerCase();
+ const filtered = allUsers.filter(u =>
+  u.email.toLowerCase().includes(q)
+ );
+ displayUsers(filtered);
+}
+
+async function approveDep(id,uid,amt){
+ if(!confirm("Luluskan deposit RM "+amt+"?")) return;
+ showLoader();
+
+ const {data:check} = await client.from('recharges')
+ .select('status')
+ .eq('id',id)
+ .single();
+
+ if(check.status!=='pending'){
+  alert("Sudah diproses!");
+  hideLoader();
+  return;
+ }
+
+ const {data:userProfile} = await client.from('profiles')
+ .select('balance, invited_by')
+ .eq('id',uid)
+ .single();
+
+ await client.from('profiles')
+ .update({balance:(userProfile.balance||0)+parseFloat(amt)})
+ .eq('id',uid);
+
+ await client.from('transactions').insert({
+  user_id:uid,
+  amount:amt,
+  type:'deposit',
+  description:'Deposit disahkan'
+ });
+
+ if(userProfile.invited_by){
+  const bonus = amt*0.10;
+  const {data:upline} = await client.from('profiles')
+   .select('balance')
+   .eq('id',userProfile.invited_by)
+   .single();
+
+  if(upline){
+   await client.from('profiles')
+    .update({balance:upline.balance+bonus})
+    .eq('id',userProfile.invited_by);
+
+   await client.from('transactions').insert({
+    user_id:userProfile.invited_by,
+    amount:bonus,
+    type:'bonus',
+    description:'Bonus referral'
+   });
+  }
+ }
+
+ await client.from('recharges')
+ .update({status:'success'})
+ .eq('id',id);
+
+ await logAdmin("Approved deposit RM "+amt);
+ await renderAllData();
+ hideLoader();
+}
+
+async function approveWit(id,uid,amt){
+ if(!confirm("Tanda sebagai sudah dibayar?")) return;
+ showLoader();
+
+ await client.from('withdrawals')
+ .update({status:'success'})
+ .eq('id',id);
+
+ await client.from('transactions').insert({
+  user_id:uid,
+  amount:amt,
+  type:'withdraw',
+  description:'Pengeluaran berjaya'
+ });
+
+ await logAdmin("Paid withdrawal RM "+amt);
+ await renderAllData();
+ hideLoader();
+}
+
+async function toggleBan(uid,current){
+ if(confirm("Tukar status sekatan user?")){
+  await client.from('profiles')
+   .update({is_banned:!current})
+   .eq('id',uid);
+  await renderAllData();
+ }
+}
+
+async function editBal(id,old){
+ const n = prompt("Baki baru:",old);
+ if(n!==null){
+  await client.from('profiles')
+   .update({balance:parseFloat(n)})
+   .eq('id',id);
+  await renderAllData();
+ }
+}
+
+document.addEventListener('DOMContentLoaded',checkAdminAccess);
 </script>
 </body>
 </html>
