@@ -64,56 +64,75 @@
     </div>
 
     <script src="app.js"></script>
-    <script>
-        let currentBalance = 0;
+   <script>
+    let currentBalance = 0;
 
-        async function initProducts() {
-            const { data: { user } } = await client.auth.getUser();
-            if (!user) return window.location.href = 'login.html';
+    async function initProducts() {
+        const { data: { user } } = await client.auth.getUser();
+        if (!user) return window.location.href = 'login.html';
 
-            const { data: profile } = await client.from('profiles').select('balance').eq('id', user.id).single();
-            if (profile) {
-                currentBalance = profile.balance;
-                document.getElementById('quickBalance').innerText = `RM ${currentBalance.toFixed(2)}`;
-            }
+        // Ambil baki terkini
+        const { data: profile } = await client.from('profiles').select('balance').eq('id', user.id).single();
+        if (profile) {
+            currentBalance = parseFloat(profile.balance);
+            document.getElementById('quickBalance').innerText = `RM ${currentBalance.toFixed(2)}`;
+        }
+    }
+
+    async function buyProduct(name, price, daily, days) {
+        const { data: { user } } = await client.auth.getUser();
+        if (!user) return;
+
+        if (currentBalance < price) {
+            alert("Baki tidak mencukupi! Sila recharge dahulu.");
+            return;
         }
 
-        async function buyProduct(name, price, daily, days) {
-            if (currentBalance < price) {
-                alert("Baki tidak mencukupi! Sila recharge dahulu.");
-                window.location.href = 'recharge.html';
-                return;
-            }
+        if (!confirm(`Sahkan pembelian ${name} (RM ${price})?`)) return;
 
-            if (!confirm(`Adakah anda mahu melabur dalam ${name} dengan harga RM ${price}?`)) return;
-
-            const { data: { user } } = await client.auth.getUser();
-
+        try {
             // 1. Tolak baki user
-            const { error: balanceError } = await client
+            const newBalance = currentBalance - price;
+            const { error: balErr } = await client
                 .from('profiles')
-                .update({ balance: currentBalance - price })
+                .update({ balance: newBalance })
                 .eq('id', user.id);
 
-            if (balanceError) return alert("Ralat transaksi!");
+            if (balErr) throw balErr;
 
-            // 2. Simpan dalam user_investments
-            const { error: invError } = await client.from('user_investments').insert([{
+            // 2. Rekod dalam Log Transaksi (Penting untuk audit!)
+            await client.from('transactions').insert([{
+                user_id: user.id,
+                amount: price,
+                type: 'investment',
+                description: `Membeli pakej: ${name}`
+            }]);
+
+            // 3. Masukkan dalam table pelaburan
+            // Pastikan nama table di sini sama dengan di Supabase (user_investments)
+            const { error: invErr } = await client.from('user_investments').insert([{
                 user_id: user.id,
                 product_name: name,
                 amount: price,
                 daily_profit: daily,
                 expiry_days: days,
-                status: 'active'
+                status: 'active',
+                created_at: new Date()
             }]);
 
-            if (!invError) {
-                alert("Pembelian Berjaya! Mesin mining anda telah mula bekerja.");
-                window.location.href = 'mining.html';
-            }
-        }
+            if (invErr) throw invErr;
 
-        window.onload = initProducts;
-    </script>
+            alert("Pelaburan Berjaya! Sila semak di halaman Mining.");
+            window.location.href = 'mining.html';
+
+        } catch (err) {
+            console.error(err);
+            alert("Ralat berlaku: " + err.message);
+        }
+    }
+
+    window.onload = initProducts;
+</script>
+
 </body>
 </html>

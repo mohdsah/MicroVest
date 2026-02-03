@@ -51,7 +51,7 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
+      <script src="app.js"></script>
     <script>
         function previewImage(input) {
             const preview = document.getElementById('imagePreview');
@@ -75,21 +75,23 @@
             if (!amount || amount < 30) return alert("Minimum deposit adalah RM 30");
             if (!file) return alert("Sila muat naik resit pembayaran");
 
-            btn.innerText = "PROSES...";
+            btn.innerText = "MEMPROSES...";
             btn.disabled = true;
 
             try {
-                const user = (await client.auth.getUser()).data.user;
+                const { data: { user } } = await client.auth.getUser();
+                if (!user) throw new Error("Sesi tamat. Sila login semula.");
 
-                // 1. Upload Gambar ke Storage Supabase
-                const fileName = `${user.id}/${Date.now()}.png`;
+                // 1. Muat naik gambar ke Storage Supabase
+                // Pastikan anda sudah create bucket bernama 'receipts' di Supabase
+                const fileName = `public/${user.id}-${Date.now()}.png`;
                 const { data: uploadData, error: uploadError } = await client.storage
                     .from('receipts')
                     .upload(fileName, file);
 
                 if (uploadError) throw uploadError;
 
-                // 2. Simpan Data ke Table Recharges
+                // 2. Simpan rekod ke table 'recharges'
                 const { error: dbError } = await client.from('recharges').insert([{
                     user_id: user.id,
                     amount: parseFloat(amount),
@@ -99,11 +101,21 @@
 
                 if (dbError) throw dbError;
 
-                alert("Deposit berjaya dihantar! Sila tunggu pengesahan admin.");
+                // 3. NOTIFIKASI TELEGRAM (Sangat Penting!)
+                const msg = `💰 <b>DEPOSIT BARU!</b>\n\n` +
+                            `👤 User: ${user.email}\n` +
+                            `💵 Jumlah: <b>RM ${parseFloat(amount).toFixed(2)}</b>\n` +
+                            `🕒 Masa: ${new Date().toLocaleString('ms-MY')}\n\n` +
+                            `Sila semak dashboard untuk pengesahan.`;
+                
+                await sendTelegramAlert(msg);
+
+                alert("Deposit berjaya dihantar! Admin akan mengesahkan dalam masa 1-30 minit.");
                 window.location.href = 'records.html';
 
             } catch (error) {
-                alert("Ralat: " + error.message);
+                console.error(error);
+                alert("Ralat: " + (error.message || "Gagal menghantar rekod"));
                 btn.innerText = "HANTAR REKOD";
                 btn.disabled = false;
             }

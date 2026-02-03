@@ -7,49 +7,55 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .recharge-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .auth-input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; }
+        .product-page-header { background: #800000; color: white; padding: 30px 20px; text-align: center; border-radius: 0 0 20px 20px; }
+    </style>
 </head>
 <body style="background: #f1f5f9;">
 
     <div class="app-shell">
         <div class="product-page-header">
-            <h2>Pasukan Saya</h2>
-            <p>Bina rangkaian dan jana komisen pasif</p>
+            <h2 style="margin:0;">Pasukan Saya</h2>
+            <p style="font-size: 13px; opacity: 0.9;">Bina rangkaian dan jana komisen pasif</p>
         </div>
 
         <div class="content-area" style="padding: 20px; padding-bottom: 100px;">
             
             <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <div class="recharge-card" style="flex: 1; text-align: center; padding: 15px; border-bottom: 3px solid #800000;">
-                    <small style="color: #64748b;">AHLI AKTIF</small>
-                    <h2 id="teamCount" style="color: #1e293b;">0</h2>
+                <div class="recharge-card" style="flex: 1; text-align: center; border-bottom: 4px solid #800000;">
+                    <small style="color: #64748b; font-weight: bold; font-size: 10px;">AHLI PASUKAN</small>
+                    <h2 id="teamCount" style="color: #1e293b; margin: 5px 0;">0</h2>
                 </div>
-                <div class="recharge-card" style="flex: 1; text-align: center; padding: 15px; border-bottom: 3px solid #10b981;">
-                    <small style="color: #64748b;">EST. KOMISEN</small>
-                    <h2 id="totalComm" style="color: #10b981;">RM 0</h2>
+                <div class="recharge-card" style="flex: 1; text-align: center; border-bottom: 4px solid #10b981;">
+                    <small style="color: #64748b; font-weight: bold; font-size: 10px;">KOMISEN TERKUMPUL</small>
+                    <h2 id="totalComm" style="color: #10b981; margin: 5px 0;">RM 0.00</h2>
                 </div>
             </div>
 
             <div class="recharge-card" style="margin-bottom: 20px;">
-                <h4 style="margin-bottom: 10px; font-size: 14px;">Pautan Jemputan Anda</h4>
+                <h4 style="margin: 0 0 10px 0; font-size: 14px;">Pautan Jemputan</h4>
                 <div style="display: flex; gap: 10px;">
-                    <input type="text" id="shareLink" class="auth-input" readonly style="font-size: 12px; margin-bottom: 0;">
-                    <button onclick="copyInvite()" style="background: #1e293b; color: white; border: none; padding: 0 15px; border-radius: 8px; font-size: 12px;">SALIN</button>
+                    <input type="text" id="shareLink" class="auth-input" readonly>
+                    <button onclick="copyInvite()" style="background: #800000; color: white; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold;">SALIN</button>
                 </div>
+                <p style="font-size: 10px; color: #94a3b8; margin-top: 8px;">Dapatkan bonus 10% setiap kali ahli bawah deposit.</p>
             </div>
 
             <div class="recharge-card">
-                <h4 style="margin-bottom: 15px; color: #1e293b;">Senarai Ahli (Level 1)</h4>
+                <h4 style="margin: 0 0 15px 0; color: #1e293b; font-size: 14px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">Senarai Ahli (Level 1)</h4>
                 <div id="teamList">
-                    <p style="text-align: center; color: #94a3b8; font-size: 13px;">Tiada ahli pasukan lagi.</p>
+                    <p style="text-align: center; color: #94a3b8; font-size: 13px; padding: 20px;">Memuatkan data pasukan...</p>
                 </div>
             </div>
         </div>
 
-        <nav class="bottom-nav">
-            <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
-            <a href="product_list.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Produk</span></a>
-            <a href="mining.html" class="nav-item"><i class="fas fa-microchip"></i><span>Mining</span></a>
-            <a href="profile.html" class="nav-item active"><i class="fas fa-user-circle"></i><span>Profil</span></a>
+        <nav class="bottom-nav" style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #eee;">
+            <a href="dashboard.html" class="nav-item" style="text-align: center; text-decoration: none; color: #94a3b8;"><i class="fas fa-home" style="display: block;"></i><span style="font-size: 10px;">Home</span></a>
+            <a href="product_list.html" class="nav-item" style="text-align: center; text-decoration: none; color: #94a3b8;"><i class="fas fa-chart-line" style="display: block;"></i><span style="font-size: 10px;">Produk</span></a>
+            <a href="team.html" class="nav-item active" style="text-align: center; text-decoration: none; color: #800000;"><i class="fas fa-users" style="display: block;"></i><span style="font-size: 10px;">Team</span></a>
+            <a href="profile.html" class="nav-item" style="text-align: center; text-decoration: none; color: #94a3b8;"><i class="fas fa-user-circle" style="display: block;"></i><span style="font-size: 10px;">Profil</span></a>
         </nav>
     </div>
 
@@ -57,43 +63,54 @@
     <script>
         async function loadTeamData() {
             const { data: { user } } = await client.auth.getUser();
-            if (!user) return;
+            if (!user) return window.location.href = 'login.html';
 
-            // 1. Dapatkan kod referral sendiri
+            // 1. Dapatkan kod referral & jana link
             const { data: profile } = await client.from('profiles').select('referral_code').eq('id', user.id).single();
-            const myCode = profile.referral_code || 'TIADA';
-            document.getElementById('shareLink').value = `https://microvest.com/register.html?ref=${myCode}`;
+            const myCode = profile?.referral_code || '---';
+            const currentUrl = window.location.origin;
+            document.getElementById('shareLink').value = `${currentUrl}/register.html?ref=${myCode}`;
 
-            // 2. Ambil senarai orang yang dijemput (invited_by = user.id)
-            const { data: team, error } = await client
+            // 2. Ambil senarai Team (Downline)
+            const { data: team } = await client
                 .from('profiles')
                 .select('email, created_at')
                 .eq('invited_by', user.id);
 
-            if (error) return console.error(error);
+            // 3. Ambil Jumlah Komisen Sebenar dari table 'transactions'
+            const { data: trans } = await client
+                .from('transactions')
+                .select('amount')
+                .eq('user_id', user.id)
+                .eq('type', 'bonus');
+
+            // Kira Total Komisen
+            const totalComm = trans ? trans.reduce((sum, item) => sum + parseFloat(item.amount), 0) : 0;
+            document.getElementById('totalComm').innerText = `RM ${totalComm.toFixed(2)}`;
 
             if (team && team.length > 0) {
                 document.getElementById('teamCount').innerText = team.length;
-                document.getElementById('totalComm').innerText = `RM ${team.length * 5}`; // Contoh: Bonus RM5 per kepala
-
                 const container = document.getElementById('teamList');
                 container.innerHTML = team.map(member => `
-                    <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
+                    <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f1f5f9;">
                         <div>
-                            <b style="font-size: 13px; color: #334155;">${member.email.split('@')[0]}***</b><br>
-                            <small style="color: #94a3b8;">Sertai: ${new Date(member.created_at).toLocaleDateString()}</small>
+                            <b style="font-size: 13px; color: #334155;">${member.email.split('@')[0]}***@...</b><br>
+                            <small style="color: #94a3b8; font-size: 10px;">Sertai: ${new Date(member.created_at).toLocaleDateString('ms-MY')}</small>
                         </div>
-                        <div style="color: #10b981; font-size: 12px; font-weight: bold;">Aktif</div>
+                        <div style="background: #dcfce7; color: #16a34a; font-size: 10px; padding: 4px 8px; border-radius: 20px; font-weight: bold; align-self: center;">Level 1</div>
                     </div>
                 `).join('');
+            } else {
+                document.getElementById('teamList').innerHTML = '<p style="text-align: center; color: #94a3b8; font-size: 13px; padding: 20px;">Jemput kawan untuk mula menjana komisen!</p>';
             }
         }
 
         function copyInvite() {
-            const link = document.getElementById('shareLink');
-            link.select();
-            document.execCommand('copy');
-            alert("Pautan jemputan disalin!");
+            const copyText = document.getElementById("shareLink");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); 
+            navigator.clipboard.writeText(copyText.value);
+            alert("Pautan jemputan berjaya disalin!");
         }
 
         document.addEventListener('DOMContentLoaded', loadTeamData);

@@ -3,159 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Admin - MicroVest</title>
+    <title>Admin Elite Panel - MicroVest</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --primary: #800000; --secondary: #0f172a; --accent: #fbbf24; }
+        body { background: #f8fafc; font-family: 'Inter', sans-serif; margin: 0; }
+        #adminDashboard { display: none; padding: 20px; }
+        .header-pro { background: var(--secondary); color: white; padding: 25px; border-radius: 20px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+        .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .card-stat { background: white; padding: 20px; border-radius: 18px; border-left: 5px solid var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .card-stat h3 { margin: 10px 0 0 0; font-size: 22px; }
+        .card-stat small { color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 10px; }
+        .chart-container { background: white; padding: 20px; border-radius: 20px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .list-container { background: white; padding: 20px; border-radius: 20px; margin-bottom: 20px; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #f1f5f9; transition: 0.2s; }
+        .item-row:hover { background: #fdfdfd; }
+        .btn-status { padding: 8px 12px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 11px; margin-left: 5px; }
+        .log-item { padding: 10px; border-bottom: 1px solid #eee; font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
+    </style>
 </head>
-<body style="background: #f1f5f9;">
+<body>
 
-    <div class="app-shell">
-        <div class="product-page-header">
-            <h2>Pusat Kawalan Admin</h2>
-            <p>Urus Deposit & Withdraw</p>
+    <div id="adminDashboard">
+        <div class="header-pro">
+            <div>
+                <h2 style="margin:0;">MicroVest HQ</h2>
+                <small id="currentAdminEmail" style="color:var(--accent)"></small>
+            </div>
+            <button onclick="handleAdminLogout()" class="btn-status" style="background:#ef4444; color:white;">LOGOUT</button>
         </div>
 
-        <div class="content-area" style="padding: 20px; margin-top: -20px;">
-            
-            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <div class="recharge-card" style="flex: 1; text-align: center; padding: 15px;">
-                    <small style="color: #64748b;">PENDING DEPOSIT</small>
-                    <h2 id="countPending" style="color: #f59e0b;">0</h2>
-                </div>
-                <div class="recharge-card" style="flex: 1; text-align: center; padding: 15px;">
-                    <small style="color: #64748b;">PENDING WITHDRAW</small>
-                    <h2 id="countWithdraw" style="color: #ef4444;">0</h2>
-                </div>
-            </div>
+        <div class="grid-stats">
+            <div class="card-stat"><small>Untung Bersih</small><h3 id="netProfit" style="color:var(--primary)">RM 0</h3></div>
+            <div class="card-stat" style="border-color:#10b981"><small>Total User</small><h3 id="totalUsersCount">0</h3></div>
+            <div class="card-stat" style="border-color:#3b82f6"><small>Depo Sukses</small><h3 id="totalDepDone">RM 0</h3></div>
+            <div class="card-stat" style="border-color:#f59e0b"><small>Pending Task</small><h3 id="totalPending">0</h3></div>
+        </div>
 
-            <div class="recharge-card">
-                <h4 style="margin-bottom: 15px; color: #1e293b; border-left: 4px solid #10b981; padding-left: 10px;">
-                    Deposit Perlu Disahkan
-                </h4>
-                <div id="depositList">
-                    <p style="text-align: center; color: #94a3b8;">Memuatkan deposit...</p>
-                </div>
-            </div>
+        <div class="chart-container">
+            <h4 style="margin-top:0;"><i class="fas fa-chart-line"></i> Aliran Tunai (Deposit vs Withdraw)</h4>
+            <canvas id="financeChart" height="100"></canvas>
+        </div>
 
-            <div class="recharge-card" style="margin-top: 20px;">
-                <h4 style="margin-bottom: 15px; color: #1e293b; border-left: 4px solid #ef4444; padding-left: 10px;">
-                    Permohonan Withdraw
-                </h4>
-                <div id="withdrawList">
-                    <p style="text-align: center; color: #94a3b8;">Memuatkan permohonan...</p>
-                </div>
+        <div class="list-container">
+            <h4><i class="fas fa-history"></i> Aktiviti Terkini (Log)</h4>
+            <div id="recentLogs">Memuatkan rekod...</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="list-container">
+                <h4><i class="fas fa-arrow-down" style="color:#10b981"></i> Deposit Pending</h4>
+                <div id="depositList"></div>
             </div>
+            <div class="list-container">
+                <h4><i class="fas fa-arrow-up" style="color:#ef4444"></i> Withdraw Pending</h4>
+                <div id="withdrawList"></div>
+            </div>
+        </div>
+
+        <div class="list-container" style="margin-top:20px;">
+            <h4><i class="fas fa-user-friends"></i> Pengurusan Pengguna</h4>
+            <div id="userList"></div>
         </div>
     </div>
 
     <script>
-        // 1. KONFIGURASI SUPABASE (Pastikan URL & Key betul)
         const SUPABASE_URL = 'https://mgvjwgbjccgsjkjhddru.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ndmp3Z2JqY2Nnc2pramhkZHJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwMzQxNzcsImV4cCI6MjA4NTYxMDE3N30.JJ03f7HO4bKiCF2g0eY3HzrT2KHKUzjpYgBALYHeYa0'; 
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // 2. FUNGSI LOAD DEPOSIT
-        async function loadPendingDeposits() {
-            try {
-                const { data, error } = await client
-                    .from('recharges')
-                    .select('*, profiles(email)')
-                    .eq('status', 'pending');
+        let financeChart;
 
-                if (error) throw error;
-                const container = document.getElementById('depositList');
-                document.getElementById('countPending').innerText = data.length;
-
-                if (data.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: #94a3b8; font-size: 13px;">Tiada deposit pending.</p>';
-                    return;
-                }
-
-                container.innerHTML = data.map(item => `
-                    <div style="padding: 15px; border-bottom: 1px solid #eee; margin-bottom: 10px; background: #f0fdf4; border-radius: 8px;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <div>
-                                <b style="font-size: 13px;">${item.profiles?.email}</b><br>
-                                <b style="color: #10b981;">RM ${parseFloat(item.amount).toFixed(2)}</b>
-                            </div>
-                            <button onclick="approveDeposit('${item.id}', '${item.user_id}', ${item.amount})" 
-                                    style="background: #10b981; color: white; border: none; padding: 5px 12px; border-radius: 5px; cursor: pointer; font-size: 11px;">
-                                APPROVE
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (err) { console.error(err); }
+        async function checkAdminAccess() {
+            const { data: { user } } = await client.auth.getUser();
+            if (!user) { window.location.href = 'login.html'; return; }
+            const { data: profile } = await client.from('profiles').select('role').eq('id', user.id).single();
+            if (profile && profile.role === 'admin') {
+                document.getElementById('adminDashboard').style.display = 'block';
+                document.getElementById('currentAdminEmail').innerText = user.email;
+                renderAllData();
+            } else {
+                alert("Akses Ditolak!"); window.location.href = 'dashboard.html';
+            }
         }
 
-        // 3. FUNGSI APPROVE DEPOSIT
-        async function approveDeposit(depositId, userId, amount) {
-            if (!confirm(`Luluskan deposit RM ${amount}?`)) return;
+        async function handleAdminLogout() { await client.auth.signOut(); window.location.href = 'login.html'; }
+
+        async function renderAllData() {
+            const { count: uCount } = await client.from('profiles').select('*', { count: 'exact', head: true });
+            const { data: dep } = await client.from('recharges').select('*');
+            const { data: wit } = await client.from('withdrawals').select('*');
+            
+            const totalDep = dep.filter(x => x.status === 'success').reduce((a,b) => a + parseFloat(b.amount), 0);
+            const totalWit = wit.filter(x => x.status === 'success').reduce((a,b) => a + parseFloat(b.amount), 0);
+            const pendingCount = dep.filter(x => x.status === 'pending').length + wit.filter(x => x.status === 'pending').length;
+
+            document.getElementById('totalUsersCount').innerText = uCount;
+            document.getElementById('totalDepDone').innerText = `RM ${totalDep.toFixed(2)}`;
+            document.getElementById('netProfit').innerText = `RM ${(totalDep - totalWit).toFixed(2)}`;
+            document.getElementById('totalPending').innerText = pendingCount;
+
+            updateChart(totalDep, totalWit);
+            loadLists();
+            loadLogs();
+        }
+
+        function updateChart(dep, wit) {
+            const ctx = document.getElementById('financeChart').getContext('2d');
+            if(financeChart) financeChart.destroy();
+            financeChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Deposit', 'Withdraw'],
+                    datasets: [{ data: [dep, wit], backgroundColor: ['#10b981', '#ef4444'], borderRadius: 10 }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } } }
+            });
+        }
+
+        async function loadLogs() {
+            const { data: logs } = await client.from('transactions').select('*, profiles(email)').order('created_at', {ascending: false}).limit(10);
+            document.getElementById('recentLogs').innerHTML = logs.map(l => `
+                <div class="log-item">
+                    <span><b>${l.profiles?.email}</b>: ${l.description}</span>
+                    <b style="color:${l.type === 'withdraw' ? '#ef4444' : '#10b981'}">
+                        ${l.type === 'withdraw' ? '-' : '+'} RM ${l.amount.toFixed(2)}
+                    </b>
+                </div>
+            `).join('') || 'Tiada rekod terkini.';
+        }
+
+        async function loadLists() {
+            const { data: dList } = await client.from('recharges').select('*, profiles(email)').eq('status', 'pending');
+            document.getElementById('depositList').innerHTML = dList.map(i => `
+                <div class="item-row">
+                    <span>${i.profiles?.email}<br><b>RM ${i.amount}</b></span>
+                    <button class="btn-status" style="background:#10b981; color:white" onclick="approveDep('${i.id}','${i.user_id}',${i.amount})">APPROVE</button>
+                </div>
+            `).join('') || '<small>Tiada pending</small>';
+
+            const { data: wList } = await client.from('withdrawals').select('*, profiles(email)').eq('status', 'pending');
+            document.getElementById('withdrawList').innerHTML = wList.map(i => `
+                <div class="item-row">
+                    <span>${i.profiles?.email}<br><b>RM ${i.amount}</b></span>
+                    <button class="btn-status" style="background:#ef4444; color:white" onclick="approveWit('${i.id}','${i.user_id}',${i.amount})">PAID</button>
+                </div>
+            `).join('') || '<small>Tiada pending</small>';
+
+            const { data: uList } = await client.from('profiles').select('*').order('created_at', {ascending: false});
+            document.getElementById('userList').innerHTML = uList.map(u => `
+                <div class="item-row">
+                    <span>${u.email} ${u.is_banned ? '🔴' : '🟢'}<br><b>RM ${u.balance.toFixed(2)}</b></span>
+                    <div>
+                        <button onclick="editBal('${u.id}',${u.balance})" class="btn-status" style="background:#3b82f6; color:white">EDIT</button>
+                        <button onclick="toggleBan('${u.id}', ${u.is_banned})" class="btn-status" style="background:${u.is_banned ? '#10b981' : '#ef4444'}; color:white">
+                            ${u.is_banned ? 'UNBAN' : 'BAN'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function approveDep(id, uid, amt) {
+            if(!confirm("Luluskan deposit RM" + amt + "?")) return;
             try {
-                // Update status deposit
-                await client.from('recharges').update({ status: 'success' }).eq('id', depositId);
+                const { data: userProfile } = await client.from('profiles').select('balance, invited_by').eq('id', uid).single();
                 
-                // Tambah baki user
-                const { data: profile } = await client.from('profiles').select('balance').eq('id', userId).single();
-                const newBal = (profile.balance || 0) + parseFloat(amount);
-                await client.from('profiles').update({ balance: newBal }).eq('id', userId);
+                // 1. Update Baki & Log User
+                await client.from('profiles').update({ balance: (userProfile.balance || 0) + parseFloat(amt) }).eq('id', uid);
+                await client.from('transactions').insert([{ user_id: uid, amount: amt, type: 'deposit', description: 'Deposit disahkan' }]);
 
-                alert("Deposit Berjaya!");
-                loadPendingDeposits(); // Data akan hilang dari senarai automatik
-            } catch (err) { alert(err.message); }
-        }
-
-        // 4. FUNGSI LOAD WITHDRAWALS
-        async function loadPendingWithdrawals() {
-            try {
-                const { data, error } = await client
-                    .from('withdrawals')
-                    .select('*, profiles(email)')
-                    .eq('status', 'pending');
-
-                if (error) throw error;
-                const container = document.getElementById('withdrawList');
-                document.getElementById('countWithdraw').innerText = data.length;
-
-                if (data.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: #94a3b8; font-size: 13px;">Tiada withdraw pending.</p>';
-                    return;
+                // 2. Bonus Referral (10%)
+                if (userProfile.invited_by) {
+                    const bonus = amt * 0.10;
+                    const { data: upline } = await client.from('profiles').select('balance').eq('id', userProfile.invited_by).single();
+                    if (upline) {
+                        await client.from('profiles').update({ balance: upline.balance + bonus }).eq('id', userProfile.invited_by);
+                        await client.from('transactions').insert([{ user_id: userProfile.invited_by, amount: bonus, type: 'bonus', description: 'Bonus referral deposit downline' }]);
+                    }
                 }
-
-                container.innerHTML = data.map(item => `
-                    <div style="padding: 15px; border-bottom: 1px solid #eee; margin-bottom: 10px; background: #fff1f2; border-radius: 8px;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <div>
-                                <b style="font-size: 13px;">${item.profiles?.email}</b><br>
-                                <b style="color: #ef4444;">RM ${parseFloat(item.amount).toFixed(2)}</b><br>
-                                <small>${item.bank_name}: ${item.bank_account}</small>
-                            </div>
-                            <button onclick="approveWithdraw('${item.id}')" 
-                                    style="background: #ef4444; color: white; border: none; padding: 5px 12px; border-radius: 5px; cursor: pointer; font-size: 11px;">
-                                DONE PAY
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (err) { console.error(err); }
+                await client.from('recharges').update({ status: 'success' }).eq('id', id);
+                renderAllData();
+            } catch (e) { alert(e.message); }
         }
 
-        // 5. FUNGSI APPROVE WITHDRAW
-        async function approveWithdraw(id) {
-            if(!confirm("Anda sudah transfer duit ke bank user?")) return;
-            try {
-                await client.from('withdrawals').update({ status: 'success' }).eq('id', id);
-                alert("Withdraw Selesai!");
-                loadPendingWithdrawals(); // Data akan hilang dari senarai automatik
-            } catch (err) { alert(err.message); }
+        async function approveWit(id, uid, amt) {
+            if(!confirm("Tanda sebagai sudah dibayar?")) return;
+            await client.from('withdrawals').update({ status: 'success' }).eq('id', id);
+            await client.from('transactions').insert([{ user_id: uid, amount: amt, type: 'withdraw', description: 'Pengeluaran berjaya' }]);
+            renderAllData();
         }
 
-        // Jalankan semasa mula
-        document.addEventListener('DOMContentLoaded', () => {
-            loadPendingDeposits();
-            loadPendingWithdrawals();
-        });
+        async function toggleBan(uid, currentStatus) {
+            if(confirm("Tukar status sekatan user?")) {
+                await client.from('profiles').update({ is_banned: !currentStatus }).eq('id', uid);
+                renderAllData();
+            }
+        }
+
+        async function editBal(id, old) {
+            const n = prompt("Baki baru:", old);
+            if(n !== null) {
+                await client.from('profiles').update({ balance: parseFloat(n) }).eq('id', id);
+                renderAllData();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', checkAdminAccess);
     </script>
 </body>
 </html>

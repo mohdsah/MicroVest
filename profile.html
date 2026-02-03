@@ -7,63 +7,73 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Tambahan CSS untuk Sejarah Transaksi di Profil */
+        .history-section { background: white; margin: 20px; border-radius: 15px; padding: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .history-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+        .history-item:last-child { border-bottom: none; }
+        .status-plus { color: #10b981; font-weight: bold; }
+        .status-minus { color: #ef4444; font-weight: bold; }
+    </style>
 </head>
 <body style="background: #f8fafc;">
 
     <div class="app-shell">
-        <div class="profile-header">
-            <div class="profile-avatar">
-                <i class="fas fa-user-tie"></i>
+        <div class="profile-header" style="background: #800000; color: white; padding: 40px 20px; text-align: center; border-radius: 0 0 25px 25px;">
+            <div class="profile-avatar" style="font-size: 40px; margin-bottom: 10px;">
+                <i class="fas fa-user-circle"></i>
             </div>
-            <h3 id="userEmailDisplay" style="font-size: 18px;">Memuatkan...</h3>
-            <p id="userStatus" style="font-size: 11px; opacity: 0.8; margin-top: 5px;">AHLI VIP</p>
+            <h3 id="userEmailDisplay" style="font-size: 18px; margin: 0;">Memuatkan...</h3>
+            <p id="userStatus" style="font-size: 11px; opacity: 0.8; margin-top: 5px; background: rgba(255,255,255,0.2); display: inline-block; padding: 2px 10px; border-radius: 10px;">AHLI VIP</p>
         </div>
 
         <div style="display: flex; gap: 15px; padding: 0 20px; margin-top: -25px;">
             <div style="flex:1; background: white; padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                <span style="font-size: 10px; color: #64748b;">BAKI SEMASA</span>
-                <b id="userBalanceDisplay" style="display: block; font-size: 16px; color: #8b0000; margin-top: 5px;">RM 0.00</b>
+                <span style="font-size: 10px; color: #64748b; font-weight: bold;">BAKI SEMASA</span>
+                <b id="userBalanceDisplay" style="display: block; font-size: 16px; color: #800000; margin-top: 5px;">RM 0.00</b>
             </div>
             <div style="flex:1; background: white; padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                <span style="font-size: 10px; color: #64748b;">TARIKH SERTAI</span>
-                <b id="userJoinDate" style="display: block; font-size: 16px; color: #1e293b; margin-top: 5px;">--/--</b>
+                <span style="font-size: 10px; color: #64748b; font-weight: bold;">TARIKH SERTAI</span>
+                <b id="userJoinDate" style="display: block; font-size: 14px; color: #1e293b; margin-top: 5px;">--/--</b>
             </div>
         </div>
 
-        <div class="menu-list">
-            <a href="withdraw.html" class="menu-item">
-                <i class="fas fa-university"></i>
-                <div class="menu-text">Maklumat Bank & Withdraw</div>
-                <i class="fas fa-chevron-right chevron"></i>
+        <div class="menu-list" style="margin-top: 20px; padding: 0 20px;">
+            <a href="withdraw.html" class="menu-item" style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; text-decoration: none; color: #333; box-shadow: 0 2px 5px rgba(0,0,0,0.03);">
+                <i class="fas fa-university" style="color: #800000; width: 30px;"></i>
+                <div style="flex: 1; font-size: 14px;">Maklumat Bank & Withdraw</div>
+                <i class="fas fa-chevron-right" style="font-size: 12px; color: #ccc;"></i>
             </a>
-            <a href="records.html" class="menu-item">
-                <i class="fas fa-file-invoice-dollar"></i>
-                <div class="menu-text">Rekod Transaksi</div>
-                <i class="fas fa-chevron-right chevron"></i>
+            
+            <a href="#" onclick="contactSupport()" class="menu-item" style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; text-decoration: none; color: #333; box-shadow: 0 2px 5px rgba(0,0,0,0.03);">
+                <i class="fas fa-headset" style="color: #800000; width: 30px;"></i>
+                <div style="flex: 1; font-size: 14px;">Bantuan Pelanggan</div>
+                <i class="fas fa-chevron-right" style="font-size: 12px; color: #ccc;"></i>
             </a>
-            <a href="#" onclick="contactSupport()" class="menu-item">
-                <i class="fas fa-headset"></i>
-                <div class="menu-text">Bantuan Pelanggan</div>
-                <i class="fas fa-chevron-right chevron"></i>
-            </a>
-            <a href="#" onclick="handleLogout()" class="menu-item" style="color: #e11d48;">
-                <i class="fas fa-sign-out-alt" style="color: #e11d48;"></i>
-                <div class="menu-text">Log Keluar</div>
+
+            <a href="#" onclick="handleLogout()" class="menu-item" style="display: flex; align-items: center; background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; text-decoration: none; color: #e11d48; box-shadow: 0 2px 5px rgba(0,0,0,0.03);">
+                <i class="fas fa-sign-out-alt" style="width: 30px;"></i>
+                <div style="flex: 1; font-size: 14px; font-weight: bold;">Log Keluar</div>
             </a>
         </div>
 
-        <nav class="bottom-nav">
-            <a href="dashboard.html" class="nav-item">
-                <i class="fas fa-home"></i><span>Home</span>
+        <div class="history-section">
+            <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #1e293b;">Transaksi Terkini</h4>
+            <div id="userLogList">Memuatkan rekod...</div>
+        </div>
+
+        <nav class="bottom-nav" style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #eee;">
+            <a href="dashboard.html" class="nav-item" style="text-align: center; text-decoration: none; color: #94a3b8; font-size: 12px;">
+                <i class="fas fa-home" style="display: block; font-size: 18px;"></i><span>Home</span>
             </a>
-            <a href="product_list.html" class="nav-item">
-                <i class="fas fa-chart-line"></i><span>Produk</span>
+            <a href="product_list.html" class="nav-item" style="text-align: center; text-decoration: none; color: #94a3b8; font-size: 12px;">
+                <i class="fas fa-chart-line" style="display: block; font-size: 18px;"></i><span>Produk</span>
             </a>
-            <a href="mining.html" class="nav-item">
-                <i class="fas fa-microchip"></i><span>Mining</span>
+            <a href="mining.html" class="nav-item" style="text-align: center; text-decoration: none; color: #94a3b8; font-size: 12px;">
+                <i class="fas fa-microchip" style="display: block; font-size: 18px;"></i><span>Mining</span>
             </a>
-            <a href="profile.html" class="nav-item active">
-                <i class="fas fa-user-circle"></i><span>Profil</span>
+            <a href="profile.html" class="nav-item active" style="text-align: center; text-decoration: none; color: #800000; font-size: 12px;">
+                <i class="fas fa-user-circle" style="display: block; font-size: 18px;"></i><span>Profil</span>
             </a>
         </nav>
     </div>
@@ -71,39 +81,55 @@
     <script src="app.js"></script>
     <script>
         async function loadProfile() {
-            // Pastikan guna getUser() untuk data paling tepat
             const { data: { user } } = await client.auth.getUser();
             if (!user) return window.location.href = 'login.html';
 
             document.getElementById('userEmailDisplay').innerText = user.email;
             
-            // Format tarikh sertai
-            const joinedDate = new Date(user.created_at).toLocaleDateString('ms-MY', {
-                year: 'numeric', month: '2-digit', day: '2-digit'
-            });
+            // 1. Tarikh Sertai
+            const joinedDate = new Date(user.created_at).toLocaleDateString('ms-MY');
             document.getElementById('userJoinDate').innerText = joinedDate;
 
-            // Ambil baki terbaru dari table profiles
-            const { data: profile, error } = await client
+            // 2. Ambil Profil (Baki)
+            const { data: profile } = await client
                 .from('profiles')
                 .select('balance')
                 .eq('id', user.id)
                 .single();
 
-            if (error) {
-                console.error("Gagal ambil baki:", error.message);
-                return;
+            if (profile) {
+                const balance = parseFloat(profile.balance || 0);
+                document.getElementById('userBalanceDisplay').innerText = `RM ${balance.toFixed(2)}`;
             }
 
-            if (profile) {
-                // Gunakan formatRM dari app.js jika ada, atau format manual
-                const balance = parseFloat(profile.balance || 0);
-                document.getElementById('userBalanceDisplay').innerText = `RM ${balance.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            // 3. Ambil Log Transaksi (5 Terkini)
+            const { data: logs } = await client
+                .from('transactions')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false })
+                .limit(5);
+
+            const logDiv = document.getElementById('userLogList');
+            if (logs && logs.length > 0) {
+                logDiv.innerHTML = logs.map(l => `
+                    <div class="history-item">
+                        <div>
+                            <div style="font-weight: 600;">${l.description}</div>
+                            <div style="font-size: 10px; color: #94a3b8;">${new Date(l.created_at).toLocaleDateString()}</div>
+                        </div>
+                        <div class="${l.type === 'withdraw' ? 'status-minus' : 'status-plus'}">
+                            ${l.type === 'withdraw' ? '-' : '+'} RM ${l.amount.toFixed(2)}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                logDiv.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:10px;">Tiada transaksi lagi</div>';
             }
         }
 
         function contactSupport() {
-            const phone = "60123456789"; // Ganti dengan no anda
+            const phone = "60111111111"; // Ganti no WhatsApp anda
             const msg = "Hi Admin, saya perlukan bantuan bantuan berkaitan akaun MicroVest saya.";
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
@@ -111,12 +137,10 @@
         async function handleLogout() {
             if (confirm("Adakah anda pasti mahu log keluar?")) {
                 await client.auth.signOut();
-                localStorage.clear();
                 window.location.href = 'login.html';
             }
         }
 
-        // Jalankan fungsi loadProfile apabila halaman sedia
         document.addEventListener('DOMContentLoaded', loadProfile);
     </script>
 </body>

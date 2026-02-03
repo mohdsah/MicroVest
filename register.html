@@ -11,34 +11,34 @@
 <body style="background: #f8fafc;">
 
     <div class="app-shell auth-container">
-        <div class="auth-header">
-            <h1>Sertai Kami</h1>
+        <div class="auth-header" style="text-align: center; margin-bottom: 20px; padding-top: 40px;">
+            <h1 style="color: #800000;">Sertai Kami</h1>
             <p style="color: #64748b;">Mula melabur dan jana pendapatan harian</p>
         </div>
 
-        <div class="auth-card">
+        <div class="auth-card" style="max-width: 400px; margin: auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
             <div id="refBadge" class="ref-info-badge" style="display: none; background: #f0fdf4; border: 1px solid #10b981; padding: 10px; border-radius: 8px; margin-bottom: 15px; color: #15803d; font-size: 13px;">
                 <i class="fas fa-users"></i> Anda dijemput oleh: <b id="refName">...</b>
             </div>
 
-            <div class="input-group">
-                <label><i class="fas fa-envelope"></i> Alamat Emel</label>
-                <input type="email" id="email" class="auth-input" placeholder="contoh@gmail.com">
+            <div class="input-group" style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px;"><i class="fas fa-envelope"></i> Alamat Emel</label>
+                <input type="email" id="email" class="auth-input" placeholder="contoh@gmail.com" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; box-sizing: border-box;">
             </div>
 
-            <div class="input-group">
-                <label><i class="fas fa-lock"></i> Kata Laluan</label>
-                <input type="password" id="password" class="auth-input" placeholder="Minima 6 aksara">
+            <div class="input-group" style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px;"><i class="fas fa-lock"></i> Kata Laluan</label>
+                <input type="password" id="password" class="auth-input" placeholder="Minima 6 aksara" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; box-sizing: border-box;">
             </div>
 
-            <div class="input-group">
-                <label><i class="fas fa-lock"></i> Sahkan Kata Laluan</label>
-                <input type="password" id="confirmPassword" class="auth-input" placeholder="Ulang kata laluan">
+            <div class="input-group" style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px;"><i class="fas fa-lock"></i> Sahkan Kata Laluan</label>
+                <input type="password" id="confirmPassword" class="auth-input" placeholder="Ulang kata laluan" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; box-sizing: border-box;">
             </div>
 
-            <button class="btn-auth" id="regBtn" onclick="handleRegister()">DAFTAR AKAUN</button>
+            <button class="btn-auth" id="regBtn" onclick="handleRegister()" style="width: 100%; background: #800000; color: white; padding: 14px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer;">DAFTAR AKAUN</button>
             
-            <div class="auth-footer" style="text-align: center; margin-top: 15px; font-size: 14px;">
+            <div class="auth-footer" style="text-align: center; margin-top: 20px; font-size: 14px; color: #64748b;">
                 Sudah ada akaun? <a href="login.html" style="color: #800000; font-weight: bold; text-decoration: none;">Log Masuk</a>
             </div>
         </div>
@@ -46,7 +46,6 @@
 
     <script src="app.js"></script>
     <script>
-        // 1. Ambil kod referral dari URL (?ref=ABC123)
         const urlParams = new URLSearchParams(window.location.search);
         const refCode = urlParams.get('ref');
 
@@ -75,7 +74,7 @@
             btn.disabled = true;
 
             try {
-                // A. Cari ID Upline (Tuan Kod) berdasarkan kod referral
+                // A. Cari ID Upline (Tuan Kod)
                 let uplineId = null;
                 if (refCode) {
                     const { data: uplineProfile } = await client
@@ -97,8 +96,7 @@
 
                 if (error) throw error;
 
-                // C. Simpan profil ke table 'profiles'
-                // Kita guna 'invited_by' supaya selari dengan database
+                // C. Simpan profil lengkap ke table 'profiles'
                 const myNewRefCode = Math.random().toString(36).substring(2, 8).toUpperCase();
                 
                 const { error: profileErr } = await client
@@ -108,8 +106,9 @@
                         email: email, 
                         balance: 0, 
                         referral_code: myNewRefCode,
-                        invited_by: uplineId, // HUBUNGAN LEVEL 1
-                        is_banned: false
+                        invited_by: uplineId,
+                        role: 'user',       // PENTING: Set sebagai user biasa
+                        is_banned: false    // PENTING: Untuk fungsi ban/unban
                     }]);
 
                 if (profileErr) throw profileErr;

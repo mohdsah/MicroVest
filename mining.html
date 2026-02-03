@@ -54,13 +54,13 @@
 
     <script src="app.js"></script>
     <script>
-        async function loadActiveMining() {
+async function loadActiveMining() {
     const { data: { user } } = await client.auth.getUser();
     if (!user) return;
 
     try {
         const { data: investments, error } = await client
-            .from('investments')
+            .from('investments') // Pastikan nama table konsisten (investments atau user_investments)
             .select('*')
             .eq('user_id', user.id)
             .eq('status', 'active');
@@ -75,19 +75,28 @@
             
             container.innerHTML = investments.map(item => {
                 totalDaily += parseFloat(item.daily_profit);
+                
+                // Logik semak cooldown (24 jam)
+                const lastClaim = item.last_claim ? new Date(item.last_claim) : new Date(item.created_at);
+                const now = new Date();
+                const hoursSinceLastClaim = (now - lastClaim) / (1000 * 60 * 60);
+                const canClaim = hoursSinceLastClaim >= 24;
+
                 return `
-                    <div class="recharge-card" style="margin-bottom: 15px; border-left: 5px solid #10b981; background: white;">
+                    <div class="recharge-card" style="margin-bottom: 15px; border-left: 5px solid #10b981; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <h4 style="margin: 0;">${item.product_name}</h4>
-                                <small style="color: #64748b;">Mula: ${new Date(item.created_at).toLocaleDateString()}</small>
+                                <h4 style="margin: 0; color: #1e293b;">${item.product_name}</h4>
+                                <small style="color: #94a3b8;">Mula: ${new Date(item.created_at).toLocaleDateString()}</small>
                             </div>
                             <div style="text-align: right;">
-                                <b style="color: #10b981;">+ RM ${parseFloat(item.daily_profit).toFixed(2)}</b><br>
+                                <b style="color: #10b981; font-size: 16px;">+ RM ${parseFloat(item.daily_profit).toFixed(2)}</b><br>
                                 <button onclick="claimProfit('${item.id}', ${item.daily_profit})" 
-                                        style="margin-top:5px; background:#1e293b; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:10px; cursor:pointer;">
-                                    CLAIM PROFIT
+                                        ${!canClaim ? 'disabled' : ''}
+                                        style="margin-top:8px; background:${canClaim ? '#10b981' : '#cbd5e1'}; color:white; border:none; padding:6px 12px; border-radius:6px; font-size:11px; cursor:${canClaim ? 'pointer' : 'not-allowed'}; font-weight:bold;">
+                                    ${canClaim ? 'CLAIM PROFIT' : 'COOLDOWN'}
                                 </button>
+                                ${!canClaim ? `<br><small style="font-size:9px; color:#94a3b8;">Tunggu ${Math.ceil(24 - hoursSinceLastClaim)} jam lagi</small>` : ''}
                             </div>
                         </div>
                     </div>
@@ -95,40 +104,49 @@
             }).join('');
 
             document.getElementById('totalProfit').innerText = `RM ${totalDaily.toFixed(2)}`;
+        } else {
+            container.innerHTML = `<div style="text-align: center; padding: 40px 0;"><i class="fas fa-box-open" style="font-size: 50px; color: #cbd5e1; margin-bottom: 15px;"></i><p style="color: #94a3b8;">Tiada mesin aktif.</p></div>`;
         }
     } catch (err) {
         console.error(err.message);
     }
 }
 
-// FUNGSI UNTUK CLAIM DUIT
 async function claimProfit(investmentId, amount) {
     const { data: { user } } = await client.auth.getUser();
     
+    // Disable butang sementara proses
+    if(!confirm(`Claim untung harian RM ${amount.toFixed(2)}?`)) return;
+
     try {
-        // 1. Ambil baki semasa
+        // 1. Ambil baki semasa & data pelaburan
         const { data: profile } = await client.from('profiles').select('balance').eq('id', user.id).single();
         
-        // 2. Tambah baki baru
+        // 2. Update baki profil
         const newBalance = parseFloat(profile.balance) + parseFloat(amount);
-        
-        const { error: updateError } = await client
-            .from('profiles')
-            .update({ balance: newBalance })
-            .eq('id', user.id);
+        await client.from('profiles').update({ balance: newBalance }).eq('id', user.id);
 
-        if (updateError) throw updateError;
+        // 3. Update 'last_claim' dalam table investments
+        await client.from('investments').update({ last_claim: new Date() }).eq('id', investmentId);
 
-        alert(`Berjaya claim RM ${amount.toFixed(2)}! Baki anda telah dikemaskini.`);
-        location.reload(); // Refresh untuk nampak baki baru
+        // 4. Rekod dalam Log Transaksi
+        await client.from('transactions').insert([{
+            user_id: user.id,
+            amount: amount,
+            type: 'profit',
+            description: `Claim untung harian`
+        }]);
+
+        alert(`Berjaya! RM ${amount.toFixed(2)} telah dimasukkan ke dompet.`);
+        loadActiveMining(); // Refresh data tanpa reload halaman penuh
 
     } catch (err) {
-        alert("Gagal claim: " + err.message);
+        alert("Ralat: " + err.message);
     }
 }
 
 document.addEventListener('DOMContentLoaded', loadActiveMining);
+</script>
 
-    </script>
 </body>
 </html>

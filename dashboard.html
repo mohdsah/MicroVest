@@ -13,57 +13,60 @@
     <div class="app-shell">
         <div style="padding: 20px 20px 0; display: flex; justify-content: space-between; align-items: center;">
             <div>
-                <p style="font-size: 12px; color: #64748b;">Selamat Datang,</p>
-                <h4 id="userEmail" style="font-size: 14px; color: #1e293b;">Memuatkan...</h4>
+                <p style="font-size: 12px; color: #64748b; margin: 0;">Selamat Datang,</p>
+                <h4 id="userEmail" style="font-size: 14px; color: #1e293b; margin: 5px 0;">Memuatkan...</h4>
             </div>
-            <div style="width: 40px; height: 40px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                <i class="fas fa-user" style="color: #8b0000;"></i>
+            <div style="width: 40px; height: 40px; background: #fee2e2; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-user" style="color: #800000;"></i>
             </div>
         </div>
 
-        <div class="wallet-section">
+        <div class="wallet-section" style="background: linear-gradient(135deg, #800000 0%, #4a0000 100%); margin: 20px; padding: 25px; border-radius: 20px; color: white; box-shadow: 0 10px 20px rgba(128,0,0,0.2);">
             <div class="wallet-balance">
-                <h3>Jumlah Baki (Wallet)</h3>
-                <h2 id="userBalance">RM 0.00</h2>
+                <small style="opacity: 0.8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Jumlah Baki (Wallet)</small>
+                <h2 id="userBalance" style="font-size: 32px; margin: 10px 0;">RM 0.00</h2>
             </div>
-            <div style="margin-top: 15px; font-size: 12px; opacity: 0.7;">
-                <i class="fas fa-shield-alt"></i> Akaun Dilindungi
-            </div>
-        </div>
-
-        <div class="quick-actions">
-            <div>
-                <a href="recharge.html" class="action-btn"><i class="fas fa-wallet"></i></a>
-                <p class="action-label">RECHARGE</p>
-            </div>
-            <div>
-                <a href="withdraw.html" class="action-btn"><i class="fas fa-hand-holding-usd"></i></a>
-                <p class="action-label">WITHDRAW</p>
-            </div>
-            <div>
-                <a href="team.html" class="action-btn"><i class="fas fa-users"></i></a>
-                <p class="action-label">TEAM</p>
-            </div>
-            <div>
-                <a href="bank.html" class="action-btn"><i class="fas fa-university"></i></a>
-                <p class="action-label">BANK</p>
+            <div style="margin-top: 15px; font-size: 11px; opacity: 0.7; display: flex; align-items: center; gap: 5px;">
+                <i class="fas fa-shield-alt"></i> Akaun Dilindungi oleh MicroVest SSL
             </div>
         </div>
 
-        <h3 class="section-title">Pelaburan Saya</h3>
+        <div class="quick-actions" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 20px; text-align: center;">
+            <div>
+                <a href="recharge.html" class="action-btn" style="background: white; width: 50px; height: 50px; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-decoration: none; color: #800000;"><i class="fas fa-wallet"></i></a>
+                <p style="font-size: 10px; font-weight: bold; color: #64748b;">DEPOSIT</p>
+            </div>
+            <div>
+                <a href="withdraw.html" class="action-btn" style="background: white; width: 50px; height: 50px; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-decoration: none; color: #800000;"><i class="fas fa-hand-holding-usd"></i></a>
+                <p style="font-size: 10px; font-weight: bold; color: #64748b;">WITHDRAW</p>
+            </div>
+            <div>
+                <a href="team.html" class="action-btn" style="background: white; width: 50px; height: 50px; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-decoration: none; color: #800000;"><i class="fas fa-users"></i></a>
+                <p style="font-size: 10px; font-weight: bold; color: #64748b;">TEAM</p>
+            </div>
+            <div>
+                <a href="profile.html" class="action-btn" style="background: white; width: 50px; height: 50px; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-decoration: none; color: #800000;"><i class="fas fa-id-card"></i></a>
+                <p style="font-size: 10px; font-weight: bold; color: #64748b;">PROFIL</p>
+            </div>
+        </div>
+
+        <h3 style="padding: 0 20px; font-size: 16px; margin-top: 30px; color: #1e293b;">Pelaburan Saya</h3>
         <div id="activeInvestments" style="padding: 0 20px; padding-bottom: 100px;">
-            <p style="text-align: center; color: #94a3b8; font-size: 12px; padding: 20px; background: white; border-radius: 15px;">Tiada pelaburan aktif saat ini.</p>
+            <div style="text-align: center; color: #94a3b8; font-size: 12px; padding: 30px; background: white; border-radius: 20px; border: 1px dashed #e2e8f0;">
+                <i class="fas fa-box-open" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+                Tiada pelaburan aktif saat ini.
+            </div>
         </div>
 
-        <nav class="bottom-nav">
-            <a href="dashboard.html" class="nav-item active">
-                <i class="fas fa-home"></i><span>Home</span>
+        <nav class="bottom-nav" style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #f1f5f9; box-shadow: 0 -5px 15px rgba(0,0,0,0.02);">
+            <a href="dashboard.html" class="nav-item active" style="color: #800000; text-decoration: none; text-align: center; font-size: 12px;">
+                <i class="fas fa-home" style="display: block; font-size: 18px; margin-bottom: 4px;"></i><span>Home</span>
             </a>
-            <a href="product_list.html" class="nav-item">
-                <i class="fas fa-chart-line"></i><span>Produk</span>
+            <a href="product_list.html" class="nav-item" style="color: #94a3b8; text-decoration: none; text-align: center; font-size: 12px;">
+                <i class="fas fa-chart-line" style="display: block; font-size: 18px; margin-bottom: 4px;"></i><span>Produk</span>
             </a>
-            <a href="profile.html" class="nav-item">
-                <i class="fas fa-user-circle"></i><span>Profil</span>
+            <a href="profile.html" class="nav-item" style="color: #94a3b8; text-decoration: none; text-align: center; font-size: 12px;">
+                <i class="fas fa-user-circle" style="display: block; font-size: 18px; margin-bottom: 4px;"></i><span>Profil</span>
             </a>
         </nav>
     </div>
@@ -77,15 +80,23 @@
                 return;
             }
 
-            document.getElementById('userEmail').innerText = user.email.split('@')[0];
+            document.getElementById('userEmail').innerText = user.email.split('@')[0].toUpperCase();
 
-            // Tarik data baki dari table profiles
-            const { data: profile } = await client
-                .from('profiles')
-                .select('balance')
-                .eq('id', user.id)
-                .single();
+            // 1. Ambil data baki awal
+            fetchBalance(user.id);
 
+            // 2. SISTEM REAL-TIME: Dengar perubahan pada table profiles
+            client
+                .channel('public:profiles')
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` }, payload => {
+                    console.log('Baki dikemaskini secara live!');
+                    document.getElementById('userBalance').innerText = `RM ${payload.new.balance.toFixed(2)}`;
+                })
+                .subscribe();
+        }
+
+        async function fetchBalance(uid) {
+            const { data: profile } = await client.from('profiles').select('balance').eq('id', uid).single();
             if (profile) {
                 document.getElementById('userBalance').innerText = `RM ${profile.balance.toFixed(2)}`;
             }

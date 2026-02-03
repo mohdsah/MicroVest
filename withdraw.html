@@ -56,74 +56,95 @@
 
     <script src="app.js"></script>
     <script>
-        let userBankName = "";
-        let userBankAcc = "";
-        let currentBalance = 0;
+    let userBankName = "";
+    let userBankAcc = "";
+    let currentBalance = 0;
 
-        async function initWithdrawPage() {
+    async function initWithdrawPage() {
+        const { data: { user } } = await client.auth.getUser();
+        if (!user) return window.location.href = 'login.html';
+
+        const { data: profile, error } = await client
+            .from('profiles')
+            .select('balance, bank_name, bank_account')
+            .eq('id', user.id)
+            .single();
+
+        if (profile) {
+            currentBalance = parseFloat(profile.balance || 0);
+            document.getElementById('displayBalance').innerText = `RM ${currentBalance.toFixed(2)}`;
+
+            if (profile.bank_name && profile.bank_account) {
+                userBankName = profile.bank_name;
+                userBankAcc = profile.bank_account;
+                document.getElementById('displayBankName').innerText = userBankName;
+                document.getElementById('displayBankAcc').innerText = userBankAcc;
+                
+                const btn = document.getElementById('btnWithdraw');
+                btn.disabled = false;
+                btn.style.background = "#800000";
+                document.getElementById('errorMsg').style.display = "none";
+            } else {
+                document.getElementById('errorMsg').style.display = "block";
+            }
+        }
+    }
+
+    async function processWithdraw() {
+        const amountInput = document.getElementById('withdrawAmount');
+        const amount = parseFloat(amountInput.value);
+
+        // Validasi
+        if (!amount || amount < 50) return alert("Minimum pengeluaran adalah RM 50.00");
+        if (amount > currentBalance) return alert("Baki tidak mencukupi!");
+
+        if (!confirm(`Sahkan penarikan RM ${amount.toFixed(2)} ke ${userBankName}?`)) return;
+
+        const btn = document.getElementById('btnWithdraw');
+        btn.disabled = true; // Elak double submit
+        btn.innerText = "MEMPROSES...";
+
+        try {
             const { data: { user } } = await client.auth.getUser();
-            if (!user) return;
 
-            // Ambil baki dan maklumat bank dari profiles
-            const { data: profile, error } = await client
+            // 1. Rekod permohonan ke table withdrawals (untuk Admin semak)
+            const { error: withdrawErr } = await client.from('withdrawals').insert([{
+                user_id: user.id,
+                amount: amount,
+                bank_name: userBankName,
+                bank_account: userBankAcc,
+                status: 'pending'
+            }]);
+            if (withdrawErr) throw withdrawErr;
+
+            // 2. Tolak baki dari profile
+            const newBalance = currentBalance - amount;
+            const { error: balErr } = await client
                 .from('profiles')
-                .select('balance, bank_name, bank_account')
-                .eq('id', user.id)
-                .single();
+                .update({ balance: newBalance })
+                .eq('id', user.id);
+            if (balErr) throw balErr;
 
-            if (profile) {
-                currentBalance = profile.balance || 0;
-                document.getElementById('displayBalance').innerText = `RM ${currentBalance.toFixed(2)}`;
+            // 3. Masukkan ke dalam Log Transaksi (records.html akan baca ini)
+            await client.from('transactions').insert([{
+                user_id: user.id,
+                amount: amount,
+                type: 'withdraw',
+                description: `Pengeluaran tunai (Pending)`
+            }]);
 
-                if (profile.bank_name && profile.bank_account) {
-                    userBankName = profile.bank_name;
-                    userBankAcc = profile.bank_account;
-                    document.getElementById('displayBankName').innerText = userBankName;
-                    document.getElementById('displayBankAcc').innerText = userBankAcc;
-                    
-                    // Aktifkan butang
-                    const btn = document.getElementById('btnWithdraw');
-                    btn.disabled = false;
-                    btn.style.background = "#800000";
-                } else {
-                    document.getElementById('errorMsg').style.display = "block";
-                }
-            }
+            alert("Permohonan berjaya dihantar! Admin akan memproses dalam masa 24 jam.");
+            window.location.href = 'profile.html';
+
+        } catch (err) {
+            alert("Ralat: " + err.message);
+            btn.disabled = false;
+            btn.innerText = "HANTAR PERMOHONAN";
         }
+    }
 
-        async function processWithdraw() {
-            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+    document.addEventListener('DOMContentLoaded', initWithdrawPage);
+</script>
 
-            if (!amount || amount < 50) return alert("Minimum pengeluaran adalah RM 50.00");
-            if (amount > currentBalance) return alert("Baki tidak mencukupi!");
-
-            if (!confirm(`Tarik RM ${amount.toFixed(2)} ke akaun ${userBankName} (${userBankAcc})?`)) return;
-
-            try {
-                const { data: { user } } = await client.auth.getUser();
-
-                // 1. Tolak baki
-                const newBalance = currentBalance - amount;
-                await client.from('profiles').update({ balance: newBalance }).eq('id', user.id);
-
-                // 2. Simpan rekod pengeluaran
-                await client.from('withdrawals').insert([{
-                    user_id: user.id,
-                    amount: amount,
-                    bank_name: userBankName,
-                    bank_account: userBankAcc,
-                    status: 'pending'
-                }]);
-
-                alert("Permohonan dihantar! Baki anda telah ditolak.");
-                window.location.href = 'records.html';
-
-            } catch (err) {
-                alert("Ralat: " + err.message);
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', initWithdrawPage);
-    </script>
 </body>
 </html>
