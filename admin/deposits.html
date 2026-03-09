@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#020206">
+<title>Admin | Deposit</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../css/v6.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+.dep-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r-xl); padding:20px; margin-bottom:12px;
+  position:relative; overflow:hidden;
+  transition:border-color .2s;
+}
+.dep-card.pending  { border-left:3px solid var(--gold); }
+.dep-card.approved { border-left:3px solid var(--profit); opacity:.7; }
+.dep-card.rejected { border-left:3px solid var(--loss);  opacity:.6; }
+.dep-top { display:flex;align-items:center;justify-content:space-between;margin-bottom:14px; }
+.dep-email { font-size:13px;font-weight:700;margin-bottom:3px; }
+.dep-meta  { font-size:10px;color:var(--ice-3); }
+.dep-amt   { font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--profit); }
+.dep-actions { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px; }
+.proof-thumb { width:100%;border-radius:var(--r-m);margin:10px 0;cursor:pointer;max-height:140px;object-fit:cover;border:1px solid var(--border-hi); }
+.filter-row { display:flex;gap:8px;overflow-x:auto;padding:0 var(--pad) 16px; }
+.filter-btn { padding:8px 16px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--ice-3);font-size:11px;font-weight:700;cursor:pointer;font-family:'Instrument Sans',sans-serif;white-space:nowrap;flex-shrink:0;transition:.2s; }
+.filter-btn.on { background:var(--v-dim);border-color:var(--v-border);color:var(--v-pale); }
+.proof-modal { position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px; }
+.proof-modal img { max-width:100%;max-height:90vh;border-radius:var(--r-m); }
+</style>
+</head>
+<body>
+<div class="amb-v"></div>
+<div class="shell">
+  <div class="pg-hd anim a1">
+    <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+  <a href="robots.html" style="color:#FB923C;font-size:11px;font-weight:800;text-decoration:none;display:flex;align-items:center;gap:5px;padding:7px 12px;border:1px solid rgba(251,146,60,.2);border-radius:9px;background:rgba(251,146,60,.06)">🤖 Robot</a>
+    <a href="tickets.html" style="color:var(--v-pale);font-size:11px;font-weight:800;text-decoration:none;display:flex;align-items:center;gap:5px;padding:7px 12px;border:1px solid rgba(124,58,237,.2);border-radius:9px;background:rgba(124,58,237,.06)">🎫 Tiket</a>
+    <div><div class="pg-title">Pengurusan Deposit</div><div class="pg-sub">Luluskan atau tolak permohonan</div></div>
+    <div class="chip chip-g" style="margin-left:auto" id="pendCount">0 Pending</div>
+  </div>
+
+  <!-- FILTER -->
+  <div class="filter-row anim a2">
+    <button class="filter-btn on" onclick="filterDep('pending',this)">⏳ Pending</button>
+    <button class="filter-btn" onclick="filterDep('approved',this)">✅ Diluluskan</button>
+    <button class="filter-btn" onclick="filterDep('rejected',this)">❌ Ditolak</button>
+    <button class="filter-btn" onclick="filterDep('all',this)">📋 Semua</button>
+  </div>
+
+  <div id="depList" style="padding:0 var(--pad)">
+    <div class="skel skel-row anim a1" style="border-radius:22px;margin-bottom:12px"></div>
+    <div class="skel skel-row anim a2" style="border-radius:22px;margin-bottom:12px"></div>
+    <div class="skel skel-row anim a3" style="border-radius:22px"></div>
+  </div>
+</div>
+
+<div id="proofModal" style="display:none"></div>
+
+<script src="../js/config.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+let _user, _allDep=[], _curFilter='pending';
+
+async function guardAdmin() {
+  const { data:{session} } = await db.auth.getSession();
+  if (!session) { location.href='../login.html'; return null; }
+  const { data:p } = await db.from('profiles').select('is_admin').eq('id',session.user.id).single();
+  if (!p?.is_admin) { location.href='../dashboard.html'; return null; }
+  return session.user;
+}
+
+async function loadDeposits(filter='pending') {
+  let q = db.from('transactions').select('*, profiles(email,balance,total_deposit,vip_rank)')
+    .eq('type','deposit').order('created_at',{ascending:false}).limit(60);
+  if (filter!=='all') q = q.eq('status',filter);
+  const { data } = await q;
+  _allDep = data||[];
+  renderDeposits(_allDep);
+  const pend = _allDep.filter(d=>d.status==='pending').length;
+  document.getElementById('pendCount').textContent = pend+' Pending';
+}
+
+function filterDep(f,btn) {
+  _curFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  loadDeposits(f);
+}
+
+function renderDeposits(deps) {
+  const el = document.getElementById('depList');
+  if (!deps.length) { el.innerHTML='<div style="text-align:center;padding:40px;color:var(--ice-3)">Tiada rekod deposit</div>'; return; }
+  el.innerHTML = deps.map(d => {
+    const p = d.profiles||{};
+    const rank = MV.getRank(p.total_deposit||0);
+    return `
+    <div class="dep-card ${d.status}" id="card-${d.id}">
+      <div class="dep-top">
+        <div>
+          <div class="dep-email">${p.email||d.user_id.slice(0,12)+'…'}</div>
+          <div class="dep-meta">${rank.icon} ${rank.name} · ${UI.ago(d.created_at)}</div>
+        </div>
+        <div class="dep-amt">+${UI.rm(d.amount)}</div>
+      </div>
+      ${d.proof_url ? `<img src="${d.proof_url}" class="proof-thumb" onclick="viewProof('${d.proof_url}')" onerror="this.style.display='none'">` : '<div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:12px;text-align:center;font-size:11px;color:var(--ice-3);margin:10px 0">📎 Tiada resit dimuat naik</div>'}
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:${d.status==='pending'?'0':'0'}px">
+        <div style="flex:1">
+          <div style="font-size:10px;color:var(--ice-3)">Baki semasa</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700">${UI.rm(p.balance||0)}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--ice-3)">Total deposit</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--profit)">${UI.rm(p.total_deposit||0)}</div>
+        </div>
+      </div>
+      ${d.status==='pending' ? `
+      <div class="dep-actions" style="margin-top:14px">
+        <button class="btn btn-profit btn-sm" onclick="approveDeposit('${d.id}','${d.user_id}',${d.amount})">
+          ✅ Luluskan
+        </button>
+        <button class="btn btn-sm" style="background:var(--loss-dim);color:var(--loss);border:1px solid rgba(239,68,68,0.2)" onclick="rejectDeposit('${d.id}','${d.user_id}',${d.amount})">
+          ❌ Tolak
+        </button>
+      </div>` : `<div style="margin-top:10px;font-size:11px;color:${d.status==='approved'?'var(--profit)':'var(--loss)'};font-weight:700">${d.status==='approved'?'✅ Diluluskan':'❌ Ditolak'} · ${d.approved_at?UI.ago(d.approved_at):''}</div>`}
+    </div>`;
+  }).join('');
+}
+
+async function approveDeposit(txId, userId, amount) {
+  UI.confirm('Luluskan Deposit', `Sahkan luluskan deposit <strong>${UI.rm(amount)}</strong>?`, async () => {
+    UI.loading('Memproses...');
+    // Atomic: credit balance via RPC, then update metadata with fresh read
+    await RPC.creditProfit(userId, amount);                          // atomic balance+earned
+    await RPC.incWallet(userId, 'main', amount);                     // atomic wallet sync
+
+    // Update total_deposit + VIP rank with fresh read
+    const { data:p } = await db.from('profiles').select('total_deposit').eq('id',userId).single();
+    const newDep  = (p?.total_deposit||0) + amount;
+    const newRank = MV.getRank(newDep);
+    await db.from('profiles').update({ total_deposit:newDep, vip_rank:newRank.id }).eq('id',userId);
+    await db.from('transactions').update({ status:'approved', approved_at:new Date().toISOString() }).eq('id',txId);
+
+    // Notifications
+    await db.from('notifications').insert([{
+      user_id:userId, type:'deposit',
+      message:`✅ Deposit ${UI.rm(amount)} telah diluluskan! Baki anda: ${UI.rm(newBal)}`,
+    }]);
+
+    // Check VIP upgrade notification
+    const oldRank = MV.getRank(p?.total_deposit||0);
+    if (newRank.id !== oldRank.id) {
+      await db.from('notifications').insert([{
+        user_id:userId, type:'vip',
+        message:`👑 Tahniah! Anda naik ke rank ${newRank.icon} ${newRank.name}!`,
+      }]);
+    }
+
+    // MVT earn reward
+    const mvtEarn = Math.floor(amount * MV.TOKEN.earnRate);
+    if (mvtEarn > 0) {
+      await RPC.incMVT(userId, mvtEarn);
+    }
+
+    UI.unload();
+    UI.toast(`✅ Deposit ${UI.rm(amount)} diluluskan!`,'success');
+    loadDeposits(_curFilter);
+  }, 'Luluskan');
+}
+
+async function rejectDeposit(txId, userId, amount) {
+  UI.confirm('Tolak Deposit', `Tolak permohonan deposit ${UI.rm(amount)}?`, async () => {
+    UI.loading();
+    await db.from('transactions').update({ status:'rejected', rejection_reason:'Ditolak oleh admin' }).eq('id',txId);
+    await db.from('notifications').insert([{
+      user_id:userId, type:'deposit',
+      message:`❌ Permohonan deposit ${UI.rm(amount)} ditolak. Hubungi sokongan untuk maklumat lanjut.`,
+    }]);
+    UI.unload();
+    UI.toast('Deposit ditolak.','warning');
+    loadDeposits(_curFilter);
+  }, 'Tolak', true);
+}
+
+function viewProof(url) {
+  const m = document.getElementById('proofModal');
+  m.style.display='flex';
+  m.innerHTML=`<div class="proof-modal" onclick="document.getElementById('proofModal').style.display='none'"><img src="${url}"></div>`;
+}
+
+async function init() {
+  UI.loading();
+  _user = await guardAdmin();
+  if (!_user) return;
+  await loadDeposits('pending');
+
+  // Live listen
+  db.channel('admin-dep').on('postgres_changes',{event:'INSERT',schema:'public',table:'transactions',filter:`type=eq.deposit`},()=>{
+    loadDeposits(_curFilter);
+    UI.toast('🔔 Deposit baru masuk!','info',3000);
+  }).subscribe();
+
+  UI.unload();
+}
+window.addEventListener('load',init);
+</script>
+</body>
+</html>

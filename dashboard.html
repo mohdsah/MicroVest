@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#020206">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>MicroVest v6 | Dashboard</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="css/v6.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ── TOPBAR ──────────────────────────────────────────────── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px var(--pad) 10px;
+  position: sticky; top: 0; z-index: 200;
+  background: linear-gradient(to bottom, rgba(2,2,6,0.98) 70%, transparent);
+  backdrop-filter: blur(20px);
+}
+.logo-mark {
+  display: flex; align-items: center; gap: 8px;
+}
+.logo-icon {
+  width: 32px; height: 32px; border-radius: 10px;
+  background: linear-gradient(135deg,#5B21B6,#7C3AED);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; box-shadow: 0 4px 14px var(--v-glow);
+}
+.logo-text {
+  font-family: var(--font-impact);
+  font-size: 20px; letter-spacing: 2px;
+  background: linear-gradient(90deg, #E2E8FF, #A78BFA);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.icon-btn {
+  width: 38px; height: 38px; border-radius: 14px;
+  background: var(--glass); border: 1px solid var(--border-hi);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ice-2); font-size: 15px; text-decoration: none;
+  position: relative; transition: background .2s;
+}
+.icon-btn.has-dot::after {
+  content:''; position:absolute; top:7px; right:7px;
+  width:7px; height:7px; border-radius:50%; background:#EF4444;
+  border:2px solid var(--void); animation:blink 2s infinite;
+}
+.avatar-btn {
+  width: 38px; height: 38px; border-radius: 14px;
+  background: linear-gradient(135deg,#5B21B6,#7C3AED);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-impact); font-size: 16px; color: #fff;
+  text-decoration: none; letter-spacing: 1px;
+}
+
+/* ── GREETING ────────────────────────────────────────────── */
+.greeting-row { padding: 10px var(--pad) 20px; }
+.greeting-hi  { font-size: 11px; color: var(--ice-3); letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 3px; }
+.greeting-name{ font-family: var(--font-serif); font-size: 24px; font-style: italic; margin-bottom: 8px; }
+.greeting-rank{ display: inline-flex; align-items: center; gap: 7px; padding: 5px 14px; border-radius: var(--r-pill); font-size: 11px; font-weight: 700; }
+
+/* ── MARKET TICKER ───────────────────────────────────────── */
+.market-ticker {
+  border: 1px solid var(--v-border); border-radius: var(--r-pill);
+  background: rgba(10,10,22,0.97); padding: 10px 16px;
+  margin: 0 var(--pad) 18px;
+  display: flex; align-items: center; gap: 12px; overflow: hidden;
+}
+.tk-live { display: flex; align-items: center; gap: 7px; flex-shrink: 0;
+  font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--v-pale); }
+.tk-dot  { width: 6px; height: 6px; border-radius: 50%; background: var(--profit); box-shadow: 0 0 8px var(--profit); animation: blink 1.8s infinite; }
+.tk-scroll { flex: 1; overflow: hidden; }
+.tk-inner  { display: inline-flex; gap: 36px; animation: ticker-scroll 30s linear infinite; white-space: nowrap; }
+.tk-seg    { font-size: 11px; color: var(--ice-2); display: inline-flex; align-items: center; gap: 6px; }
+.tk-seg .pos { color: var(--profit); font-weight: 700; font-family: var(--font-data); }
+.tk-seg .neg { color: var(--loss); font-weight: 700; font-family: var(--font-data); }
+
+/* ── MULTI WALLET ────────────────────────────────────────── */
+.wallet-row {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px; padding: 0 var(--pad); margin-bottom: 20px;
+}
+
+/* ── QUICK ACTIONS ───────────────────────────────────────── */
+.qa-row {
+  display: grid; grid-template-columns: repeat(5,1fr);
+  gap: 8px; padding: 0 var(--pad); margin-bottom: 24px;
+}
+.qa-item {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: var(--r-l); padding: 13px 4px;
+  text-decoration: none; color: var(--ice-2);
+  transition: all .25s var(--spring);
+}
+.qa-item:active { transform: scale(0.85); }
+.qa-ico { width: 36px; height: 36px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.qa-lbl { font-size: 9px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; }
+
+/* ── PLATFORM STATS ──────────────────────────────────────── */
+.ps-row {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 8px; padding: 0 var(--pad); margin-bottom: 24px;
+}
+.ps-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-m); padding: 12px 8px; text-align: center; }
+.ps-v    { font-family: var(--font-data); font-size: 13px; font-weight: 700; display: block; margin-bottom: 3px; }
+.ps-l    { font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ice-3); }
+
+/* ── ANALYTICS CHART ─────────────────────────────────────── */
+.mini-chart-wrap {
+  background: var(--pit); border: 1px solid var(--border-hi);
+  border-radius: var(--r-xl); padding: 20px; margin: 0 var(--pad) 22px;
+}
+.chart-hd {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+}
+.chart-t   { font-family: var(--font-serif); font-size: 15px; }
+.chart-sub { font-size: 10px; color: var(--ice-3); margin-top: 2px; }
+.chart-total{ font-family: var(--font-data); font-size: 18px; font-weight: 700; color: var(--v-pale); }
+
+/* ── LIVE FEED SECTION ───────────────────────────────────── */
+.live-feed {
+  background: rgba(6,6,14,0.97); border: 1px solid var(--border-hi);
+  border-radius: var(--r-xl); overflow: hidden;
+  margin: 0 var(--pad) 22px;
+}
+.live-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+}
+.live-badge { display: flex; align-items: center; gap: 8px; }
+.live-dot   { width: 6px; height: 6px; border-radius: 50%; background: var(--profit); box-shadow: 0 0 8px var(--profit); animation: blink 1.6s infinite; }
+.live-count { font-family: var(--font-data); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: var(--r-pill); background: var(--v-dim); color: var(--v-pale); }
+#liveList   { max-height: 240px; overflow-y: auto; }
+
+/* ── ACTIVE PLAN PREVIEW ─────────────────────────────────── */
+.inv-row {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-l); padding: 16px; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 12px;
+  position: relative; overflow: hidden; cursor: pointer;
+  transition: border-color .2s;
+}
+.inv-row:hover { border-color: var(--v-border); }
+.inv-prog-bar { position: absolute; bottom: 0; left: 0; height: 2px; border-radius: 0 0 0 var(--r-l); }
+
+/* ── NOTIF DRAWER ────────────────────────────────────────── */
+.notif-drawer {
+  position: fixed; top: 0; right: 0; width: min(360px,100%); height: 100dvh;
+  background: rgba(4,4,10,0.98); backdrop-filter: blur(30px);
+  border-left: 1px solid var(--border-hi); z-index: 800;
+  transform: translateX(110%); transition: transform .42s var(--smooth);
+  overflow-y: auto;
+}
+.notif-drawer.open { transform: translateX(0); }
+.notif-item { padding: 14px 20px; border-bottom: 1px solid var(--border); }
+.notif-item.unread { background: rgba(124,58,237,0.04); }
+.ni-msg  { font-size: 13px; font-weight: 600; line-height: 1.5; }
+.ni-time { font-size: 10px; color: var(--ice-3); margin-top: 4px; }
+
+/* ── LANG PICKER ─────────────────────────────────────────── */
+.lang-bar { display: flex; gap: 8px; overflow-x: auto; padding: 0 var(--pad) 18px; }
+</style>
+</head>
+<body>
+<div class="amb-v"></div><div class="amb-o"></div>
+<div class="shell">
+
+  <!-- TOPBAR -->
+  <div class="topbar anim a1">
+    <div class="logo-mark">
+      <div class="logo-icon">⚡</div>
+      <span class="logo-text">MICROVEST</span>
+    </div>
+    <div class="topbar-right">
+      <a href="notifications.html" class="icon-btn" id="notifBtn" style="position:relative">
+        <i class="far fa-bell"></i>
+        <span id="notifDot" style="display:none;position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:#7C3AED;box-shadow:0 0 6px rgba(124,58,237,.7)"></span>
+      </a>
+      <a href="#" class="icon-btn" onclick="toggleLang(event)" title="Bahasa">
+        <i class="fas fa-globe"></i>
+      </a>
+      <a href="profile.html" class="avatar-btn" id="avatarBtn">?</a>
+    </div>
+  </div>
+
+  <!-- GREETING -->
+  <div class="greeting-row anim a1">
+    <div class="greeting-hi" data-i18n="dashboard.greeting">Selamat Datang</div>
+    <div class="greeting-name" id="greetName">—</div>
+    <div class="greeting-rank" id="greetRank">—</div>
+  </div>
+
+  <!-- LANG SWITCHER (hidden by default) -->
+  <div id="langBar" class="lang-bar" style="display:none"></div>
+
+  <!-- MARKET TICKER -->
+  <div class="market-ticker anim a2">
+    <div class="tk-live"><div class="tk-dot"></div>LIVE</div>
+    <div class="tk-scroll">
+      <div class="tk-inner" id="tkInner">
+        <span class="tk-seg">MVT/MYR <span class="pos">RM 0.085</span> <span class="pos">+2.4%</span></span>
+        <span class="tk-seg">Users <span class="pos">12,548</span></span>
+        <span class="tk-seg">Total Deposit <span class="pos">RM 1.28M</span></span>
+        <span class="tk-seg">Mining Active <span class="pos">4,291</span></span>
+        <span class="tk-seg">24h Profit <span class="pos">RM 48,200</span></span>
+        <span class="tk-seg">Plan Gold <span class="pos">+90%</span></span>
+        <span class="tk-seg">MVT/MYR <span class="pos">RM 0.085</span> <span class="pos">+2.4%</span></span>
+        <span class="tk-seg">Users <span class="pos">12,548</span></span>
+        <span class="tk-seg">Total Deposit <span class="pos">RM 1.28M</span></span>
+        <span class="tk-seg">Mining Active <span class="pos">4,291</span></span>
+        <span class="tk-seg">24h Profit <span class="pos">RM 48,200</span></span>
+        <span class="tk-seg">Plan Gold <span class="pos">+90%</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MULTI WALLET CARDS -->
+  <div class="wallet-row anim a2">
+    <div class="wallet-card wallet-main" onclick="location.href='wallet.html?w=main'">
+      <div class="label wallet-label" style="color:rgba(167,139,250,0.7)">Main <span id="liveTime" style="font-family:JetBrains Mono,monospace;font-size:8px;opacity:.4;margin-left:4px"></span></div>
+      <div class="wallet-val" id="walMain" style="font-size:20px">—</div>
+      <div class="wallet-sub" style="color:rgba(167,139,250,0.5)">Utama</div>
+    </div>
+    <div class="wallet-card wallet-mining" onclick="location.href='wallet.html?w=mining'">
+      <div class="label wallet-label" style="color:rgba(251,146,60,0.7)">Mining</div>
+      <div class="wallet-val" id="walMining" style="font-size:20px;color:#FB923C">—</div>
+      <div class="wallet-sub" style="color:rgba(251,146,60,0.5)">Profit</div>
+    </div>
+    <div class="wallet-card wallet-bonus" onclick="location.href='wallet.html?w=bonus'">
+      <div class="label wallet-label" style="color:rgba(134,239,172,0.7)">Bonus</div>
+      <div class="wallet-val" id="walBonus" style="font-size:20px;color:#86EFAC">—</div>
+      <div class="wallet-sub" style="color:rgba(134,239,172,0.5)">Komisen</div>
+    </div>
+  </div>
+
+  <!-- QUICK ACTIONS -->
+  <div class="qa-row anim a2">
+    <a href="wallet.html?tab=deposit" class="qa-item">
+      <div class="qa-ico" style="background:rgba(34,197,94,0.12)">💰</div>
+      <span class="qa-lbl" data-i18n="wallet.deposit">Deposit</span>
+    </a>
+    <a href="wallet.html?tab=withdraw" class="qa-item">
+      <div class="qa-ico" style="background:rgba(239,68,68,0.1)">💸</div>
+      <span class="qa-lbl" data-i18n="wallet.withdraw">Withdraw</span>
+    </a>
+    <a href="investment.html" class="qa-item">
+      <div class="qa-ico" style="background:rgba(124,58,237,0.12)">📈</div>
+      <span class="qa-lbl" data-i18n="nav.invest">Invest</span>
+    </a>
+    <a href="mining.html" class="qa-item">
+      <div class="qa-ico" style="background:rgba(249,115,22,0.12)">⛏️</div>
+      <span class="qa-lbl" data-i18n="nav.mining">Mining</span>
+    </a>
+    <a href="market.html" class="qa-item">
+      <div class="qa-ico" style="background:rgba(234,179,8,0.12)">🪙</div>
+      <span class="qa-lbl" data-i18n="nav.market">Market</span>
+    </a>
+  </div>
+
+  <!-- PLATFORM STATS -->
+  <div class="ps-row anim a3">
+    <div class="ps-item"><span class="ps-v" style="color:var(--v-pale)" id="ps-users">—</span><span class="ps-l">Users</span></div>
+    <div class="ps-item"><span class="ps-v" style="color:var(--profit)" id="ps-dep">—</span><span class="ps-l">Deposit</span></div>
+    <div class="ps-item"><span class="ps-v" style="color:var(--loss)" id="ps-with">—</span><span class="ps-l">Withdraw</span></div>
+    <div class="ps-item"><span class="ps-v" style="color:var(--gold)" id="ps-mine">—</span><span class="ps-l">Mining</span></div>
+  </div>
+
+  <!-- PROFIT ANALYTICS CHART -->
+  <div class="mini-chart-wrap anim a3">
+    <div class="chart-hd">
+      <div>
+        <div class="chart-t" data-i18n="dashboard.total_profit">Profit Analytics</div>
+        <div class="chart-sub">7 hari terakhir</div>
+      </div>
+      <div style="text-align:right">
+        <div class="chart-total" id="chartTotal">RM 0.00</div>
+        <div class="chip chip-g" style="font-size:9px;margin-top:4px" id="chartChange">+0%</div>
+      </div>
+    </div>
+    <canvas id="profitChart" height="120"></canvas>
+  </div>
+
+  <!-- LIVE ACTIVITY FEED -->
+  <div class="anim a4">
+    <div class="sec" style="margin-bottom:12px">
+      <div>
+        <span class="sec-t" data-i18n="dashboard.live_feed">Feed Langsung</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="live-count" id="liveCount">0</span>
+        <a href="analytics.html" class="sec-lk">Analitik →</a>
+      </div>
+    </div>
+    <div class="live-feed">
+      <div class="live-hd">
+        <div class="live-badge">
+          <div class="live-dot"></div>
+          <span style="font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--v-pale)">Realtime</span>
+        </div>
+        <span style="font-size:10px;color:var(--ice-3)" id="liveTs">—</span>
+      </div>
+      <div id="liveList">
+        <!-- RT.pushFeedItem() injects here -->
+        <div style="text-align:center;padding:30px;color:var(--ice-3);font-size:12px">
+          Menunggu aktiviti live...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVE INVESTMENTS -->
+  <div class="anim a4">
+    <div class="sec"><span class="sec-t" data-i18n="dashboard.active_plans">Plan Aktif</span><a href="investment.html" class="sec-lk">Semua →</a></div>
+    <div id="activePlans" style="padding:0 var(--pad)">
+      <div class="skel skel-row" style="border-radius:22px;margin-bottom:10px"></div>
+      <div class="skel skel-row" style="border-radius:22px"></div>
+    </div>
+  </div>
+
+  <!-- MISSIONS PREVIEW -->
+  <div class="anim a5">
+    <div class="sec" style="margin-top:24px"><span class="sec-t" data-i18n="nav.missions">Misi Harian</span><a href="missions.html" class="sec-lk">Lihat Semua →</a></div>
+    <div id="missionPreview" style="padding:0 var(--pad)">
+      <div class="skel skel-row" style="border-radius:22px;margin-bottom:10px"></div>
+    </div>
+  </div>
+
+</div>
+
+
+  <!-- ANNOUNCEMENT BANNER (loaded from system_settings) -->
+  <div id="announceBanner" style="display:none;margin:0 var(--pad) 14px">
+    <div style="background:linear-gradient(135deg,rgba(249,115,22,.12),rgba(249,115,22,.04));border:1px solid rgba(249,115,22,.25);border-radius:14px;padding:12px 16px;display:flex;align-items:flex-start;gap:10px;position:relative">
+      <span style="font-size:18px;flex-shrink:0">📢</span>
+      <div style="flex:1;font-size:12px;color:rgba(226,232,255,.8);line-height:1.6" id="announceText"></div>
+      <button onclick="this.closest('[id]').style.display='none'"
+        style="background:none;border:none;color:rgba(226,232,255,.3);cursor:pointer;font-size:16px;flex-shrink:0;padding:0;line-height:1">✕</button>
+    </div>
+  </div>
+
+<!-- AI ROBOT QUICK STATUS -->
+  <div style="padding:0 var(--pad) 20px" class="anim a3">
+    <!-- AI Robot Card -->
+    <div style="background:linear-gradient(135deg,rgba(124,58,237,.1),rgba(91,33,182,.05));border:1px solid rgba(124,58,237,.25);border-radius:var(--r-xl);padding:18px;cursor:pointer;position:relative;overflow:hidden;margin-bottom:10px" onclick="location.href='robots.html'">
+      <!-- Circuit bg -->
+      <div style="position:absolute;inset:0;opacity:.04;background-image:linear-gradient(rgba(124,58,237,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,.5) 1px,transparent 1px);background-size:18px 18px;pointer-events:none"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;position:relative">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;border-radius:10px;background:rgba(124,58,237,.2);display:flex;align-items:center;justify-content:center;font-size:16px">🤖</div>
+          <div style="font-size:13px;font-weight:800;color:#C4B5FD">AI Robot Aktif</div>
+        </div>
+        <a href="robots.html" style="font-size:10px;color:rgba(167,139,250,.7);text-decoration:none;font-weight:700">Lihat Semua →</a>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;position:relative">
+        <div style="text-align:center">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:#A78BFA" id="mqMachines">—</div>
+          <div style="font-size:9px;color:rgba(167,139,250,.6);font-weight:700;margin-top:2px">BOT AKTIF</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--profit)" id="mqDaily">—</div>
+          <div style="font-size:9px;color:rgba(34,197,94,.6);font-weight:700;margin-top:2px">RM/HARI</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:#F97316" id="mqPending">—</div>
+          <div style="font-size:9px;color:rgba(249,115,22,.6);font-weight:700;margin-top:2px">BOLEH CLAIM</div>
+        </div>
+      </div>
+    </div>
+    <!-- Mining mini card -->
+    <div style="background:linear-gradient(135deg,rgba(249,115,22,.07),rgba(249,115,22,.02));border:1px solid rgba(249,115,22,.15);border-radius:var(--r-xl);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:14px" onclick="location.href='mining.html'">
+      <div style="width:34px;height:34px;border-radius:10px;background:rgba(249,115,22,.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⛏️</div>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:800;color:#FB923C;margin-bottom:2px">Mining Rig</div>
+        <div style="font-size:11px;color:var(--ice-3)"><span id="mqMachinesM">—</span> mesin aktif · <span style="color:var(--profit)" id="mqDailyM">—</span>/hari</div>
+      </div>
+      <i class="fas fa-chevron-right" style="color:rgba(249,115,22,.4);font-size:11px"></i>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a href="dashboard.html" class="nav-item active"><i class="fas fa-house"></i><span>Home</span></a>
+  <a href="investment.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Invest</span></a>
+  <a href="robots.html" class="nav-item" style="position:relative">
+    <span style="position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#5B21B6,#7C3AED);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(124,58,237,.5);pointer-events:none"></span><i class="fas fa-robot"></i><span>Robot</span></a>
+  <a href="mining.html" class="nav-item"><i class="fas fa-microchip"></i><span>Mining</span></a>
+  <a href="profile.html" class="nav-item"><i class="fas fa-user-circle"></i><span>Profil</span></a>
+</nav>
+
+<!-- NOTIF DRAWER -->
+<div class="notif-drawer" id="notifDrawer">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:22px 20px 14px;border-bottom:1px solid var(--border)">
+    <div style="font-family:'DM Serif Display',serif;font-size:17px">Notifikasi</div>
+    <button onclick="toggleNotif(event)" style="background:none;border:none;color:var(--ice-2);font-size:20px;cursor:pointer;line-height:1">✕</button>
+  </div>
+  <div id="notifList"><div style="text-align:center;padding:40px;color:var(--ice-3)">Tiada notifikasi</div></div>
+</div>
+<div id="drawerOverlay" onclick="toggleNotif(event)" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);z-index:799;display:none"></div>
+
+<script src="js/config.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/realtime.js"></script>
+<script src="js/automation.js"></script>
+<script src="js/lang.js"></script>
+<script>
+let _user, _profile, _chartInst;
+
+/* ── NOTIF DRAWER ─────────────────────────────────────────── */
+let _nd = false;
+function toggleNotif(e) {
+  e.preventDefault(); _nd = !_nd;
+  document.getElementById('notifDrawer').classList.toggle('open', _nd);
+  document.getElementById('drawerOverlay').style.display = _nd ? 'block' : 'none';
+  if (_nd) loadNotifs();
+}
+function toggleLang(e) {
+  e.preventDefault();
+  const lb = document.getElementById('langBar');
+  const open = lb.style.display !== 'none';
+  lb.style.display = open ? 'none' : 'flex';
+  if (!open) Lang.renderSwitcher('langBar');
+}
+
+/* ── NOTIFICATIONS ─────────────────────────────────────────── */
+async function loadNotifs() {
+  const { data } = await db.from('notifications').select('*').eq('user_id', _user.id)
+    .order('created_at', {ascending:false}).limit(30);
+  const el = document.getElementById('notifList');
+  el.innerHTML = (data||[]).length ? data.map(n => `
+    <div class="notif-item ${n.is_read?'':'unread'}">
+      <div class="ni-msg">${n.message}</div>
+      <div class="ni-time">${UI.ago(n.created_at)}</div>
+    </div>`).join('') : '<div style="text-align:center;padding:40px;color:var(--ice-3)">Tiada notifikasi</div>';
+  const unread = (data||[]).filter(n=>!n.is_read).length;
+  if (unread > 0) document.getElementById('notifBtn').classList.add('has-dot');
+  await db.from('notifications').update({is_read:true}).eq('user_id',_user.id).eq('is_read',false);
+  document.getElementById('notifBtn').classList.remove('has-dot');
+}
+
+/* ── MULTI WALLET ──────────────────────────────────────────── */
+async function loadWallets(profile) {
+  // Try wallets table first, fallback to single balance
+  const { data: wallets, error } = await db.from('wallets').select('*').eq('user_id', _user.id);
+  if (wallets?.length) {
+    const main   = wallets.find(w=>w.wallet_type==='main');
+    const mining = wallets.find(w=>w.wallet_type==='mining');
+    const bonus  = wallets.find(w=>w.wallet_type==='bonus');
+    document.getElementById('walMain').textContent   = 'RM ' + (main?.balance||0).toFixed(2);
+    document.getElementById('walMining').textContent = 'RM ' + (mining?.balance||0).toFixed(2);
+    document.getElementById('walBonus').textContent  = 'RM ' + (bonus?.balance||0).toFixed(2);
+  } else {
+    // Fallback to profile balance breakdown
+    document.getElementById('walMain').textContent   = 'RM ' + (profile.balance||0).toFixed(2);
+    document.getElementById('walMining').textContent = 'RM ' + (profile.mining_wallet||0).toFixed(2);
+    document.getElementById('walBonus').textContent  = 'RM ' + (profile.bonus_wallet||0).toFixed(2);
+  }
+}
+
+/* ── PROFIT CHART ──────────────────────────────────────────── */
+async function buildProfitChart(userId) {
+  // Fetch last 7 days of approved transactions
+  const since = new Date(Date.now() - 7*86400000).toISOString();
+  const { data } = await db.from('transactions')
+    .select('type, amount, created_at')
+    .eq('user_id', userId).eq('status','approved')
+    .gte('created_at', since)
+    .in('type', ['profit','mining','bonus','referral']);
+
+  // Bucket by day
+  const days = Array.from({length:7}, (_,i) => {
+    const d = new Date(Date.now() - (6-i)*86400000);
+    return d.toLocaleDateString('ms-MY',{weekday:'short'});
+  });
+  const buckets = Array(7).fill(0);
+  (data||[]).forEach(tx => {
+    const daysAgo = Math.floor((Date.now() - new Date(tx.created_at)) / 86400000);
+    if (daysAgo < 7) buckets[6-daysAgo] += tx.amount || 0;
+  });
+
+  const total  = buckets.reduce((s,v)=>s+v,0);
+  const change = buckets[5] > 0 ? ((buckets[6]-buckets[5])/buckets[5]*100).toFixed(1) : '0';
+
+  document.getElementById('chartTotal').textContent = UI.rm(total);
+  const chg = document.getElementById('chartChange');
+  chg.textContent = (change >= 0 ? '+' : '') + change + '%';
+  chg.style.background = change >= 0 ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)';
+  chg.style.color = change >= 0 ? '#22C55E' : '#EF4444';
+
+  if (_chartInst) _chartInst.destroy();
+  const ctx = document.getElementById('profitChart').getContext('2d');
+  const grad = ctx.createLinearGradient(0,0,0,120);
+  grad.addColorStop(0, 'rgba(124,58,237,0.35)');
+  grad.addColorStop(1, 'rgba(124,58,237,0)');
+
+  _chartInst = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: days,
+      datasets: [{
+        label: 'Profit (RM)',
+        data: buckets,
+        borderColor: '#7C3AED',
+        backgroundColor: grad,
+        borderWidth: 2,
+        pointRadius: 4,
+        pointBackgroundColor: '#7C3AED',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 1.5,
+        fill: true,
+        tension: 0.4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#3D4466', font:{size:10} } },
+        y: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#3D4466', font:{size:10}, callback: v=>'RM'+v } },
+      },
+    },
+  });
+}
+
+/* ── ACTIVE INVESTMENTS ───────────────────────────────────── */
+async function loadActivePlans(userId) {
+  const { data } = await db.from('investments').select('*').eq('user_id',userId).eq('status','active').limit(3);
+  const el = document.getElementById('activePlans');
+  if (!data?.length) {
+    el.innerHTML = `<div style="text-align:center;padding:28px;background:var(--surface);border:1px solid var(--border);border-radius:22px">
+      <div style="font-size:36px;margin-bottom:10px">📈</div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:6px" data-i18n="dashboard.no_plans">Tiada pelaburan aktif</div>
+      <a href="investment.html" class="btn btn-v btn-sm" style="display:inline-flex;text-decoration:none;margin-top:10px">Labur Sekarang</a>
+    </div>`; return;
+  }
+  el.innerHTML = data.map(inv => {
+    const p   = MV.getPlan(inv.plan_id)||{icon:'📈',name:inv.plan_id,color:'#7C3AED'};
+    const pct = Math.min(((Date.now()-new Date(inv.created_at))/(new Date(inv.end_at)-new Date(inv.created_at)))*100,100);
+    const canClaim = !inv.last_claimed_at || (Date.now()-new Date(inv.last_claimed_at))>=23.5*3600000;
+    return `
+    <div class="inv-row" onclick="location.href='investment.html'">
+      <div style="font-size:28px;flex-shrink:0">${p.icon}</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">${p.name}</div>
+        <div style="margin-bottom:8px">
+          <div class="prog-t"><div class="prog-f prog-v" style="width:${pct.toFixed(0)}%"></div></div>
+        </div>
+        <div style="font-size:10px;color:var(--ice-3)">${UI.countdown(inv.end_at)} lagi</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-family:var(--font-data);font-size:14px;font-weight:700;color:var(--profit)">+${UI.rm(inv.daily_profit)}</div>
+        <div style="font-size:10px;margin-top:3px;color:${canClaim?'var(--v-pale)':'var(--ice-3)'}">${canClaim?'▶ Claim':'✓ Done'}</div>
+      </div>
+      <div class="inv-prog-bar" style="width:${pct.toFixed(0)}%;background:${p.color}"></div>
+    </div>`;
+  }).join('');
+}
+
+/* ── DAILY MISSIONS PREVIEW ───────────────────────────────── */
+async function loadMissionPreview(userId) {
+  const { data: done } = await db.from('user_missions').select('mission_id').eq('user_id',userId);
+  const doneSet = new Set((done||[]).map(m=>m.mission_id));
+  const daily = MV.MISSIONS.filter(m=>m.category==='daily').slice(0,2);
+  const el = document.getElementById('missionPreview');
+  el.innerHTML = daily.map(m => {
+    const complete = doneSet.has(m.id);
+    return `
+    <div class="mission-item ${complete?'completed':'active'}" onclick="location.href='missions.html'">
+      <div class="mi-top">
+        <div class="mi-icon">${m.icon}</div>
+        <div style="flex:1">
+          <div class="mi-name">${m.name}</div>
+          <div class="mi-desc">+RM${m.reward} +${m.xp}XP +${m.mvt}MVT</div>
+        </div>
+        <div class="mi-reward">${complete?'✓ Done':'Buat →'}</div>
+      </div>
+      <div class="mi-track"><div class="mi-fill" style="width:${complete?100:0}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+/* ── PLATFORM STATS ───────────────────────────────────────── */
+async function loadStats() {
+  const [pr, tx] = await Promise.all([
+    db.from('profiles').select('id',{count:'exact',head:true}),
+    db.from('transactions').select('type,amount').eq('status','approved'),
+  ]);
+  const t = tx.data||[];
+  const fmt = n => n>=1e6?(n/1e6).toFixed(1)+'M':n>=1000?(n/1000).toFixed(0)+'K':n.toFixed(0);
+  document.getElementById('ps-users').textContent = UI.big(pr.count||0);
+  document.getElementById('ps-dep').textContent   = 'RM'+fmt(t.filter(x=>x.type==='deposit').reduce((s,x)=>s+(x.amount||0),0));
+  document.getElementById('ps-with').textContent  = 'RM'+fmt(t.filter(x=>x.type==='withdraw').reduce((s,x)=>s+(x.amount||0),0));
+  document.getElementById('ps-mine').textContent  = 'RM'+fmt(t.filter(x=>['mining','profit'].includes(x.type)).reduce((s,x)=>s+(x.amount||0),0));
+}
+
+/* ── REALTIME PROFILE UPDATE ─────────────────────────────── */
+function listenProfile(userId) {
+  RT.subscribeProfile(userId, p => {
+    // Update wallet cards live
+    document.getElementById('walMain').textContent = 'RM ' + (p.balance||0).toFixed(2);
+  });
+  // Show notification dot if unread
+  (async () => {
+    const { count } = await db.from('notifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId).eq('is_read', false);
+    const dot = document.getElementById('notifDot');
+    if (dot && count > 0) dot.style.display = 'block';
+  })();
+
+  RT.subscribeNotifications(userId, n => {
+    const dot = document.getElementById('notifDot');
+    if (dot) dot.style.display = 'block';
+    document.getElementById('notifBtn').classList.add('has-dot');
+  });
+  RT.subscribeWithdraws(userId, tx => {
+    if (tx.status === 'approved') {
+      UI.toast('✅ Withdraw diluluskan! Dana sedang diproses.', 'success', 5000);
+    } else if (tx.status === 'rejected') {
+      UI.toast('❌ Withdraw ditolak. Baki dikembalikan.', 'error', 5000);
+    }
+  });
+  RT.subscribeGlobalFeed();
+}
+
+/* ── MAIN ─────────────────────────────────────────────────── */
+async function init() {
+  Lang.init();
+  UI.loading();
+  const { data:{ session } } = await db.auth.getSession();
+  if (!session) { location.href = 'login.html'; return; }
+  _user = session.user;
+
+  // Maintenance check
+  const { data:sys } = await db.from('system_settings').select('value').eq('key','maintenance_mode').single().catch(()=>({data:null}));
+  if (sys?.value === true || sys?.value === 'true') {
+    const { data:adm } = await db.from('profiles').select('is_admin').eq('id',_user.id).single();
+    if (!adm?.is_admin) {
+      document.body.innerHTML = `<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#020206;text-align:center;font-family:'Instrument Sans',sans-serif;padding:20px"><div><div style="font-size:56px;margin-bottom:16px">🔧</div><div style="font-size:22px;font-weight:800;color:#fff;margin-bottom:8px">Penyelenggaraan</div><p style="color:#8B95BB">Sistem akan kembali dalam beberapa minit.</p></div></div>`;
+      return;
+    }
+  }
+
+  const { data: p } = await db.from('profiles').select('*').eq('id',_user.id).single();
+  _profile = p;
+
+  // Greeting
+  const name = _user.email.split('@')[0];
+  document.getElementById('greetName').textContent = name.charAt(0).toUpperCase() + name.slice(1);
+  document.getElementById('avatarBtn').textContent = name[0].toUpperCase();
+
+  // Rank badge
+  const rank = MV.getRank(p?.total_deposit||0);
+  const rb = document.getElementById('greetRank');
+  rb.textContent = `${rank.icon} ${rank.name}`;
+  rb.style.cssText = `background:${rank.color}18;border:1px solid ${rank.color}35;color:${rank.color};display:inline-flex;align-items:center;gap:7px;padding:5px 14px;border-radius:999px;font-size:11px;font-weight:700;margin-top:4px`;
+
+  // Parallel load
+  await Promise.all([
+    loadWallets(p),
+    buildProfitChart(_user.id),
+    loadActivePlans(_user.id),
+    loadMissionPreview(_user.id),
+    loadStats(),
+  ]);
+
+  // Automation
+  await Auto.start(_user.id);
+  await Auto.checkInvestmentMaturity(_user.id);
+
+  // Real-time
+  listenProfile(_user.id);
+  // ── ANNOUNCEMENT BANNER ──────────────────────────────────
+  db.from('system_settings').select('value').eq('key','announcement').single()
+    .then(({data})=>{ const m=data?.value?.trim(); if(m){document.getElementById('announceText').textContent=m;document.getElementById('announceBanner').style.display='';} }).catch(()=>{});
+
+  // ── LIVE CLOCK ──────────────────────────────────────────────
+  (function(){ const el=document.getElementById('liveTime'); if(!el) return; const t=()=>el.textContent=new Date().toLocaleTimeString('ms-MY',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); t(); setInterval(t,1000); })();
+
+  // ── BALANCE REFRESH ─────────────────────────────────────────
+  window.refreshBalance=async function(){ const {data:p}=await db.from('profiles').select('balance,mvt_balance').eq('id',userId).single(); if(!p) return; const w=document.getElementById('walMain'); if(w) w.textContent='RM '+Number(p.balance||0).toFixed(2); UI.toast('Baki dikemaskini','success',1500); };
+  setTimeout(() => RT.populateDemoFeed(), 800);
+
+  // Load AI Robot + Mining quick stats
+  (async () => {
+    const now = Date.now();
+    // ROBOTS
+    const { data:robots } = await db.from('user_robots').select('robot_id,daily_profit,last_claimed_at').eq('user_id',userId).eq('status','active');
+    const rActive    = robots?.length || 0;
+    const rDaily     = (robots||[]).reduce((s,r) => s + Number(r.daily_profit||0), 0);
+    const rClaimable = (robots||[]).filter(r => {
+      const last = r.last_claimed_at ? new Date(r.last_claimed_at).getTime() : 0;
+      return (now - last) >= 23.5*3600000;
+    }).length;
+    document.getElementById('mqMachines').textContent = rActive;
+    document.getElementById('mqDaily').textContent    = 'RM '+rDaily.toFixed(2);
+    document.getElementById('mqPending').textContent  = rClaimable;
+    if (rClaimable > 0) {
+      document.getElementById('mqPending').style.color     = '#F97316';
+      document.getElementById('mqPending').style.animation = 'pulse-glow 2s infinite';
+    }
+
+    // MACHINES (mining mini card)
+    const { data:machines } = await db.from('user_machines').select('machine_id,last_claimed_at').eq('user_id',userId).eq('status','active');
+    const mActive = machines?.length || 0;
+    const mDaily  = (machines||[]).reduce((s,m) => {
+      const cfg = MV.MACHINES.find(x=>x.id===m.machine_id);
+      return s + (cfg ? cfg.price*cfg.dailyRate : 0);
+    }, 0);
+    const elM = document.getElementById('mqMachinesM');
+    const elD = document.getElementById('mqDailyM');
+    if (elM) elM.textContent = mActive;
+    if (elD) elD.textContent = 'RM '+mDaily.toFixed(2);
+  })();
+
+  // Live timestamp
+  setInterval(() => {
+    document.getElementById('liveTs').textContent = UI.time(new Date());
+  }, 10000);
+  document.getElementById('liveTs').textContent = UI.time(new Date());
+
+  // PWA
+  await RT.registerSW();
+  await RT.requestPush();
+
+  UI.unload();
+}
+
+function updateWalletCards(p) {
+  const b = document.getElementById('mainBal');
+  const e = document.getElementById('totalEarned');
+  if (b && p.balance !== undefined) UI.count(b, p.balance, 'RM');
+  if (e && p.total_earned !== undefined) UI.count(e, p.total_earned, 'RM');
+}
+
+window.addEventListener('load', init);
+window.addEventListener('beforeunload', () => { RT.destroy(); Auto.stop(); });
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .catch(e => console.warn('SW reg failed:', e));
+  });
+}
+</script>
+</body>
+</html>

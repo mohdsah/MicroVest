@@ -1,0 +1,23 @@
+{
+  "name": "MicroVest v6 — Fintech Platform",
+  "short_name": "MicroVest",
+  "description": "Platform pelaburan & mining premium. Real-time. Multi-wallet. MVT Token. 4-Level MLM.",
+  "start_url": "/dashboard.html",
+  "display": "standalone",
+  "background_color": "#020206",
+  "theme_color": "#7C3AED",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "ms-MY",
+  "categories": ["finance", "business"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Dashboard", "url": "/dashboard.html" },
+    { "name": "Misi",      "url": "/missions.html"  },
+    { "name": "Pasaran",   "url": "/market.html"    },
+    { "name": "Analitik",  "url": "/analytics.html" }
+  ]
+}

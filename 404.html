@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#020206">
+<title>MicroVest — Halaman Tidak Dijumpai</title>
+<link rel="stylesheet" href="css/v6.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+.err-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 24px;text-align:center}
+.err-code{font-family:'Bebas Neue',sans-serif;font-size:120px;line-height:1;background:linear-gradient(135deg,#7C3AED,#F97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.err-title{font-family:'DM Serif Display',serif;font-size:26px;margin-bottom:12px}
+.err-sub{font-size:14px;color:rgba(226,232,255,.45);line-height:1.7;max-width:280px;margin:0 auto 36px}
+.glitch{position:relative;display:inline-block}
+.glitch::before,.glitch::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#7C3AED,#F97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.glitch::before{animation:glitch-1 2s infinite;clip-path:polygon(0 0,100% 0,100% 35%,0 35%)}
+.glitch::after{animation:glitch-2 2s infinite;clip-path:polygon(0 65%,100% 65%,100% 100%,0 100%)}
+@keyframes glitch-1{0%,100%{transform:translate(0)}10%{transform:translate(-3px,2px)}20%{transform:translate(3px,-2px)}30%,90%{transform:translate(0)}}
+@keyframes glitch-2{0%,100%{transform:translate(0)}40%{transform:translate(3px,2px)}50%{transform:translate(-3px,-2px)}60%,90%{transform:translate(0)}}
+</style>
+</head>
+<body>
+<div class="amb-v"></div>
+<div class="err-wrap">
+  <div class="err-code glitch" data-text="404">404</div>
+  <div class="err-title">Halaman Tidak Dijumpai</div>
+  <div class="err-sub">Halaman yang anda cari tidak wujud atau telah dipindahkan.</div>
+  <a href="dashboard.html" class="btn btn-v" style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px">
+    <i class="fas fa-house"></i> Kembali ke Dashboard
+  </a>
+  <div style="margin-top:20px">
+    <a href="support.html" style="font-size:12px;color:rgba(226,232,255,.4);text-decoration:none">Perlukan bantuan? →</a>
+  </div>
+</div>
+<script src="js/config.js"></script>
+<script>
+// Auto-redirect if logged in
+db.auth.getSession().then(({ data:{ session }}) => {
+  if (!session) location.href = 'login.html';
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#020206">
+<title>MicroVest Admin — Tiket Sokongan</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../css/v6.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body { max-width:900px; margin:0 auto; }
+.adm-hd { display:flex; align-items:center; gap:14px; padding:22px var(--pad) 16px; border-bottom:1px solid var(--border); }
+.adm-title { font-family:'DM Serif Display',serif; font-size:22px; }
+.filter-row { display:flex; gap:8px; padding:14px var(--pad); border-bottom:1px solid var(--border); overflow-x:auto; }
+.fp { padding:8px 16px; border-radius:999px; border:1px solid var(--border); background:transparent; color:var(--ice-3); font-size:11px; font-weight:800; cursor:pointer; font-family:'Instrument Sans',sans-serif; white-space:nowrap; transition:.2s; }
+.fp.on { background:var(--v-dim); border-color:var(--v-border); color:var(--v-pale); }
+.ticket-row { padding:16px var(--pad); border-bottom:1px solid rgba(255,255,255,.04); cursor:pointer; transition:.15s; }
+.ticket-row:hover { background:rgba(255,255,255,.02); }
+.tr-head { display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+.tr-badge { padding:3px 8px; border-radius:6px; font-size:9px; font-weight:800; }
+.st-open    { background:rgba(34,197,94,.15);  color:#22C55E; }
+.st-pending { background:rgba(234,179,8,.12);  color:#EAB308; }
+.st-closed  { background:rgba(100,116,139,.15);color:#64748B; }
+.reply-box { padding:0 var(--pad) 16px; display:none; }
+.reply-box.show { display:block; }
+</style>
+</head>
+<body>
+<div class="amb-v"></div>
+
+<div class="adm-hd">
+  <a href="dashboard.html" style="color:var(--ice-3);font-size:20px;text-decoration:none"><i class="fas fa-arrow-left"></i></a>
+  <a href="robots.html" style="color:#FB923C;font-size:11px;font-weight:800;text-decoration:none;display:flex;align-items:center;gap:5px;padding:7px 12px;border:1px solid rgba(251,146,60,.2);border-radius:9px;background:rgba(251,146,60,.06)">🤖 Robot</a>
+  <div>
+    <div class="adm-title">🎫 Tiket Sokongan</div>
+    <div style="font-size:11px;color:var(--ice-3)" id="ticketCount">Memuatkan...</div>
+  </div>
+  <button onclick="loadTickets()" style="margin-left:auto;padding:9px 16px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--ice-2);font-size:11px;font-weight:800;cursor:pointer;font-family:'Instrument Sans',sans-serif">
+    <i class="fas fa-refresh"></i> Muat Semula
+  </button>
+</div>
+
+<div class="filter-row">
+  <button class="fp on" onclick="setFilter('open',this)">🟢 Terbuka</button>
+  <button class="fp"    onclick="setFilter('pending',this)">🟡 Dalam Proses</button>
+  <button class="fp"    onclick="setFilter('closed',this)">⚫ Selesai</button>
+  <button class="fp"    onclick="setFilter('all',this)">📋 Semua</button>
+</div>
+
+<div id="ticketList">
+  <div style="text-align:center;padding:40px;color:var(--ice-3)">Memuatkan tiket...</div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+let _filter = 'open', _tickets = [];
+
+const CAT_ICONS = { deposit:'💰', withdraw:'💸', mining:'⛏️', account:'👤', other:'❓' };
+const ST_CLS    = { open:'st-open', pending:'st-pending', closed:'st-closed' };
+const ST_LBL    = { open:'Terbuka', pending:'Dalam Proses', closed:'Selesai' };
+
+function setFilter(f, btn) {
+  _filter = f;
+  document.querySelectorAll('.fp').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderTickets();
+}
+
+async function loadTickets() {
+  const { data } = await db.from('support_tickets')
+    .select('*, profiles(email,vip_rank)')
+    .order('created_at', { ascending: false })
+    .limit(100);
+  _tickets = data || [];
+  document.getElementById('ticketCount').textContent = `${_tickets.length} jumlah tiket`;
+  renderTickets();
+}
+
+function renderTickets() {
+  const filtered = _filter === 'all' ? _tickets : _tickets.filter(t => t.status === _filter);
+  const el = document.getElementById('ticketList');
+
+  if (!filtered.length) {
+    el.innerHTML = `<div style="text-align:center;padding:50px;color:var(--ice-3);font-size:13px">Tiada tiket ${_filter === 'all' ? '' : _filter}</div>`;
+    return;
+  }
+
+  el.innerHTML = filtered.map(t => `
+    <div class="ticket-row" onclick="toggleTicket('${t.id}')">
+      <div class="tr-head">
+        <span style="font-size:20px">${CAT_ICONS[t.category]||'🎫'}</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:800">${t.subject}</div>
+          <div style="font-size:10px;color:var(--ice-3)">${t.ticket_id} · ${t.profiles?.email?.replace(/(.{3}).+(@.+)/,'$1***$2')||'—'} · ${UI.ago(t.created_at)}</div>
+        </div>
+        <span class="tr-badge ${ST_CLS[t.status]||'st-open'}">${ST_LBL[t.status]||'Terbuka'}</span>
+      </div>
+      <div id="reply-${t.id}" class="reply-box">
+        <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;font-size:12px;color:var(--ice-2);line-height:1.7">${t.description}</div>
+        ${t.screenshot ? `<div style="margin-bottom:12px"><a href="${t.screenshot}" target="_blank" style="font-size:11px;color:var(--v-pale)">📎 Lihat Screenshot</a></div>` : ''}
+        ${t.admin_reply ? `<div style="background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:12px;padding:14px;margin-bottom:12px;font-size:12px;color:var(--ice-2)"><strong style="color:var(--v-pale)">Jawapan Admin:</strong><br>${t.admin_reply}</div>` : ''}
+        <textarea id="reply-text-${t.id}" placeholder="Taip jawapan admin..." style="width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--border);background:rgba(255,255,255,.04);color:var(--ice);font-family:'Instrument Sans',sans-serif;font-size:13px;resize:none;min-height:90px;box-sizing:border-box;outline:none;margin-bottom:8px">${t.admin_reply||''}</textarea>
+        <div style="display:flex;gap:8px">
+          <button onclick="replyTicket('${t.id}','pending',event)" style="flex:1;padding:11px;border-radius:10px;border:1px solid rgba(234,179,8,.3);background:rgba(234,179,8,.08);color:#EAB308;font-size:11px;font-weight:800;cursor:pointer;font-family:'Instrument Sans',sans-serif">🟡 Hantar & Pending</button>
+          <button onclick="replyTicket('${t.id}','closed',event)"  style="flex:1;padding:11px;border-radius:10px;border:none;background:linear-gradient(135deg,#5B21B6,#7C3AED);color:#fff;font-size:11px;font-weight:800;cursor:pointer;font-family:'Instrument Sans',sans-serif">✅ Selesai</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleTicket(id) {
+  const box = document.getElementById(`reply-${id}`);
+  if (box) box.classList.toggle('show');
+}
+
+async function replyTicket(id, status, e) {
+  e.stopPropagation();
+  const reply = document.getElementById(`reply-text-${id}`)?.value || '';
+  UI.loading('Menghantar...');
+
+  await db.from('support_tickets').update({
+    admin_reply: reply,
+    status: status,
+    updated_at: new Date().toISOString(),
+  }).eq('id', id);
+
+  // Notify user
+  const ticket = _tickets.find(t => t.id === id);
+  if (ticket) {
+    await db.from('notifications').insert([{
+      user_id: ticket.user_id,
+      type: 'info',
+      message: `🎫 ${ticket.ticket_id}: ${status === 'closed' ? '✅ Tiket anda telah diselesaikan.' : '🔄 Tiket anda sedang diproses.'} ${reply ? 'Jawapan: ' + reply.substring(0,100) : ''}`,
+    }]).catch(()=>{});
+  }
+
+  UI.unload();
+  UI.toast(`✅ Tiket ${status === 'closed' ? 'diselesaikan' : 'dikemaskini'}!`, 'success');
+  await loadTickets();
+}
+
+async function init() {
+  const { data:{ session } } = await db.auth.getSession();
+  if (!session) { location.href = '../login.html'; return; }
+  const { data:p } = await db.from('profiles').select('is_admin').eq('id',session.user.id).single();
+  if (!p?.is_admin) { location.href = '../dashboard.html'; return; }
+  await loadTickets();
+  // Realtime new tickets
+  db.channel('admin-tickets').on('postgres_changes',{event:'INSERT',schema:'public',table:'support_tickets'},()=>{
+    UI.toast('🎫 Tiket baru diterima!','info'); loadTickets();
+  }).subscribe();
+}
+window.addEventListener('load', init);
+</script>
+</body>
+</html>

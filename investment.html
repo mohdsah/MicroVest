@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#020206">
+<title>MicroVest v6 | Pelaburan</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="css/v6.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* Plan card — full-width premium */
+.plan-card {
+  border-radius: 26px; padding: 24px 22px;
+  margin: 0 var(--pad) 14px;
+  position: relative; overflow: hidden;
+  cursor: pointer; transition: transform .22s var(--spring);
+}
+.plan-card:active { transform: scale(0.97); }
+.plan-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+/* Per-plan themes */
+.pl-starter { background: linear-gradient(135deg,#020B1A,#030E22); border: 1px solid rgba(59,130,246,.3); }
+.pl-starter::before { background: linear-gradient(90deg,transparent,#3B82F6,transparent); }
+.pl-silver  { background: linear-gradient(135deg,#0D0D12,#13131A); border: 1px solid rgba(148,163,184,.25); }
+.pl-silver::before  { background: linear-gradient(90deg,transparent,#94A3B8,transparent); }
+.pl-gold    { background: linear-gradient(135deg,#1A1000,#221600); border: 1px solid rgba(234,179,8,.35); box-shadow: 0 12px 40px rgba(234,179,8,.08); }
+.pl-gold::before    { background: linear-gradient(90deg,transparent,#EAB308,transparent); }
+.pl-diamond { background: linear-gradient(135deg,#0E0020,#12002A); border: 1px solid rgba(124,58,237,.4); box-shadow: 0 14px 50px rgba(124,58,237,.12); }
+.pl-diamond::before { background: linear-gradient(90deg,transparent,#7C3AED,transparent); }
+.pl-elite   { background: linear-gradient(135deg,#001A08,#001A0D); border: 1px solid rgba(34,197,94,.35); box-shadow: 0 14px 50px rgba(34,197,94,.08); }
+.pl-elite::before   { background: linear-gradient(90deg,transparent,#22C55E,transparent); }
+
+.pc-top    { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.pc-icon   { font-size: 34px; flex-shrink: 0; }
+.pc-name   { font-family: 'DM Serif Display',serif; font-size: 20px; flex: 1; }
+.pc-badge  { padding: 4px 12px; border-radius: 999px; font-size: 9px; font-weight: 800; letter-spacing: 1.5px; }
+
+.pc-stats  { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 18px; }
+.pcs-item  { background: rgba(0,0,0,.35); border-radius: 12px; padding: 10px 8px; text-align: center; }
+.pcs-v     { font-family: 'JetBrains Mono',monospace; font-size: 14px; font-weight: 700; display: block; margin-bottom: 3px; }
+.pcs-l     { font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; opacity: .5; }
+
+.pc-btn    { width: 100%; padding: 14px; border-radius: 16px; border: none; font-family: 'Instrument Sans',sans-serif; font-weight: 800; font-size: 14px; cursor: pointer; transition: .2s var(--spring); }
+.pc-btn:active { transform: scale(0.95); }
+
+/* Tab bar */
+.tab-bar {
+  display: flex; gap: 6px; padding: 0 var(--pad); margin-bottom: 20px;
+  position: sticky; top: 72px; z-index: 100;
+  background: linear-gradient(rgba(2,2,6,.97) 80%,transparent);
+  padding-bottom: 12px;
+}
+.tb-btn {
+  flex: 1; padding: 11px; border-radius: 14px; border: 1px solid var(--border);
+  background: transparent; color: var(--ice-3);
+  font-family: 'Instrument Sans',sans-serif; font-weight: 700; font-size: 12px;
+  cursor: pointer; transition: .2s;
+}
+.tb-btn.on { background: var(--v-dim); border-color: var(--v-border); color: var(--v-pale); }
+
+/* Active investment row */
+.inv-item {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-xl); padding: 20px; margin: 0 var(--pad) 12px;
+  position: relative; overflow: hidden;
+}
+.inv-item::after {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  border-radius: 0 2px 2px 0;
+}
+.ii-top   { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.ii-icon  { font-size: 28px; flex-shrink: 0; }
+.ii-name  { font-family: 'DM Serif Display',serif; font-size: 16px; flex: 1; }
+.ii-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
+.is-box   { background: rgba(255,255,255,.04); border-radius: 10px; padding: 10px; text-align: center; }
+.is-v     { font-family: 'JetBrains Mono',monospace; font-size: 14px; font-weight: 700; display: block; margin-bottom: 2px; }
+.is-l     { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ice-3); }
+
+/* History table */
+.hist-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 0; border-bottom: 1px solid var(--border);
+}
+.hr-ico { width: 40px; height: 40px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.hr-info { flex: 1; }
+.hr-name { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.hr-date { font-size: 10px; color: var(--ice-3); }
+.hr-right { text-align: right; flex-shrink: 0; }
+.hr-ret   { font-family: 'JetBrains Mono',monospace; font-size: 14px; font-weight: 700; }
+.hr-st    { font-size: 9px; padding: 2px 8px; border-radius: 999px; margin-top: 2px; display: inline-block; }
+
+/* Buy modal */
+.buy-back { position: fixed; inset: 0; background: rgba(0,0,0,.92); backdrop-filter: blur(22px); z-index: 900; display: flex; align-items: flex-end; justify-content: center; animation: bg-fade .3s ease; }
+.buy-box  { background: linear-gradient(175deg,#0A0A16,#04040C); border: 1px solid rgba(255,255,255,.07); border-radius: 28px 28px 0 0; width: min(500px,100%); padding: 28px 24px 48px; animation: slide-up .42s cubic-bezier(0.34,1.56,0.64,1) both; }
+@keyframes bg-fade  { from{opacity:0} to{opacity:1} }
+@keyframes slide-up { from{transform:translateY(100%)} to{transform:translateY(0)} }
+@keyframes rise     { from{opacity:0;transform:scale(.9) translateY(20px)} to{opacity:1;transform:scale(1) translateY(0)} }
+
+.calc-box { background: rgba(124,58,237,.08); border: 1px solid var(--v-border); border-radius: var(--r-l); padding: 16px; margin: 14px 0; }
+.calc-row { display: flex; justify-content: space-between; padding: 5px 0; }
+.calc-l   { font-size: 12px; color: var(--ice-2); }
+.calc-v   { font-family: 'JetBrains Mono',monospace; font-size: 13px; font-weight: 700; }
+.calc-div { height: 1px; background: var(--border); margin: 8px 0; }
+
+.preset-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.preset-btn { padding: 8px 15px; border-radius: 999px; border: 1px solid var(--border-hi); background: rgba(255,255,255,.04); color: var(--ice-2); font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Instrument Sans',sans-serif; transition: .2s; }
+.preset-btn:hover { border-color: var(--v-border); color: var(--v-pale); background: var(--v-dim); }
+
+/* Summary strip */
+.sum-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; padding: 0 var(--pad); margin-bottom: 22px; }
+.ss-box    { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-l); padding: 14px; text-align: center; }
+.ss-v      { font-family: 'JetBrains Mono',monospace; font-size: 16px; font-weight: 700; display: block; margin-bottom: 3px; }
+.ss-l      { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--ice-3); }
+</style>
+</head>
+<body>
+<div class="amb-v"></div><div class="amb-o"></div>
+<div class="shell">
+
+  <!-- HEADER -->
+  <div class="pg-hd anim a1">
+    <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+    <div>
+      <div class="pg-title">Pelaburan</div>
+      <div class="pg-sub">5 Plan · Auto-Profit Harian</div>
+    </div>
+    <a href="analytics.html" style="margin-left:auto;color:var(--v-pale);text-decoration:none;font-size:12px;font-weight:700">Analitik →</a>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar anim a1">
+    <button class="tb-btn on" id="tb-plan"   onclick="switchTab('plan')">📋 Plan</button>
+    <button class="tb-btn"   id="tb-active"  onclick="switchTab('active')">⚡ Aktif</button>
+    <button class="tb-btn"   id="tb-history" onclick="switchTab('history')">📂 Rekod</button>
+  </div>
+
+  <!-- ── PLAN TAB ─────────────────────────────── -->
+  <div id="view-plan">
+    <!-- Summary -->
+    <div class="sum-strip anim a2">
+      <div class="ss-box"><span class="ss-v v-pale" id="sumActive">—</span><span class="ss-l">Plan Aktif</span></div>
+      <div class="ss-box"><span class="ss-v profit" id="sumEarned">—</span><span class="ss-l">Total Profit</span></div>
+      <div class="ss-box"><span class="ss-v gold"   id="sumReturn">—</span><span class="ss-l">ROI</span></div>
+    </div>
+
+    <!-- Plan cards -->
+    <div id="planCards" class="anim a3"></div>
+  </div>
+
+  <!-- ── ACTIVE TAB ────────────────────────────── -->
+  <div id="view-active" style="display:none">
+    <div id="activeList">
+      <div class="skel skel-row anim a1" style="border-radius:22px;margin:0 var(--pad) 12px"></div>
+      <div class="skel skel-row anim a2" style="border-radius:22px;margin:0 var(--pad)"></div>
+    </div>
+  </div>
+
+  <!-- ── HISTORY TAB ───────────────────────────── -->
+  <div id="view-history" style="display:none;padding:0 var(--pad)">
+    <div id="histList">
+      <div class="skel skel-row anim a1" style="border-radius:14px;margin-bottom:8px"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a href="dashboard.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
+  <a href="investment.html" class="nav-item active"><i class="fas fa-chart-line"></i><span>Invest</span></a>
+  <a href="robots.html" class="nav-item" style="position:relative">
+    <span style="position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#5B21B6,#7C3AED);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(124,58,237,.5);pointer-events:none"></span><i class="fas fa-robot"></i><span>Robot</span></a>
+  <a href="mining.html" class="nav-item"><i class="fas fa-microchip"></i><span>Mining</span></a>
+  <a href="profile.html" class="nav-item"><i class="fas fa-user-circle"></i><span>Profil</span></a>
+</nav>
+
+<!-- BUY MODAL -->
+<div id="buyModal" style="display:none"></div>
+
+<script src="js/config.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/automation.js"></script>
+<script src="js/lang.js"></script>
+<script src="js/realtime.js"></script>
+<script>
+let _user, _profile, _curTab = 'plan', _activePlans = [], _history = [];
+
+const PLAN_CLASS   = { starter:'pl-starter', silver:'pl-silver', gold:'pl-gold', diamond:'pl-diamond', elite:'pl-elite' };
+const PLAN_BTN_CLR = { starter:'#3B82F6', silver:'#94A3B8', gold:'#EAB308', diamond:'#7C3AED', elite:'#22C55E' };
+const PLAN_BADGE_CLR = { HOT:'rgba(239,68,68,.15):#EF4444', BEST:'rgba(234,179,8,.15):#EAB308', VIP:'rgba(124,58,237,.15):#A78BFA', NEW:'rgba(34,197,94,.15):#22C55E' };
+
+/* ── TAB SWITCH ─────────────────────────────────────────── */
+function switchTab(t) {
+  _curTab = t;
+  ['plan','active','history'].forEach(k => {
+    document.getElementById('tb-'+k).className    = 'tb-btn'+(t===k?' on':'');
+    document.getElementById('view-'+k).style.display = t===k?'':'none';
+  });
+  if (t === 'active')  loadActive();
+  if (t === 'history') loadHistory();
+}
+
+/* ── PLAN CARDS ─────────────────────────────────────────── */
+function renderPlans() {
+  const el = document.getElementById('planCards');
+  el.innerHTML = MV.PLANS.map(p => {
+    const [bgCol, textCol] = (PLAN_BADGE_CLR[p.badge]||'rgba(255,255,255,.06):#8B95BB').split(':');
+    return `
+    <div class="plan-card ${PLAN_CLASS[p.id]||''}" onclick="openBuy('${p.id}')">
+      <div class="pc-top">
+        <div class="pc-icon">${p.icon}</div>
+        <div class="pc-name">${p.name}</div>
+        ${p.badge?`<span class="pc-badge" style="background:${bgCol};color:${textCol};border:1px solid ${textCol}30">${p.badge}</span>`:''}
+      </div>
+      <div class="pc-stats">
+        <div class="pcs-item">
+          <span class="pcs-v" style="color:${p.color}">RM${p.price}</span>
+          <span class="pcs-l">Min</span>
+        </div>
+        <div class="pcs-item">
+          <span class="pcs-v" style="color:var(--profit)">${(p.dailyRate*100).toFixed(1)}%</span>
+          <span class="pcs-l">/ Hari</span>
+        </div>
+        <div class="pcs-item">
+          <span class="pcs-v" style="color:var(--gold)">${p.totalReturn}%</span>
+          <span class="pcs-l">Total ROI</span>
+        </div>
+        <div class="pcs-item">
+          <span class="pcs-v">${p.durationDays}</span>
+          <span class="pcs-l">Hari</span>
+        </div>
+      </div>
+      <button class="pc-btn" style="background:${p.color}20;color:${p.color};border:1px solid ${p.color}40">
+        Labur Sekarang →
+      </button>
+    </div>`;
+  }).join('');
+}
+
+/* ── BUY MODAL ──────────────────────────────────────────── */
+function openBuy(planId) {
+  const p = MV.getPlan(planId);
+  if (!p) return;
+  const m = document.getElementById('buyModal');
+  m.style.display = 'flex';
+  m.innerHTML = `
+    <div class="buy-back" onclick="closeBuy(event)">
+      <div class="buy-box" onclick="event.stopPropagation()">
+        <div style="width:40px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin:0 auto 20px"></div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+          <div style="font-size:36px">${p.icon}</div>
+          <div>
+            <div style="font-family:'DM Serif Display',serif;font-size:20px">${p.name} Plan</div>
+            <div style="font-size:11px;color:var(--ice-3)">${p.durationDays} hari · ${(p.dailyRate*100).toFixed(1)}%/hari · ${p.totalReturn}% ROI</div>
+          </div>
+        </div>
+
+        <div class="field-wrap">
+          <label class="field-lbl">JUMLAH PELABURAN (RM)</label>
+          <input class="field" id="buyAmt" type="number" min="${p.price}" step="50" placeholder="Min RM ${p.price}" oninput="calcProfit('${planId}')">
+          <div class="preset-row">
+            ${[p.price, p.price*2, p.price*5].map(v=>`<button class="preset-btn" onclick="document.getElementById('buyAmt').value=${v};calcProfit('${planId}')">RM${v}</button>`).join('')}
+            <button class="preset-btn" onclick="setMax('${planId}')">Max Baki</button>
+          </div>
+        </div>
+
+        <div class="calc-box" id="calcBox">
+          <div class="calc-row"><span class="calc-l">Profit Harian</span><span class="calc-v profit" id="cDaily">RM 0.00</span></div>
+          <div class="calc-row"><span class="calc-l">Profit Total (${p.durationDays} hari)</span><span class="calc-v gold" id="cTotal">RM 0.00</span></div>
+          <div class="calc-row"><span class="calc-l">Nilai Pulangan</span><span class="calc-v" style="color:var(--v-pale)" id="cReturn">RM 0.00</span></div>
+          <div class="calc-div"></div>
+          <div class="calc-row"><span class="calc-l">Tarikh Tamat</span><span class="calc-v" id="cEnd">—</span></div>
+        </div>
+
+        <button class="btn btn-v btn-full btn-lg" onclick="confirmBuy('${planId}')">
+          📈 Sahkan Pelaburan
+        </button>
+        <button onclick="closeBuy()" style="width:100%;margin-top:10px;padding:12px;background:none;border:none;color:var(--ice-3);font-weight:700;cursor:pointer;font-family:'Instrument Sans',sans-serif">Batal</button>
+      </div>
+    </div>`;
+}
+
+function closeBuy(e) {
+  if (!e || e.target.classList.contains('buy-back')) {
+    document.getElementById('buyModal').style.display='none';
+    document.getElementById('buyModal').innerHTML='';
+  }
+}
+
+function calcProfit(planId) {
+  const p   = MV.getPlan(planId);
+  const amt = parseFloat(document.getElementById('buyAmt')?.value||0);
+  if (!amt || !p) return;
+  const daily   = amt * p.dailyRate;
+  const total   = amt * (p.totalReturn/100);
+  const endDate = new Date(Date.now() + p.durationDays*86400000);
+  document.getElementById('cDaily').textContent  = UI.rm(daily);
+  document.getElementById('cTotal').textContent  = UI.rm(total);
+  document.getElementById('cReturn').textContent = UI.rm(amt + total);
+  document.getElementById('cEnd').textContent    = UI.date(endDate);
+}
+
+async function setMax(planId) {
+  const p = MV.getPlan(planId);
+  const { data:pr } = await db.from('profiles').select('balance').eq('id',_user.id).single();
+  const bal = Math.floor((pr?.balance||0)/p.price)*p.price;
+  document.getElementById('buyAmt').value = bal;
+  calcProfit(planId);
+}
+
+async function confirmBuy(planId) {
+  const p   = MV.getPlan(planId);
+  const amt = parseFloat(document.getElementById('buyAmt')?.value||0);
+  if (amt < p.price) { UI.toast(`Minimum RM ${p.price} untuk plan ${p.name}`,'error'); return; }
+
+  const { data:pr } = await db.from('profiles').select('balance,total_deposit').eq('id',_user.id).single();
+  if ((pr?.balance||0) < amt) { UI.toast('Baki tidak mencukupi!','error'); return; }
+
+  UI.loading('Mengaktifkan pelaburan...');
+  const now    = new Date();
+  const endAt  = new Date(now.getTime() + p.durationDays*86400000);
+  const daily  = amt * p.dailyRate;
+  const totalR = amt * (p.totalReturn/100);
+
+  // Atomic: deduct balance + increment total_deposit atomically
+  await RPC.incBalance(_user.id, -amt);
+  const { data:cur } = await db.from('profiles').select('total_deposit').eq('id',_user.id).single();
+  const newDep  = (cur?.total_deposit||0) + amt;
+  const newRank = MV.getRank(newDep);
+  await db.from('profiles').update({ total_deposit:newDep, vip_rank:newRank.id }).eq('id',_user.id);
+
+  await db.from('investments').insert([{
+    user_id:       _user.id,
+    plan_id:       planId,
+    amount:        amt,
+    daily_profit:  daily,
+    total_return:  totalR,
+    status:        'active',
+    end_at:        endAt.toISOString(),
+  }]);
+
+  // MVT reward for investing
+  const mvtEarn = Math.floor(amt * MV.TOKEN.earnRate);
+  await RPC.incMVT(_user.id, mvtEarn);
+
+  await db.from('notifications').insert([{
+    user_id: _user.id, type:'invest',
+    message:`✅ Plan ${p.name} berjaya diaktifkan! RM${daily.toFixed(2)}/hari selama ${p.durationDays} hari. +${mvtEarn} MVT!`,
+  }]);
+
+  // Auto referral
+  await Auto.processReferralChain(_user.id, amt, 'invest');
+
+  UI.unload();
+  closeBuy(null);
+  UI.toast(`✅ Plan ${p.name} aktif! +RM${daily.toFixed(2)}/hari`,'success',5000);
+  UI.burst(window.innerWidth/2, window.innerHeight/3, 14);
+  loadSummary();
+  switchTab('active');
+}
+
+/* ── ACTIVE INVESTMENTS ─────────────────────────────────── */
+async function loadActive() {
+  const el = document.getElementById('activeList');
+  UI.skeleton(el, 3, 'card');
+  const { data } = await db.from('investments').select('*').eq('user_id',_user.id).eq('status','active').order('created_at',{ascending:false});
+  _activePlans = data||[];
+  if (!_activePlans.length) {
+    el.innerHTML = `<div style="text-align:center;padding:40px 20px">
+      <div style="font-size:52px;margin-bottom:14px">📈</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:8px">Tiada pelaburan aktif</div>
+      <p style="font-size:12px;color:var(--ice-3);margin-bottom:20px">Mulakan dengan memilih plan di atas</p>
+      <button onclick="switchTab('plan')" class="btn btn-v">Pilih Plan →</button>
+    </div>`; return;
+  }
+  el.innerHTML = _activePlans.map(inv => {
+    const p     = MV.getPlan(inv.plan_id)||{icon:'📈',name:inv.plan_id,color:'#7C3AED'};
+    const pct   = Math.min(((Date.now()-new Date(inv.created_at)) / (new Date(inv.end_at)-new Date(inv.created_at)))*100,100);
+    const claimed  = inv.total_claimed||0;
+    const remaining= (inv.total_return||0) - claimed;
+    const canClaim = !inv.last_claimed_at || (Date.now()-new Date(inv.last_claimed_at)) >= 23.5*3600000;
+    return `
+    <div class="inv-item" style="border-left:3px solid ${p.color}">
+      <div class="ii-top">
+        <div class="ii-icon">${p.icon}</div>
+        <div>
+          <div class="ii-name">${p.name}</div>
+          <div style="font-size:10px;color:var(--ice-3)">Tamat ${UI.date(inv.end_at)} · ${UI.countdown(inv.end_at)} lagi</div>
+        </div>
+        <div class="chip chip-g" style="font-size:9px;margin-left:auto">${pct.toFixed(0)}%</div>
+      </div>
+      <div class="ii-stats">
+        <div class="is-box"><span class="is-v profit">+${UI.rm(inv.daily_profit)}</span><span class="is-l">/ Hari</span></div>
+        <div class="is-box"><span class="is-v gold">  ${UI.rm(claimed)}</span><span class="is-l">Dituntut</span></div>
+        <div class="is-box"><span class="is-v v-pale">${UI.rm(remaining)}</span><span class="is-l">Berbaki</span></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--ice-3);margin-bottom:6px">
+          <span>Kemajuan</span><span>${UI.rm(inv.amount)} → ${UI.rm((inv.amount||0)+(inv.total_return||0))}</span>
+        </div>
+        <div class="prog-t"><div class="prog-f prog-v" style="width:${pct.toFixed(0)}%;background:${p.color}"></div></div>
+      </div>
+      <button class="btn btn-full ${canClaim?'btn-profit':'btn-ghost'}" onclick="${canClaim?`claimDaily('${inv.id}',${inv.daily_profit})`:'void(0)'}" ${canClaim?'':'disabled'} style="opacity:${canClaim?1:.5}">
+        ${canClaim?`⛏️ Claim RM${inv.daily_profit.toFixed(2)} Hari Ini`:'✓ Sudah Claim Hari Ini'}
+      </button>
+    </div>`;
+  }).join('');
+}
+
+async function claimDaily(invId, amount) {
+  UI.loading();
+  const { data:inv } = await db.from('investments').select('*').eq('id',invId).single();
+  if (!inv) { UI.unload(); return; }
+
+  // Check if already claimed today
+  if (inv.last_claimed_at && (Date.now()-new Date(inv.last_claimed_at)) < 23.5*3600000) {
+    UI.unload(); UI.toast('Sudah claim hari ini!','warning'); return;
+  }
+
+  await RPC.creditProfit(_user.id, amount);
+
+  await db.from('investments').update({
+    last_claimed_at: new Date().toISOString(),
+    total_claimed:   (inv.total_claimed||0) + amount,
+  }).eq('id',invId);
+
+  await db.from('transactions').insert([{ user_id:_user.id, type:'profit', amount, status:'approved', description:`Claim harian ${inv.plan_id}` }]);
+
+  // MVT mining rate
+  const mvtEarn = Math.floor(amount * MV.TOKEN.miningRate);
+  await RPC.incMVT(_user.id, mvtEarn);
+
+  UI.unload();
+  UI.toast(`✅ +RM${amount.toFixed(2)} +${mvtEarn} MVT dikreditkan!`,'success');
+  loadActive();
+  loadSummary();
+}
+
+/* ── HISTORY ─────────────────────────────────────────────── */
+async function loadHistory() {
+  const el = document.getElementById('histList');
+  UI.skeleton(el, 4, 'row');
+  const { data } = await db.from('investments').select('*').eq('user_id',_user.id).order('created_at',{ascending:false}).limit(30);
+  _history = data||[];
+  if (!_history.length) { el.innerHTML='<div style="text-align:center;padding:40px;color:var(--ice-3)">Tiada rekod</div>'; return; }
+  const stC  = {active:'var(--profit)',completed:'var(--gold)',cancelled:'var(--loss)'};
+  const stBg = {active:'rgba(34,197,94,.1)',completed:'rgba(234,179,8,.1)',cancelled:'rgba(239,68,68,.1)'};
+  el.innerHTML = _history.map(inv => {
+    const p = MV.getPlan(inv.plan_id)||{icon:'📈',name:inv.plan_id,color:'#7C3AED'};
+    return `
+    <div class="hist-row">
+      <div class="hr-ico" style="background:${p.color}18">${p.icon}</div>
+      <div class="hr-info">
+        <div class="hr-name">${p.name}</div>
+        <div class="hr-date">${UI.date(inv.created_at)} → ${UI.date(inv.end_at)}</div>
+      </div>
+      <div class="hr-right">
+        <div class="hr-ret profit">+${UI.rm(inv.total_claimed||0)}</div>
+        <span class="hr-st" style="background:${stBg[inv.status]};color:${stC[inv.status]}">${inv.status}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── SUMMARY STRIP ─────────────────────────────────────────── */
+async function loadSummary() {
+  const { data } = await db.from('investments').select('status,amount,total_claimed,total_return').eq('user_id',_user.id);
+  const active    = (data||[]).filter(i=>i.status==='active').length;
+  const earned    = (data||[]).reduce((s,i)=>s+(i.total_claimed||0),0);
+  const totalIn   = (data||[]).reduce((s,i)=>s+(i.amount||0),0);
+  const roi       = totalIn>0?((earned/totalIn)*100).toFixed(1):0;
+  document.getElementById('sumActive').textContent  = active;
+  document.getElementById('sumEarned').textContent  = UI.rm(earned);
+  document.getElementById('sumReturn').textContent  = roi+'%';
+}
+
+/* ── INIT ─────────────────────────────────────────────────── */
+async function init() {
+  UI.loading();
+  const { data:{session} } = await db.auth.getSession();
+  if (!session) { location.href='login.html'; return; }
+  _user = session.user;
+  Lang.init();
+  const { data:p } = await db.from('profiles').select('*').eq('id',_user.id).single();
+  _profile = p||{};
+  renderPlans();
+  await loadSummary();
+  UI.unload();
+}
+// Refresh claim buttons every minute (countdown)
+setInterval(() => {
+  const btns = document.querySelectorAll('[id^="claimBtn-"]');
+  if (btns.length > 0) loadActiveInvestments();
+}, 60000);
+
+window.addEventListener('load', init);
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .catch(e => console.warn('SW reg failed:', e));
+  });
+}
+</script>
+</body>
+</html>

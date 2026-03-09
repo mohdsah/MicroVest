@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#020206">
+<title>Admin | Withdraw</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../css/v6.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+.wth-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:20px;margin-bottom:12px; }
+.wth-card.pending  { border-left:3px solid var(--gold); }
+.wth-card.approved { border-left:3px solid var(--profit);opacity:.7; }
+.wth-card.rejected { border-left:3px solid var(--loss);opacity:.6; }
+.filter-row { display:flex;gap:8px;overflow-x:auto;padding:0 var(--pad) 16px; }
+.filter-btn { padding:8px 16px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--ice-3);font-size:11px;font-weight:700;cursor:pointer;font-family:'Instrument Sans',sans-serif;white-space:nowrap;flex-shrink:0;transition:.2s; }
+.filter-btn.on { background:var(--v-dim);border-color:var(--v-border);color:var(--v-pale); }
+.bank-box { background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--r-m);padding:14px;margin:12px 0; }
+.bb-row  { display:flex;justify-content:space-between;padding:4px 0; }
+.bb-l    { font-size:11px;color:var(--ice-3); }
+.bb-v    { font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700; }
+</style>
+</head>
+<body>
+<div class="amb-v"></div>
+<div class="shell">
+  <div class="pg-hd anim a1">
+    <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+  <a href="robots.html" style="color:#FB923C;font-size:11px;font-weight:800;text-decoration:none;display:flex;align-items:center;gap:5px;padding:7px 12px;border:1px solid rgba(251,146,60,.2);border-radius:9px;background:rgba(251,146,60,.06)">🤖 Robot</a>
+    <a href="tickets.html" style="color:var(--v-pale);font-size:11px;font-weight:800;text-decoration:none;display:flex;align-items:center;gap:5px;padding:7px 12px;border:1px solid rgba(124,58,237,.2);border-radius:9px;background:rgba(124,58,237,.06)">🎫 Tiket</a>
+    <div><div class="pg-title">Pengurusan Withdraw</div><div class="pg-sub">Luluskan atau tolak pengeluaran</div></div>
+    <div class="chip" style="margin-left:auto;background:rgba(239,68,68,0.1);color:#EF4444;border:1px solid rgba(239,68,68,0.2)" id="pendCount">0</div>
+  </div>
+
+  <div class="filter-row anim a2">
+    <button class="filter-btn on" onclick="filterWth('pending',this)">⏳ Pending</button>
+    <button class="filter-btn" onclick="filterWth('approved',this)">✅ Diluluskan</button>
+    <button class="filter-btn" onclick="filterWth('rejected',this)">❌ Ditolak</button>
+    <button class="filter-btn" onclick="filterWth('all',this)">📋 Semua</button>
+  </div>
+
+  <div id="wthList" style="padding:0 var(--pad)">
+    <div class="skel skel-row anim a1" style="border-radius:22px;margin-bottom:12px"></div>
+    <div class="skel skel-row anim a2" style="border-radius:22px"></div>
+  </div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+let _curFilter='pending';
+
+async function guardAdmin() {
+  const {data:{session}} = await db.auth.getSession();
+  if (!session) { location.href='../login.html'; return null; }
+  const {data:p} = await db.from('profiles').select('is_admin').eq('id',session.user.id).single();
+  if (!p?.is_admin) { location.href='../dashboard.html'; return null; }
+  return session.user;
+}
+
+async function loadWithdraws(filter='pending') {
+  let q = db.from('transactions').select('*, profiles(email,balance,vip_rank,total_deposit)')
+    .eq('type','withdraw').order('created_at',{ascending:false}).limit(60);
+  if (filter!=='all') q = q.eq('status',filter);
+  const {data} = await q;
+  const pend = (data||[]).filter(d=>d.status==='pending').length;
+  document.getElementById('pendCount').textContent = pend+' Pending';
+  renderWithdraws(data||[]);
+}
+
+function filterWth(f,btn) {
+  _curFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  loadWithdraws(f);
+}
+
+function renderWithdraws(list) {
+  const el = document.getElementById('wthList');
+  if (!list.length) { el.innerHTML='<div style="text-align:center;padding:40px;color:var(--ice-3)">Tiada rekod</div>'; return; }
+  el.innerHTML = list.map(w => {
+    const p = w.profiles||{};
+    const rank = MV.getRank(p.total_deposit||0);
+    const fee = w.amount * rank.withdrawFee;
+    const net = w.amount - fee;
+    return `
+    <div class="wth-card ${w.status}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div>
+          <div style="font-size:13px;font-weight:700">${p.email||w.user_id.slice(0,12)+'…'}</div>
+          <div style="font-size:10px;color:var(--ice-3)">${rank.icon} ${rank.name} · ${UI.ago(w.created_at)}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--loss)">-${UI.rm(w.amount)}</div>
+          <div style="font-size:10px;color:var(--profit)">Net: ${UI.rm(net)}</div>
+        </div>
+      </div>
+      <div class="bank-box">
+        <div class="bb-row"><span class="bb-l">Bank</span><span class="bb-v">${w.bank_name||'—'}</span></div>
+        <div class="bb-row"><span class="bb-l">No. Akaun</span><span class="bb-v">${w.account_number||'—'}</span></div>
+        <div class="bb-row"><span class="bb-l">Baki selepas</span><span class="bb-v">${UI.rm((p.balance||0))}</span></div>
+        <div class="bb-row"><span class="bb-l">Fee (${(rank.withdrawFee*100).toFixed(1)}%)</span><span class="bb-v" style="color:var(--loss)">-${UI.rm(fee)}</span></div>
+      </div>
+      ${w.status==='pending' ? `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+        <button class="btn btn-profit btn-sm" onclick="approveWth('${w.id}','${w.user_id}',${w.amount},'${w.bank_name||''}','${w.account_number||''}')">✅ Luluskan</button>
+        <button class="btn btn-sm" style="background:var(--loss-dim);color:var(--loss);border:1px solid rgba(239,68,68,0.2)" onclick="rejectWth('${w.id}','${w.user_id}',${w.amount})">❌ Tolak</button>
+      </div>` : `<div style="font-size:11px;font-weight:700;color:${w.status==='approved'?'var(--profit)':'var(--loss)'}">
+        ${w.status==='approved'?`✅ Diluluskan · Hantar ke ${w.bank_name} ${w.account_number}`:`❌ Ditolak: ${w.rejection_reason||'—'}`}
+      </div>`}
+    </div>`;
+  }).join('');
+}
+
+async function approveWth(txId, userId, amount, bank, accNo) {
+  UI.confirm('Luluskan Withdraw', `Sahkan hantar <strong>${UI.rm(amount)}</strong> ke ${bank} ${accNo}?`, async () => {
+    UI.loading('Memproses...');
+    await db.from('transactions').update({ status:'approved', approved_at:new Date().toISOString() }).eq('id',txId);
+    await db.from('notifications').insert([{
+      user_id:userId, type:'withdraw',
+      message:`✅ Withdraw ${UI.rm(amount)} telah diluluskan! Dana akan tiba dalam 1-2 hari bekerja ke ${bank} ${accNo}.`,
+    }]);
+    UI.unload();
+    UI.toast(`✅ Withdraw ${UI.rm(amount)} diluluskan!`,'success');
+    loadWithdraws(_curFilter);
+  }, 'Luluskan');
+}
+
+async function rejectWth(txId, userId, amount) {
+  // Prompt for rejection reason
+  const reason = prompt('Sebab penolakan (pilihan):') || 'Ditolak oleh admin';
+  if (reason === null) return;
+  UI.loading();
+  // Refund
+  // Atomic refund via RPC (no stale read)
+  await RPC.incBalance(userId, amount);
+  await RPC.incWallet(userId, 'main', amount);
+  await db.from('transactions').update({ status:'rejected', rejection_reason:reason }).eq('id',txId);
+  await db.from('notifications').insert([{
+    user_id:userId, type:'withdraw',
+    message:`❌ Withdraw ${UI.rm(amount)} ditolak: ${reason}. Dana telah dipulangkan ke baki anda.`,
+  }]);
+  UI.unload();
+  UI.toast('Withdraw ditolak, dana dipulangkan.','warning');
+  loadWithdraws(_curFilter);
+}
+
+async function init() {
+  UI.loading();
+  const user = await guardAdmin();
+  if (!user) return;
+  await loadWithdraws('pending');
+
+  db.channel('admin-wth').on('postgres_changes',{event:'INSERT',schema:'public',table:'transactions',filter:`type=eq.withdraw`},()=>{
+    loadWithdraws(_curFilter);
+    UI.toast('🔔 Permintaan withdraw baru!','warning',3000);
+  }).subscribe();
+
+  UI.unload();
+}
+window.addEventListener('load',init);
+</script>
+</body>
+</html>
