@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#020206">
 <title>Admin | Pengguna</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="../css/v6.css">
+<link rel="stylesheet" href="../css/v7.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 .search-wrap { padding:0 var(--pad);margin-bottom:16px;position:relative; }
@@ -65,6 +65,7 @@
 <div id="sheetCon"></div>
 
 <script src="../js/config.js"></script>
+<script src="../js/security.js"></script>
 <script src="../js/ui.js"></script>
 <script>
 let _users=[], _filtered=[], _curFilter='all';
@@ -157,7 +158,7 @@ function openUserSheet(userId) {
         <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
           <div style="width:54px;height:54px;border-radius:18px;background:linear-gradient(135deg,${RANK_COLORS[rank.id]}88,${RANK_COLORS[rank.id]});display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'Bebas Neue',sans-serif;color:#fff;flex-shrink:0">${(u.email||'?')[0].toUpperCase()}</div>
           <div>
-            <div style="font-size:14px;font-weight:700;margin-bottom:2px">${u.email}</div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:2px">${u.full_name || u.email}</div>
             <div style="font-size:11px;color:var(--ice-3)">${rank.icon} ${rank.name} · ${u.id.slice(0,10)}…</div>
           </div>
         </div>

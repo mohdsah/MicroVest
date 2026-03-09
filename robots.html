@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#020206">
-<title>MicroVest v6 | AI Robot</title>
+<title>MicroVest v8 | AI Robot</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="css/v6.css">
+<link rel="stylesheet" href="css/v7.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ── ROBOT CARDS ─────────────────────────────────────────── */
@@ -260,9 +260,11 @@
 <div id="buySheet"></div>
 
 <script src="js/config.js"></script>
+<script src="js/security.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/lang.js"></script>
 <script src="js/realtime.js"></script>
+<script src="js/push.js"></script>
 <script src="js/automation.js"></script>
 <script>
 let _user, _profile, _myRobots = [], _curTab = 'market';
@@ -881,8 +883,9 @@ function addClaimAllBtn() {
 /* ── INIT ─────────────────────────────────────────────────── */
 async function init() {
   UI.loading('Memuatkan robot...');
-  const { data:{ session } } = await db.auth.getSession();
-  if (!session) { location.href = 'login.html'; return; }
+  const _auth = await Security.guardSession('login.html');
+  if (!_auth) return;
+  const session = _auth.session;
   _user = session.user;
   Lang.init();
   await loadData();

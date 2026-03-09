@@ -1,0 +1,34 @@
+{
+  "name": "microvest",
+  "version": "8.0.0",
+  "description": "MicroVest — Fintech Investment & Mining Platform",
+  "private": true,
+  "scripts": {
+    "dev":          "netlify dev",
+    "deploy":       "netlify deploy",
+    "deploy:prod":  "netlify deploy --prod",
+    "db:push":      "supabase db push",
+    "db:reset":     "supabase db reset",
+    "db:seed":      "supabase db reset --with-seed-file supabase/seed.sql",
+    "supa:link":    "supabase link --project-ref zmyiaviafmmwpgxfvsbq",
+    "supa:login":   "supabase login",
+    "fn:deploy":    "supabase functions deploy send-push",
+    "setup":        "bash scripts/setup.sh",
+    "vapid:gen":    "npx web-push generate-vapid-keys --url-safe-base64",
+    "secrets:set":  "supabase secrets set --env-file .env.local",
+    "lint:html":    "find . -name '*.html' -not -path './.git/*' -not -path './node_modules/*' | xargs grep -L '</html>' | head -5",
+    "check:secrets":"grep -r 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9' --include='*.js' --include='*.html' . | grep -v '__SUPA' | grep -v config.js || echo 'OK: no exposed keys'"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.0.0",
+    "supabase": "^1.0.0",
+    "web-push": "^3.6.7",
+    "serve": "^14.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": ["fintech","investment","supabase","netlify","pwa"],
+  "homepage": "https://microvest.app"
+}

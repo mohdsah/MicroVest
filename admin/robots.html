@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#020206">
 <title>MicroVest Admin — Robot Management</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="../css/v6.css">
+<link rel="stylesheet" href="../css/v7.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 body { max-width:900px; margin:0 auto; }
@@ -100,6 +100,7 @@ body { max-width:900px; margin:0 auto; }
 </div>
 
 <script src="../js/config.js"></script>
+<script src="../js/security.js"></script>
 <script src="../js/ui.js"></script>
 <script>
 let _all = [], _filter = 'all';
@@ -192,8 +193,10 @@ function renderRobots() {
 }
 
 async function init() {
-  const { data:{ session } } = await db.auth.getSession();
-  if (!session) { location.href = '../login.html'; return; }
+  const _auth = await Security.guardAdmin('../login.html');
+  if (!_auth) return;
+  const session = _auth.session;
+  const _adminProfile = _auth.profile;
   const { data:p } = await db.from('profiles').select('is_admin').eq('id',session.user.id).single();
   if (!p?.is_admin) { location.href = '../dashboard.html'; return; }
   await loadRobots();

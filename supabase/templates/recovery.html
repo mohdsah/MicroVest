@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#03030A;font-family:'Segoe UI',Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#03030A;padding:40px 20px">
+<tr><td align="center">
+<table width="520" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#0C0C20,#121228);border:1px solid rgba(245,158,11,0.2);border-radius:20px;overflow:hidden">
+  <tr><td style="background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(245,158,11,0.05));padding:32px;text-align:center;border-bottom:1px solid rgba(245,158,11,0.1)">
+    <div style="font-size:36px;margin-bottom:10px">🔐</div>
+    <div style="font-family:'Courier New',monospace;font-size:26px;letter-spacing:6px;color:#E0F2FE;font-weight:700">MICROVEST</div>
+    <div style="font-size:11px;letter-spacing:3px;color:rgba(245,158,11,0.6);margin-top:4px">TETAPAN SEMULA KATA LALUAN</div>
+  </td></tr>
+  <tr><td style="padding:36px 32px">
+    <div style="font-size:22px;font-weight:800;color:#E0F2FE;margin-bottom:12px">Tetapkan Semula Kata Laluan</div>
+    <p style="color:rgba(226,232,255,0.6);font-size:14px;line-height:1.8;margin-bottom:28px">
+      Kami menerima permintaan untuk menetapkan semula kata laluan akaun anda. Klik butang di bawah untuk meneruskan. Pautan ini sah selama <strong style="color:#FCD34D">1 jam</strong>.
+    </p>
+    <div style="text-align:center;margin-bottom:28px">
+      <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:16px 40px;background:linear-gradient(135deg,#B45309,#F59E0B);color:#fff;border-radius:12px;font-weight:800;font-size:15px;text-decoration:none;box-shadow:0 10px 30px rgba(245,158,11,0.3)">
+        🔑 Tetapkan Kata Laluan
+      </a>
+    </div>
+    <div style="background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.15);border-radius:10px;padding:14px;margin-bottom:16px">
+      <p style="color:rgba(248,113,113,0.8);font-size:12px;margin:0;line-height:1.6">
+        ⚠️ Jika anda tidak meminta ini, abaikan emel ini. Kata laluan anda tidak akan berubah.
+      </p>
+    </div>
+    <p style="color:rgba(226,232,255,0.3);font-size:11px;text-align:center">{{ .ConfirmationURL }}</p>
+  </td></tr>
+  <tr><td style="padding:20px 32px;border-top:1px solid rgba(255,255,255,0.04);text-align:center">
+    <p style="color:rgba(226,232,255,0.2);font-size:11px;margin:0">MicroVest · <a href="https://microvest.app" style="color:rgba(167,139,250,0.4)">microvest.app</a></p>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>

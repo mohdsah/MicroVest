@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#03030A">
+<title>MicroVest — Tiada Sambungan</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@500;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body {
+  background:#03030A; color:#E2E8FF;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  min-height:100dvh; display:flex; align-items:center; justify-content:center;
+  padding:24px; text-align:center;
+  overflow:hidden;
+}
+body::before {
+  content:'';position:fixed;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 0%,rgba(109,40,217,0.12),transparent 60%),
+    linear-gradient(rgba(109,40,217,0.02) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(109,40,217,0.02) 1px,transparent 1px);
+  background-size:auto,64px 64px,64px 64px;
+}
+.wrap { position:relative; z-index:1; max-width:360px; }
+
+/* Animated wifi icon */
+.wifi-wrap {
+  width:100px; height:100px; border-radius:28px; margin:0 auto 28px;
+  background:linear-gradient(135deg,rgba(109,40,217,0.2),rgba(109,40,217,0.06));
+  border:1px solid rgba(109,40,217,0.2);
+  display:flex; align-items:center; justify-content:center;
+  font-size:44px;
+  animation:float 3s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* Pulse rings */
+.pulse-rings {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:100px; height:100px;
+}
+.ring {
+  position:absolute; inset:0; border-radius:28px;
+  border:1px solid rgba(109,40,217,0.3);
+  animation:ring-pulse 3s ease-out infinite;
+}
+.ring:nth-child(2){animation-delay:.5s}
+.ring:nth-child(3){animation-delay:1s}
+@keyframes ring-pulse{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.8);opacity:0}}
+
+.wifi-container { position:relative; width:100px; height:100px; margin:0 auto 28px; }
+
+h1 {
+  font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:3px;
+  background:linear-gradient(90deg,#E0F2FE,#A78BFA);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:12px;
+}
+.sub {
+  font-size:13px; color:rgba(226,232,255,0.45); line-height:1.75; margin-bottom:28px;
+}
+.sub strong { color:rgba(167,139,250,0.8); }
+
+/* Quick links */
+.offline-links {
+  display:flex; flex-direction:column; gap:8px; margin-bottom:28px;
+}
+.ol-link {
+  display:flex; align-items:center; gap:12px; padding:13px 16px;
+  background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06);
+  border-radius:14px; color:rgba(226,232,255,0.65); font-size:13px; font-weight:700;
+  text-decoration:none; transition:.2s; cursor:pointer;
+}
+.ol-link:hover { background:rgba(109,40,217,0.1); border-color:rgba(109,40,217,0.2); color:#C4B5FD; }
+.ol-icon { font-size:20px; flex-shrink:0; }
+.ol-lbl  { flex:1; text-align:left; }
+.ol-status { font-size:10px; letter-spacing:1px; }
+.ol-cached   { color:rgba(16,185,129,0.8); }
+.ol-nocache  { color:rgba(226,232,255,0.25); }
+
+/* Retry button */
+.retry-btn {
+  width:100%; padding:16px; border-radius:14px;
+  background:linear-gradient(135deg,#5B21B6,#7C3AED); color:#fff;
+  font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:15px;
+  border:none; cursor:pointer;
+  box-shadow:0 10px 28px rgba(109,40,217,0.4);
+  transition:transform .2s,box-shadow .2s;
+}
+.retry-btn:hover { transform:translateY(-2px); box-shadow:0 14px 36px rgba(109,40,217,0.5); }
+.retry-btn:active { transform:scale(.97); }
+
+.status-row {
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  margin-top:18px; font-size:12px; color:rgba(226,232,255,0.25);
+  font-family:'JetBrains Mono',monospace;
+}
+.status-dot {
+  width:7px; height:7px; border-radius:50%; background:rgba(244,63,94,0.7);
+  flex-shrink:0;
+}
+.status-dot.checking { background:rgba(245,158,11,0.7); animation:blink 1s infinite; }
+.status-dot.online   { background:rgba(16,185,129,0.8); }
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="wifi-container">
+    <div class="pulse-rings">
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="ring"></div>
+    </div>
+    <div class="wifi-wrap">📡</div>
+  </div>
+
+  <h1>TIADA SAMBUNGAN</h1>
+  <p class="sub">
+    Anda kini dalam mod <strong>luar talian</strong>.<br>
+    Halaman yang telah dikache boleh dibuka.<br>
+    Semak sambungan internet anda dan cuba semula.
+  </p>
+
+  <div class="offline-links" id="linkList">
+    <!-- Populated by JS -->
+  </div>
+
+  <button class="retry-btn" onclick="retryConnection()">
+    <i class="fas fa-rotate-right" style="margin-right:8px"></i>Cuba Semula
+  </button>
+
+  <div class="status-row">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusTxt">Tiada sambungan</span>
+  </div>
+</div>
+
+<script>
+const cachedPages = [
+  { url:'/dashboard.html',   label:'Dashboard',    icon:'📊' },
+  { url:'/investment.html',  label:'Pelaburan',    icon:'💹' },
+  { url:'/mining.html',      label:'Perlombongan', icon:'⛏️' },
+  { url:'/wallet.html',      label:'Wallet',       icon:'👛' },
+  { url:'/profile.html',     label:'Profil',       icon:'👤' },
+  { url:'/missions.html',    label:'Misi',         icon:'🎯' },
+];
+
+async function buildLinks() {
+  const list = document.getElementById('linkList');
+  for (const p of cachedPages) {
+    const cached = await caches.match(p.url).catch(() => null);
+    const div = document.createElement('a');
+    div.href = p.url;
+    div.className = 'ol-link';
+    div.innerHTML = `
+      <span class="ol-icon">${p.icon}</span>
+      <span class="ol-lbl">${p.label}</span>
+      <span class="ol-status ${cached?'ol-cached':'ol-nocache'}">
+        ${cached ? '✓ KACHE' : 'TIADA KACHE'}
+      </span>`;
+    if (!cached) div.onclick = e => { e.preventDefault(); }; 
+    list.appendChild(div);
+  }
+}
+
+async function retryConnection() {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusTxt');
+  dot.className = 'status-dot checking';
+  txt.textContent = 'Menyambung semula...';
+
+  try {
+    await fetch('/', { mode:'no-cors', cache:'no-store' });
+    dot.className = 'status-dot online';
+    txt.textContent = 'Disambung semula! Memuatkan...';
+    setTimeout(() => location.reload(), 800);
+  } catch(_) {
+    dot.className = 'status-dot';
+    txt.textContent = 'Masih tiada sambungan';
+  }
+}
+
+// Auto-retry every 30s
+setInterval(() => {
+  fetch('/', { mode:'no-cors', cache:'no-store' })
+    .then(() => location.reload())
+    .catch(() => {});
+}, 30000);
+
+// Monitor online event
+window.addEventListener('online', () => {
+  document.getElementById('statusDot').className = 'status-dot online';
+  document.getElementById('statusTxt').textContent = 'Disambung! Memuatkan...';
+  setTimeout(() => location.reload(), 600);
+});
+
+if ('caches' in window) buildLinks();
+</script>
+</body>
+</html>

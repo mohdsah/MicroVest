@@ -10,6 +10,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS profiles (
   id               UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email            TEXT,
+  full_name        TEXT,
   balance          NUMERIC(14,2) DEFAULT 0,
   total_deposit    NUMERIC(14,2) DEFAULT 0,
   total_earned     NUMERIC(14,2) DEFAULT 0,
@@ -132,6 +133,7 @@ CREATE TABLE IF NOT EXISTS wallets (
   created_at  TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(user_id, wallet_type)
 );
+ALTER TABLE wallets ADD CONSTRAINT IF NOT EXISTS wallets_user_wallet_unique UNIQUE (user_id, wallet_type);
 ALTER TABLE wallets ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "wallets_own" ON wallets;
 CREATE POLICY "wallets_own" ON wallets FOR ALL USING (user_id = auth.uid());
@@ -507,4 +509,58 @@ ALTER PUBLICATION supabase_realtime ADD TABLE user_robots;
 CREATE OR REPLACE FUNCTION inc_xp(uid UUID, amt NUMERIC)
 RETURNS VOID LANGUAGE SQL SECURITY DEFINER AS $$
   UPDATE profiles SET xp = xp + amt, updated_at = NOW() WHERE id = uid;
+$$;
+
+-- process_robot_promotion: credit referrer with robot promotion bonus
+CREATE OR REPLACE FUNCTION process_robot_promotion(
+  p_user_id   UUID,
+  p_robot_id  TEXT,
+  p_amount    NUMERIC
+) RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER AS $$
+DECLARE
+  v_referrer_id   UUID;
+  v_bonus_rate    NUMERIC;
+  v_bonus_amount  NUMERIC;
+  v_referrer_code TEXT;
+BEGIN
+  -- Get the referred_by code for this user
+  SELECT referral_by INTO v_referrer_code
+  FROM profiles WHERE id = p_user_id;
+  IF v_referrer_code IS NULL THEN RETURN; END IF;
+
+  -- Get referrer profile
+  SELECT id INTO v_referrer_id
+  FROM profiles WHERE referral_code = v_referrer_code;
+  IF v_referrer_id IS NULL THEN RETURN; END IF;
+
+  -- Determine bonus rate based on robot tier
+  v_bonus_rate := CASE p_robot_id
+    WHEN 'scout'    THEN 0.02
+    WHEN 'alpha'    THEN 0.03
+    WHEN 'nexus'    THEN 0.04
+    WHEN 'quantum'  THEN 0.05
+    WHEN 'sovereign'THEN 0.07
+    ELSE 0.02
+  END;
+
+  v_bonus_amount := ROUND(p_amount * v_bonus_rate, 2);
+  IF v_bonus_amount <= 0 THEN RETURN; END IF;
+
+  -- Atomic credit to referrer
+  UPDATE profiles
+    SET balance     = balance + v_bonus_amount,
+        total_earned= total_earned + v_bonus_amount,
+        updated_at  = NOW()
+  WHERE id = v_referrer_id;
+
+  -- Record in robot_promotions
+  INSERT INTO robot_promotions(promoter_id, referred_id, robot_id, amount)
+  VALUES (v_referrer_id, p_user_id, p_robot_id, v_bonus_amount);
+
+  -- Notify referrer
+  INSERT INTO notifications(user_id, type, message)
+  VALUES (v_referrer_id, 'referral',
+    format('🤖 Rakan anda aktifkan %s Bot! Bonus promosi +RM%s dikreditkan.',
+      initcap(p_robot_id), v_bonus_amount));
+END;
 $$;

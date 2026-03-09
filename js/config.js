@@ -3,9 +3,39 @@
    Supabase project: zmyiaviafmmwpgxfvsbq
 ═══════════════════════════════════════════════════════════ */
 
-const SUPA_URL = 'https://zmyiaviafmmwpgxfvsbq.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpteWlhdmlhZm1td3BneGZ2c2JxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDI3MTIsImV4cCI6MjA4ODQ3ODcxMn0.oKgp0XbATHQf-7DEcjySPBbV0dXHk10uqyyq6C2Bge0';
-const db = supabase.createClient(SUPA_URL, SUPA_KEY);
+/* ── Supabase Configuration ─────────────────────────────────────
+   Values are injected by Netlify Edge Function (inject-env.js)
+   OR by GitHub Actions CI/CD pipeline on deploy.
+   For local dev, create a .env.local file with:
+     SUPABASE_URL=https://zmyiaviafmmwpgxfvsbq.supabase.co
+     SUPABASE_ANON_KEY=your_anon_key
+   Then run: npm run dev (uses netlify dev)
+─────────────────────────────────────────────────────────────── */
+const SUPA_URL = '__SUPA_URL__' !== '' && !('__SUPA_URL__').startsWith('__')
+  ? '__SUPA_URL__'
+  : 'https://pfxtywyedbiqqypwxyfv.supabase.co'; // fallback for local dev
+
+const SUPA_KEY = '__SUPA_KEY__' !== '' && !('__SUPA_KEY__').startsWith('__')
+  ? '__SUPA_KEY__'
+  : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmeHR5d3llZGJpcXF5cHd4eWZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNjg2NDQsImV4cCI6MjA4ODY0NDY0NH0.FJmSKEl5k4GWJZAgG_HLMNVh3tN2DtRSQY78fT3KW5k'; // fallback
+
+const SUPA_OPTIONS = {
+  auth: {
+    autoRefreshToken:   true,
+    persistSession:     true,
+    detectSessionInUrl: true,
+    storageKey:         'mv8-auth',
+    storage:            localStorage,
+  },
+  realtime: {
+    params: { eventsPerSecond: 10 },
+  },
+  global: {
+    headers: { 'x-app-version': '8.0' },
+  },
+};
+
+const db = supabase.createClient(SUPA_URL, SUPA_KEY, SUPA_OPTIONS);
 
 /* ── ATOMIC HELPERS (replaces db.raw — not valid in Supabase JS v2) ──
    Calls Postgres RPC functions defined in schema_v6.sql             */
@@ -18,7 +48,9 @@ const RPC = {
 };
 
 const MV = {
-  APP_NAME:'MicroVest', CURRENCY:'RM', VERSION:'6.0',
+  APP_URL:'__APP_URL__' !== '' && !('__APP_URL__').startsWith('__') ? '__APP_URL__' : 'https://microvest.app',
+  ADMIN_EMAIL:'admin@microvest.app',
+  APP_NAME:'MicroVest', CURRENCY:'RM', VERSION:'8.0',
   MIN_DEPOSIT:20, MIN_WITHDRAW:50,
 
   PLANS:[
@@ -150,10 +182,14 @@ const _isPublic    = _publicPages.some(p => location.pathname.includes(p));
 
 if (!_isPublic) {
   db.auth.onAuthStateChange((event, session) => {
+    // FIX: guard — never redirect when already on login/forgot/404 pages
+    const authPages = ['login.html','forgot.html','404.html'];
+    const onAuthPage = authPages.some(p => location.pathname.endsWith(p) || location.pathname.endsWith('/'));
     if (event === 'SIGNED_OUT' || (!session && event !== 'INITIAL_SESSION')) {
-      // Show toast if UI is available
-      if (typeof UI !== 'undefined') UI.toast('Sesi tamat. Sila log masuk semula.', 'error', 3000);
-      setTimeout(() => { location.href = 'login.html'; }, 1500);
+      if (!onAuthPage) {
+        if (typeof UI !== 'undefined') UI.toast('Sesi tamat. Sila log masuk semula.', 'error', 3000);
+        setTimeout(() => { location.href = 'login.html'; }, 1500);
+      }
     }
     if (event === 'TOKEN_REFRESHED') {
       console.log('[Auth] Token refreshed successfully');

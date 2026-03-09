@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#020206">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>MicroVest v6 | Dashboard</title>
+<title>MicroVest v8 | Dashboard</title>
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="css/v6.css">
+<link rel="stylesheet" href="css/v7.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -402,8 +402,10 @@
 <div id="drawerOverlay" onclick="toggleNotif(event)" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);z-index:799;display:none"></div>
 
 <script src="js/config.js"></script>
+<script src="js/security.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/realtime.js"></script>
+<script src="js/push.js"></script>
 <script src="js/automation.js"></script>
 <script src="js/lang.js"></script>
 <script>
@@ -630,8 +632,9 @@ function listenProfile(userId) {
 async function init() {
   Lang.init();
   UI.loading();
-  const { data:{ session } } = await db.auth.getSession();
-  if (!session) { location.href = 'login.html'; return; }
+  const _auth = await Security.guardSession('login.html');
+  if (!_auth) return;
+  const session = _auth.session;
   _user = session.user;
 
   // Maintenance check

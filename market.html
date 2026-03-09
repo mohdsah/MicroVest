@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#020206">
-<title>MicroVest v6 | Pasaran MVT</title>
+<title>MicroVest v8 | Pasaran MVT</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="css/v6.css">
+<link rel="stylesheet" href="css/v7.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -200,6 +200,24 @@
 </div>
 
 <!-- BOTTOM NAV -->
+
+<!-- ═══════ LIVE CRYPTO MARKET SECTION ═══════ -->
+<div style="padding:0 var(--pad);margin-bottom:8px" class="anim a4">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div class="live-label">
+      <span class="live-dot"></span>
+      HARGA CRYPTO MASA NYATA
+    </div>
+    <button class="crypto-refresh-btn" onclick="loadCrypto(true)">
+      <i class="fas fa-rotate-right" id="refreshIco"></i>
+      Kemas Kini
+    </button>
+  </div>
+  <div style="font-size:10px;color:var(--ice-3);font-family:var(--font-data);margin-bottom:12px" id="cryptoUpdated">
+    Memuatkan...
+  </div>
+  <div id="cryptoGrid" class="crypto-grid"></div>
+</div>
 <nav class="bottom-nav">
   <a href="dashboard.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
   <a href="investment.html" class="nav-item active"><i class="fas fa-chart-line"></i><span>Invest</span></a>
@@ -213,6 +231,7 @@
 <div id="buyModal" style="display:none"></div>
 
 <script src="js/config.js"></script>
+<script src="js/security.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/lang.js"></script>
 <script>
@@ -533,6 +552,174 @@ if ('serviceWorker' in navigator) {
       .catch(e => console.warn('SW reg failed:', e));
   });
 }
+
+/* ═══════════════════════════════════════════════════════════
+   LIVE CRYPTO MARKET — CoinGecko (free, no API key needed)
+   Auto-refresh every 60 seconds
+════════════════════════════════════════════════════════════ */
+const CRYPTO_IDS = [
+  { id:'bitcoin',   sym:'BTC', icon:'₿', color:'#F7931A' },
+  { id:'ethereum',  sym:'ETH', icon:'Ξ', color:'#627EEA' },
+  { id:'binancecoin',sym:'BNB', icon:'⬟', color:'#F3BA2F' },
+  { id:'ripple',    sym:'XRP', icon:'✦', color:'#346AA9' },
+  { id:'solana',    sym:'SOL', icon:'◎', color:'#9945FF' },
+  { id:'cardano',   sym:'ADA', icon:'♦', color:'#0033AD' },
+  { id:'dogecoin',  sym:'DOGE',icon:'Ð', color:'#C2A633' },
+  { id:'polkadot',  sym:'DOT', icon:'●', color:'#E6007A' },
+];
+const CURRENCY      = 'myr';
+const CURRENCY_SYM  = 'RM';
+let _cryptoData     = [];
+let _cryptoTimer    = null;
+let _cryptoLoading  = false;
+
+async function loadCrypto(silent = false) {
+  if (_cryptoLoading) return;
+  _cryptoLoading = true;
+  const el = document.getElementById('cryptoGrid');
+  if (!el) { _cryptoLoading=false; return; }
+
+  if (!silent) renderCryptoSkel();
+
+  try {
+    const ids = CRYPTO_IDS.map(c=>c.id).join(',');
+    const res = await fetch(
+      `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${CURRENCY}&ids=${ids}&order=market_cap_desc&sparkline=false&price_change_percentage=24h`,
+      { signal: AbortSignal.timeout(8000) }
+    );
+    if (!res.ok) throw new Error('API error ' + res.status);
+    _cryptoData = await res.json();
+    renderCrypto(_cryptoData);
+    document.getElementById('cryptoUpdated').textContent =
+      'Dikemas kini: ' + new Date().toLocaleTimeString('ms-MY');
+  } catch(e) {
+    if (!silent) {
+      el.innerHTML = `
+        <div style="text-align:center;padding:24px;color:var(--ice-3);font-size:12px">
+          <div style="font-size:28px;margin-bottom:10px">🌐</div>
+          Gagal memuatkan data pasaran.<br>
+          <button onclick="loadCrypto()" class="crypto-refresh-btn" style="margin:12px auto 0">
+            Cuba Semula
+          </button>
+        </div>`;
+    }
+  }
+  _cryptoLoading = false;
+}
+
+function renderCryptoSkel() {
+  const el = document.getElementById('cryptoGrid');
+  if (el) el.innerHTML = CRYPTO_IDS.slice(0,6).map(()=>
+    '<div class="skel crypto-skel"></div>'
+  ).join('');
+}
+
+function renderCrypto(coins) {
+  const el = document.getElementById('cryptoGrid');
+  if (!el || !coins?.length) return;
+  el.innerHTML = coins.map(c => {
+    const cfg  = CRYPTO_IDS.find(x=>x.id===c.id) || {};
+    const chg  = c.price_change_percentage_24h || 0;
+    const up   = chg >= 0;
+    const price = c.current_price >= 1
+      ? c.current_price.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2})
+      : c.current_price.toLocaleString('en-MY',{minimumFractionDigits:4,maximumFractionDigits:6});
+    const cap = c.market_cap >= 1e12
+      ? (c.market_cap/1e12).toFixed(2)+'T'
+      : c.market_cap >= 1e9
+        ? (c.market_cap/1e9).toFixed(1)+'B'
+        : (c.market_cap/1e6).toFixed(0)+'M';
+    return `
+      <div class="crypto-card" onclick="showCryptoDetail('${c.id}')">
+        <div class="crypto-logo" style="background:${cfg.color||'#333'}22;border:1px solid ${cfg.color||'#333'}33">
+          <span style="color:${cfg.color||'#fff'};font-family:var(--font-data);font-size:16px;font-weight:700">${cfg.icon||c.symbol.toUpperCase()}</span>
+        </div>
+        <div>
+          <div class="crypto-name">${c.name}</div>
+          <div class="crypto-sym">${c.symbol.toUpperCase()} / ${CURRENCY.toUpperCase()}</div>
+          <div class="crypto-mktcap">Mkap: ${CURRENCY_SYM} ${cap}</div>
+        </div>
+        <div class="crypto-right">
+          <div class="crypto-price">${CURRENCY_SYM} ${price}</div>
+          <div class="crypto-chg ${up?'up':'dn'}">${up?'▲':'▼'} ${Math.abs(chg).toFixed(2)}%</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function showCryptoDetail(coinId) {
+  const c   = _cryptoData.find(x=>x.id===coinId);
+  const cfg = CRYPTO_IDS.find(x=>x.id===coinId)||{};
+  if (!c) return;
+  const chg = c.price_change_percentage_24h||0;
+  const up  = chg>=0;
+  if (typeof UI!=='undefined') {
+    UI.confirm(
+      `${cfg.icon||'🪙'} ${c.name} (${c.symbol.toUpperCase()})`,
+      `Harga semasa: RM ${c.current_price?.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:4})}
+` +
+      `Perubahan 24j: ${up?'+':''}${chg.toFixed(2)}%
+` +
+      `Tertinggi 24j: RM ${c.high_24h?.toLocaleString('en-MY',{minimumFractionDigits:2})}
+` +
+      `Terendah 24j: RM ${c.low_24h?.toLocaleString('en-MY',{minimumFractionDigits:2})}
+` +
+      `Volume 24j: RM ${(c.total_volume/1e6).toFixed(1)}J`,
+      null, 'Tutup'
+    );
+  }
+}
+
+/* Auto-refresh every 60s */
+function startCryptoAutoRefresh() {
+  clearInterval(_cryptoTimer);
+  _cryptoTimer = setInterval(() => loadCrypto(true), 60000);
+}
 </script>
+
+<!-- ═══════════════════════════════════════════
+     LIVE CRYPTO MARKET (CoinGecko API)
+══════════════════════════════════════════════ -->
+<style>
+.crypto-section { padding:0 var(--pad); }
+.crypto-refresh-row {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:12px;
+}
+.crypto-refresh-btn {
+  display:flex; align-items:center; gap:6px;
+  padding:7px 14px; border-radius:10px;
+  background:var(--glass); border:1px solid var(--border);
+  color:var(--plasma-pale); font-size:11px; font-weight:700;
+  cursor:pointer; font-family:var(--font-body); transition:.2s;
+}
+.crypto-refresh-btn:hover { background:var(--glass-hi); }
+.crypto-grid { display:flex; flex-direction:column; gap:6px; }
+.crypto-card {
+  display:flex; align-items:center; gap:14px;
+  padding:14px 16px; border-radius:16px;
+  background:var(--glass); border:1px solid var(--border);
+  cursor:pointer; transition:.2s;
+}
+.crypto-card:hover { background:var(--glass-hi); border-color:var(--border-hi); }
+.crypto-logo { width:42px; height:42px; border-radius:14px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:22px; }
+.crypto-name  { font-size:14px; font-weight:800; color:var(--glacier); }
+.crypto-sym   { font-size:9px; color:var(--ice-3); font-family:var(--font-data); letter-spacing:1px; margin-top:1px; }
+.crypto-mktcap{ font-size:10px; color:var(--ice-3); margin-top:2px; font-family:var(--font-data); }
+.crypto-right { margin-left:auto; text-align:right; flex-shrink:0; }
+.crypto-price { font-family:var(--font-data); font-size:15px; font-weight:700; color:var(--glacier); }
+.crypto-chg   { font-family:var(--font-data); font-size:11px; font-weight:700; margin-top:3px; padding:2px 7px; border-radius:6px; }
+.crypto-chg.up{ background:var(--profit-dim); color:var(--profit); }
+.crypto-chg.dn{ background:var(--loss-dim);   color:var(--loss); }
+.crypto-skel  { height:70px; border-radius:16px; margin-bottom:6px; }
+.live-label { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--ice-2); }
+.live-dot { width:6px; height:6px; border-radius:50%; background:var(--profit);
+  animation:live-pulse 2s ease-in-out infinite; }
+@keyframes live-pulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.5);opacity:1}50%{box-shadow:0 0 0 5px rgba(16,185,129,0);opacity:.7}}
+.crypto-chart-mini {
+  width:72px; height:32px; flex-shrink:0;
+}
+</style>
 </body>
 </html>

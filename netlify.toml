@@ -1,0 +1,168 @@
+# ═══════════════════════════════════════════════════════════════
+# MicroVest v8 — netlify.toml
+# Netlify Deployment Configuration
+# ═══════════════════════════════════════════════════════════════
+
+[build]
+  publish       = "."          # Root folder is the published site
+  command       = "echo 'MicroVest v8 static build complete'"
+
+[build.environment]
+  NODE_VERSION  = "20"
+  NPM_VERSION   = "10"
+
+# ── NETLIFY DEV (local) ────────────────────────────────────────
+[dev]
+  command       = "npx serve . -p 8888"
+  port          = 8888
+  targetPort    = 8888
+  framework     = "#static"
+
+# ── PRODUCTION CONTEXT ─────────────────────────────────────────
+[context.production]
+  command       = "echo 'Production build'"
+
+# ── PREVIEW/BRANCH DEPLOYS ─────────────────────────────────────
+[context.deploy-preview]
+  command       = "echo 'Preview build'"
+
+[context.branch-deploy]
+  command       = "echo 'Branch build'"
+
+# ─────────────────────────────────────────────────────────────
+# REDIRECTS
+# ─────────────────────────────────────────────────────────────
+
+# Force HTTPS
+[[redirects]]
+  from   = "http://microvest.app/*"
+  to     = "https://microvest.app/:splat"
+  status = 301
+  force  = true
+
+# www → non-www
+[[redirects]]
+  from   = "https://www.microvest.app/*"
+  to     = "https://microvest.app/:splat"
+  status = 301
+  force  = true
+
+# Login redirect for unauthenticated root access
+[[redirects]]
+  from   = "/"
+  to     = "/index.html"
+  status = 200
+
+# Admin section — requires auth (handled client-side via security.js)
+[[redirects]]
+  from   = "/admin"
+  to     = "/admin/dashboard.html"
+  status = 302
+
+# Catch-all for SPA routing
+[[redirects]]
+  from   = "/*"
+  to     = "/404.html"
+  status = 404
+
+# ─────────────────────────────────────────────────────────────
+# SECURITY HEADERS
+# Applied to all responses
+# ─────────────────────────────────────────────────────────────
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Prevent clickjacking
+    X-Frame-Options = "DENY"
+    
+    # XSS protection
+    X-XSS-Protection = "1; mode=block"
+    
+    # MIME type sniffing
+    X-Content-Type-Options = "nosniff"
+    
+    # Referrer policy
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    
+    # HTTP Strict Transport Security (1 year)
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    
+    # Permissions policy
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=()"
+    
+    # Content Security Policy
+    # Allows: self, Supabase, Fonts, Font Awesome, Chart.js, Supabase CDN, CoinGecko API
+    Content-Security-Policy = """
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
+      font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:;
+      img-src 'self' data: blob: https://zmyiaviafmmwpgxfvsbq.supabase.co https://assets.coingecko.com;
+      connect-src 'self' https://zmyiaviafmmwpgxfvsbq.supabase.co wss://zmyiaviafmmwpgxfvsbq.supabase.co https://api.coingecko.com;
+      worker-src 'self' blob:;
+      manifest-src 'self';
+      frame-ancestors 'none';
+      base-uri 'self';
+      form-action 'self';
+    """
+    
+    # Cross-Origin policies
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Resource-Policy = "same-origin"
+
+# HTML files — no cache (always fresh)
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Pragma        = "no-cache"
+    Expires       = "0"
+
+# Service Worker — no cache
+[[headers]]
+  for = "/service-worker.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Service-Worker-Allowed = "/"
+
+# Manifest — short cache
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+# CSS & JS — long cache (hash-busted via filename)
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Icons & images — long cache
+[[headers]]
+  for = "/icons/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "*.jpg"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+# ─────────────────────────────────────────────────────────────
+# EDGE FUNCTIONS
+# ─────────────────────────────────────────────────────────────
+
+[[edge_functions]]
+  function = "inject-env"
+  path     = "/*"
