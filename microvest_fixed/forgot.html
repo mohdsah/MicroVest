@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#020206">
+<title>MicroVest v8 | Lupa Kata Laluan</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="css/v10.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="amb-v"></div><div class="amb-o"></div>
+
+<div class="forgot-shell">
+  <!-- LOGO -->
+  <div style="text-align:center;margin-bottom:32px">
+    <div class="brand">MicroVest</div>
+    <div style="font-size:12px;color:var(--ice-3);margin-top:6px">Reset Kata Laluan</div>
+  </div>
+
+  <div class="forgot-card">
+
+    <!-- ── STEP 1: Email ────────────────────────────── -->
+    <div class="step active" id="step1">
+      <div style="text-align:center;margin-bottom:28px">
+        <div style="font-size:44px;margin-bottom:14px">🔐</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:8px">Lupa Kata Laluan?</div>
+        <div style="font-size:13px;color:var(--ice-3);line-height:1.6">Masukkan emel anda. Kami akan hantar link reset melalui Supabase Auth.</div>
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-lbl">ALAMAT EMEL</label>
+        <div style="position:relative">
+          <i class="fas fa-envelope" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--ice-3);font-size:14px"></i>
+          <input class="field" id="emailInput" type="email" placeholder="nama@emel.com" style="padding-left:44px" oninput="clearErr()">
+        </div>
+        <div id="emailErr" style="color:#EF4444;font-size:11px;margin-top:6px;display:none"></div>
+      </div>
+
+      <button class="btn btn-v btn-full btn-lg" style="margin-top:8px" onclick="sendReset()">
+        📧 Hantar Link Reset
+      </button>
+
+      <div style="text-align:center;margin-top:18px">
+        <a href="login.html" style="font-size:13px;color:var(--v-pale);font-weight:700">← Kembali ke Log Masuk</a>
+      </div>
+    </div>
+
+    <!-- ── STEP 2: Email sent ──────────────────────── -->
+    <div class="step" id="step2">
+      <div style="text-align:center;padding:10px 0">
+        <div style="font-size:56px;margin-bottom:18px;animation:bounce .6s var(--spring)">📬</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:12px">Emel Dihantar!</div>
+        <div style="font-size:13px;color:var(--ice-2);line-height:1.8;margin-bottom:8px">
+          Link reset kata laluan telah dihantar ke
+        </div>
+        <div id="sentEmail" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--v-pale);background:var(--v-dim);border:1px solid var(--v-border);border-radius:10px;padding:10px 16px;margin-bottom:20px"></div>
+        <div style="font-size:12px;color:var(--ice-3);line-height:1.7;margin-bottom:28px">
+          Semak inbox (dan folder spam). Link sah selama <strong style="color:var(--gold)">1 jam</strong>.<br>
+          Klik link → tetapkan kata laluan baru → log masuk semula.
+        </div>
+
+        <!-- Countdown resend -->
+        <div id="resendWrap" style="margin-bottom:18px">
+          <div id="resendMsg" style="font-size:12px;color:var(--ice-3)">Boleh hantar semula dalam <span id="countdown" style="color:var(--gold);font-weight:700">60</span>s</div>
+          <button id="resendBtn" class="btn btn-ghost btn-full" style="display:none;margin-top:10px" onclick="resendReset()">
+            🔄 Hantar Semula
+          </button>
+        </div>
+
+        <button class="btn btn-v btn-full" onclick="location.href='login.html'">
+          ← Kembali ke Log Masuk
+        </button>
+
+        <div style="margin-top:16px;font-size:11px;color:var(--ice-3)">
+          Masalah? Hubungi admin di Telegram
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /card -->
+
+  <!-- HELP TIPS -->
+  <div style="margin-top:24px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:var(--r-xl);padding:18px 20px;width:100%" id="helpTips">
+    <div style="font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--ice-3);margin-bottom:12px">TIPS KESELAMATAN</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--ice-2)"><span>🔑</span><span>Guna kata laluan unik (huruf besar + nombor + simbol)</span></div>
+      <div style="display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--ice-2)"><span>🚫</span><span>Jangan kongsi kata laluan kepada sesiapa</span></div>
+      <div style="display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--ice-2)"><span>📱</span><span>Aktifkan PIN Withdraw di Profil untuk keselamatan tambahan</span></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/security.js"></script>
+<script src="js/ui.js"></script>
+<script>
+let _email = '', _timer = null;
+
+function showStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+}
+
+function clearErr() {
+  const el = document.getElementById('emailErr');
+  el.style.display = 'none';
+}
+
+function showErr(msg) {
+  const el = document.getElementById('emailErr');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function sendReset() {
+  const email = document.getElementById('emailInput').value.trim().toLowerCase();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showErr('Sila masukkan alamat emel yang sah.'); return;
+  }
+  _email = email;
+  UI.loading('Menghantar link reset...');
+  const { error } = await db.auth.resetPasswordForEmail(email, {
+    redirectTo: location.origin + '/login.html?reset=1',
+  });
+  UI.unload();
+  if (error) {
+    // Don't reveal if email exists or not (security)
+    console.warn('Reset error:', error.message);
+  }
+  // Always show success (prevent email enumeration)
+  document.getElementById('sentEmail').textContent = email;
+  showStep(2);
+  document.getElementById('helpTips').style.display = 'none';
+  startCountdown();
+}
+
+function startCountdown() {
+  let secs = 60;
+  const countEl = document.getElementById('countdown');
+  const msgEl   = document.getElementById('resendMsg');
+  const btnEl   = document.getElementById('resendBtn');
+  _timer = setInterval(() => {
+    secs--;
+    countEl.textContent = secs;
+    if (secs <= 0) {
+      clearInterval(_timer);
+      msgEl.style.display  = 'none';
+      btnEl.style.display  = '';
+    }
+  }, 1000);
+}
+
+async function resendReset() {
+  document.getElementById('resendBtn').style.display = 'none';
+  document.getElementById('resendMsg').style.display = '';
+  UI.loading('Menghantar semula...');
+  await db.auth.resetPasswordForEmail(_email, {
+    redirectTo: location.origin + '/login.html?reset=1',
+  });
+  UI.unload();
+  UI.toast('✅ Emel reset dihantar semula!', 'success');
+  startCountdown();
+}
+
+// Handle password update redirect (Supabase sends user back with token in URL)
+window.addEventListener('load', async () => {
+  const hash = new URLSearchParams(window.location.hash.slice(1));
+  const type = hash.get('type');
+  if (type === 'recovery') {
+    // Show new password form inline
+    document.querySelector('.forgot-card').innerHTML = `
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:44px;margin-bottom:14px">🔓</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:8px">Tetapkan Kata Laluan Baru</div>
+        <div style="font-size:12px;color:var(--ice-3)">Mesti sekurang-kurangnya 8 aksara</div>
+      </div>
+      <div class="field-wrap" style="margin-bottom:16px">
+        <label class="field-lbl">KATA LALUAN BARU</label>
+        <div style="position:relative">
+          <input class="field" id="pw1" type="password" placeholder="Min 8 aksara" oninput="checkPwStrength()" style="padding-right:44px">
+          <i class="fas fa-eye" id="eyeIcon1" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--ice-3);cursor:pointer;font-size:14px" onclick="togglePw('pw1','eyeIcon1')"></i>
+        </div>
+        <div class="strength-bar"><div class="strength-fill" id="strFill"></div></div>
+        <div id="strLabel" style="font-size:10px;margin-top:4px;color:var(--ice-3)"></div>
+      </div>
+      <div class="field-wrap" style="margin-bottom:20px">
+        <label class="field-lbl">SAHKAN KATA LALUAN</label>
+        <div style="position:relative">
+          <input class="field" id="pw2" type="password" placeholder="Taip semula kata laluan" style="padding-right:44px">
+          <i class="fas fa-eye" id="eyeIcon2" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--ice-3);cursor:pointer;font-size:14px" onclick="togglePw('pw2','eyeIcon2')"></i>
+        </div>
+      </div>
+      <button class="btn btn-v btn-full btn-lg" onclick="updatePassword()">✅ Simpan Kata Laluan Baru</button>
+    `;
+    document.getElementById('helpTips').style.display = 'none';
+  }
+});
+
+function checkPwStrength() {
+  const pw  = document.getElementById('pw1').value;
+  const fill= document.getElementById('strFill');
+  const lbl = document.getElementById('strLabel');
+  let score = 0;
+  if (pw.length >= 8)  score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  const pct   = score * 25;
+  const clrs  = ['','#EF4444','#F97316','#EAB308','#22C55E'];
+  const lbls  = ['','Lemah','Sederhana','Kukuh','Sangat Kukuh'];
+  fill.style.width      = pct + '%';
+  fill.style.background = clrs[score] || '';
+  lbl.textContent       = lbls[score] || '';
+  lbl.style.color       = clrs[score] || '';
+}
+
+function togglePw(id, iconId) {
+  const inp = document.getElementById(id);
+  const ico = document.getElementById(iconId);
+  if (inp.type === 'password') { inp.type='text'; ico.className='fas fa-eye-slash'; ico.style.cssText=ico.style.cssText; }
+  else { inp.type='password'; ico.className='fas fa-eye'; }
+}
+
+async function updatePassword() {
+  const pw1 = document.getElementById('pw1').value;
+  const pw2 = document.getElementById('pw2').value;
+  if (pw1.length < 8)  { UI.toast('Kata laluan mesti sekurang-kurangnya 8 aksara','error'); return; }
+  if (pw1 !== pw2)     { UI.toast('Kata laluan tidak sepadan!','error'); return; }
+  UI.loading('Menyimpan...');
+  const { error } = await db.auth.updateUser({ password: pw1 });
+  UI.unload();
+  if (error) { UI.toast('Ralat: ' + error.message, 'error'); return; }
+  UI.toast('✅ Kata laluan berjaya dikemaskini!', 'success', 4000);
+  setTimeout(() => location.href = 'login.html', 2500);
+}
+</script>
+
+<script>
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js').catch(()=>{});
+</script>
+</body>
+</html>

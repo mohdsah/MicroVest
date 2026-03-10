@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="../favicon.ico">
+  <link rel="apple-touch-icon" href="../icons/icon-192.png">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#020206">
+<title>MicroVest Admin — Robot Management</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../css/v10.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+<body>
+<div class="amb-v"></div>
+
+<div class="adm-hd">
+  <a href="dashboard.html" style="color:var(--ice-3);font-size:20px;text-decoration:none"><i class="fas fa-arrow-left"></i></a>
+  <div>
+    <div class="adm-title">🤖 Robot Management</div>
+    <div style="font-size:11px;color:var(--ice-3)" id="robotCount">Memuatkan...</div>
+  </div>
+  <div style="margin-left:auto;display:flex;gap:8px">
+    <a href="tickets.html" style="color:var(--v-pale);font-size:11px;font-weight:800;text-decoration:none;display:flex;align-items:center;gap:5px;padding:7px 12px;border:1px solid rgba(124,58,237,.2);border-radius:9px;background:rgba(124,58,237,.06)">🎫 Tiket</a>
+    <button onclick="loadRobots()" style="padding:9px 16px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--ice-2);font-size:11px;font-weight:800;cursor:pointer;font-family:'Instrument Sans',sans-serif">
+      <i class="fas fa-refresh"></i>
+    </button>
+  </div>
+</div>
+
+<!-- KPI ROW -->
+<div class="kpi-row">
+  <div class="kpi">
+    <div class="kpi-val" style="color:#A78BFA" id="kTotal">—</div>
+    <div class="kpi-lbl">Jumlah Robot</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-val" style="color:#22C55E" id="kActive">—</div>
+    <div class="kpi-lbl">Aktif</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-val" style="color:var(--profit)" id="kEarned">—</div>
+    <div class="kpi-lbl">Total Earned</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-val" style="color:#F97316" id="kRevenue">—</div>
+    <div class="kpi-lbl">Revenue (Paid)</div>
+  </div>
+</div>
+
+<!-- ROBOT POPULARITY -->
+<div style="padding:14px var(--pad);border-bottom:1px solid var(--border)">
+  <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ice-3);font-weight:800;margin-bottom:12px">POPULARITI ROBOT</div>
+  <div id="popularChart"></div>
+</div>
+
+<!-- FILTERS -->
+<div class="filter-row">
+  <button class="fp on" onclick="setFilter('all',this)">📋 Semua</button>
+  <button class="fp"    onclick="setFilter('active',this)">✅ Aktif</button>
+  <button class="fp"    onclick="setFilter('expired',this)">❌ Tamat</button>
+  <button class="fp"    onclick="setFilter('scout',this)">🤖 Scout</button>
+  <button class="fp"    onclick="setFilter('alpha',this)">🦾 Alpha</button>
+  <button class="fp"    onclick="setFilter('nexus',this)">🧠 Nexus</button>
+  <button class="fp"    onclick="setFilter('quantum',this)">⚛️ Quantum</button>
+  <button class="fp"    onclick="setFilter('sovereign',this)">👑 Sovereign</button>
+</div>
+
+<!-- SEARCH -->
+<div style="padding:10px var(--pad);border-bottom:1px solid var(--border)">
+  <input id="searchBox" placeholder="Cari email pengguna..." oninput="renderRobots()"
+    style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--ice);font-family:'Instrument Sans',sans-serif;font-size:13px;outline:none">
+</div>
+
+<!-- ROBOT LIST -->
+<div id="robotList">
+  <div style="text-align:center;padding:40px;color:var(--ice-3)">Memuatkan robot...</div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/security.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+let _all = [], _filter = 'all';
+
+const BOT_ICONS = { scout:'🤖', alpha:'🦾', nexus:'🧠', quantum:'⚛️', sovereign:'👑' };
+const BOT_COLORS = { scout:'#60A5FA', alpha:'#F97316', nexus:'#22C55E', quantum:'#A78BFA', sovereign:'#FB923C' };
+const ST_CLS = { active:'s-active', expired:'s-expired', paused:'s-paused' };
+const ST_LBL = { active:'Aktif', expired:'Tamat', paused:'Jeda' };
+
+function setFilter(f, btn) {
+  _filter = f;
+  document.querySelectorAll('.fp').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderRobots();
+}
+
+async function loadRobots() {
+  const { data } = await db.from('user_robots')
+    .select('*, profiles(email, vip_rank)')
+    .order('created_at', { ascending:false })
+    .limit(500);
+  _all = data || [];
+
+  // KPIs
+  const active  = _all.filter(r => r.status === 'active');
+  const earned  = _all.reduce((s,r) => s + Number(r.total_earned||0), 0);
+  const revenue = _all.reduce((s,r) => s + Number(r.price_paid||0), 0);
+  document.getElementById('kTotal').textContent   = _all.length;
+  document.getElementById('kActive').textContent  = active.length;
+  document.getElementById('kEarned').textContent  = 'RM'+earned.toFixed(0);
+  document.getElementById('kRevenue').textContent = 'RM'+revenue.toFixed(0);
+  document.getElementById('robotCount').textContent = `${_all.length} jumlah rekod`;
+
+  // Popularity chart
+  const counts = {};
+  _all.forEach(r => counts[r.robot_id] = (counts[r.robot_id]||0)+1);
+  const total  = _all.length || 1;
+  document.getElementById('popularChart').innerHTML = MV.ROBOTS.map(bot => {
+    const cnt = counts[bot.id]||0;
+    const pct = Math.round(cnt/total*100);
+    return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+      <div style="font-size:16px;width:20px">${BOT_ICONS[bot.id]||'🤖'}</div>
+      <div style="font-size:11px;width:100px;font-weight:700;color:${BOT_COLORS[bot.id]}">${bot.name}</div>
+      <div style="flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.06)">
+        <div style="height:100%;border-radius:3px;width:${pct}%;background:${BOT_COLORS[bot.id]};transition:width 1s ease"></div>
+      </div>
+      <div style="font-size:10px;color:var(--ice-3);width:60px;text-align:right">${cnt} (${pct}%)</div>
+    </div>`;
+  }).join('');
+
+  renderRobots();
+}
+
+function renderRobots() {
+  const q = document.getElementById('searchBox')?.value.toLowerCase() || '';
+  let list = _all.filter(r => {
+    if (_filter !== 'all' && r.status !== _filter && r.robot_id !== _filter) return false;
+    if (q && !r.profiles?.email?.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  const el = document.getElementById('robotList');
+  if (!list.length) {
+    el.innerHTML = '<div style="text-align:center;padding:50px;color:var(--ice-3)">Tiada rekod</div>';
+    return;
+  }
+
+  el.innerHTML = list.map(r => {
+    const bot  = MV.getRobot(r.robot_id);
+    const col  = BOT_COLORS[r.robot_id] || '#7C3AED';
+    const days = r.expires_at ? Math.max(0,Math.ceil((new Date(r.expires_at)-new Date())/86400000)) : 0;
+    return `
+    <div class="robot-row">
+      <div class="rb-icon" style="background:${col}18;border:1px solid ${col}33">${BOT_ICONS[r.robot_id]||'🤖'}</div>
+      <div class="rb-info">
+        <div class="rb-name">${bot?.name||r.robot_id}</div>
+        <div class="rb-meta">${r.profiles?.email?.replace(/(.{4}).+(@.+)/,'$1***$2')||'—'} · ${UI.date(r.created_at)} · ${days}h lagi</div>
+      </div>
+      <div style="text-align:center;padding:0 8px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:${col}">RM${Number(r.daily_profit||0).toFixed(2)}/hari</div>
+        <div style="font-size:9px;color:var(--ice-3)">kadar</div>
+      </div>
+      <div class="rb-earn">
+        <div class="rb-val">RM${Number(r.total_earned||0).toFixed(2)}</div>
+        <div class="rb-sub">total earn</div>
+      </div>
+      <span class="status-badge ${ST_CLS[r.status]||'s-active'}">${ST_LBL[r.status]||r.status}</span>
+    </div>`;
+  }).join('');
+}
+
+async function init() {
+  const _auth = await Security.guardAdmin('../login.html');
+  if (!_auth) return;
+  const session = _auth.session;
+  const _adminProfile = _auth.profile;
+  const { data:p } = await db.from('profiles').select('is_admin').eq('id',session.user.id).single();
+  if (!p?.is_admin) { location.href = '../dashboard.html'; return; }
+  await loadRobots();
+}
+window.addEventListener('load', init);
+</script>
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js", { scope: "/" })
+        .then(r => console.log("[SW] Registered", r.scope))
+        .catch(e => console.error("[SW] Registration failed", e));
+    }
+  </script>
+</body>
+</html>

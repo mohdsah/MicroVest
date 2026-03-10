@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#020206">
+<title>MicroVest v8 | Pasukan</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="css/v10.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+<body>
+<div class="amb-v"></div>
+<div class="shell">
+
+  <!-- HEADER -->
+  <div class="pg-hd anim a1">
+    <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+    <div><div class="pg-title">Pasukan Referral</div><div class="pg-sub">4 Level · Komisyen Automatik</div></div>
+    <div style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--v-pale)" id="hdrComm">—</div>
+  </div>
+
+  <!-- REFERRAL HERO -->
+  <div class="ref-hero anim a2">
+    <!-- Code display -->
+    <div style="font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--v-pale);opacity:.6;margin-bottom:10px;font-weight:800">KOD REFERRAL SAYA</div>
+    <div class="rh-code">
+      <span class="rh-code-val" id="myRefCode">—</span>
+      <button class="copy-btn" onclick="copyCode()">📋 Salin</button>
+    </div>
+
+    <div class="rh-stats">
+      <div class="rs-box"><span class="rs-v" id="heroTotal">0</span><span class="rs-l">Ahli</span></div>
+      <div class="rs-box"><span class="rs-v gold" id="heroComm">RM 0</span><span class="rs-l">Komisyen</span></div>
+      <div class="rs-box"><span class="rs-v profit" id="heroL1">0</span><span class="rs-l">Tier 1</span></div>
+    </div>
+
+    <!-- Share buttons -->
+    <div class="share-row">
+      <button class="share-btn" style="background:#1DA462;color:#fff" onclick="shareWA()">
+        <i class="fab fa-whatsapp"></i> WhatsApp
+      </button>
+      <button class="share-btn" style="background:rgba(255,255,255,.07);color:var(--ice);border:1px solid var(--border)" onclick="shareLink()">
+        <i class="fas fa-link"></i> Salin Link
+      </button>
+    </div>
+  </div>
+
+  <!-- COMMISSION STRUCTURE -->
+  <div style="padding:0 var(--pad);margin-bottom:22px" class="anim a3">
+    <div style="font-family:'DM Serif Display',serif;font-size:17px;margin-bottom:12px">Struktur Komisyen</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      ${[
+        ['Level 1','10%','Terus','var(--profit)','rgba(34,197,94,.1)'],
+        ['Level 2','5%','Generasi 2','var(--gold)','rgba(234,179,8,.1)'],
+        ['Level 3','3%','Generasi 3','var(--v-pale)','rgba(124,58,237,.1)'],
+        ['Level 4','2%','Generasi 4','#60A5FA','rgba(59,130,246,.1)'],
+      ].map(([lv,pct,desc,c,bg])=>`
+        <div style="background:${bg};border:1px solid ${c}30;border-radius:var(--r-l);padding:14px;text-align:center">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:${c}">${pct}</div>
+          <div style="font-size:11px;font-weight:700;margin-bottom:2px">${lv}</div>
+          <div style="font-size:9px;color:var(--ice-3)">${desc}</div>
+        </div>`).join('')}
+    </div>
+  </div>
+
+  <!-- LEVEL TABS -->
+  <div class="level-tabs anim a3" id="levelTabs">
+    <button class="lv-tab on" onclick="switchLevel(1,this)">👤 Level 1</button>
+    <button class="lv-tab" onclick="switchLevel(2,this)">👥 Level 2</button>
+    <button class="lv-tab" onclick="switchLevel(3,this)">🌐 Level 3</button>
+    <button class="lv-tab" onclick="switchLevel(4,this)">🔗 Level 4</button>
+    <button class="lv-tab" onclick="switchLevel(0,this)">💰 Komisyen</button>
+  </div>
+
+  <!-- LEVEL BANNER -->
+  <div class="lv-banner anim a4" id="levelBanner">
+    <div>
+      <div class="lv-pct" id="bannerPct">10%</div>
+      <div style="font-size:9px;color:var(--ice-3);letter-spacing:1.5px">KOMISYEN LEVEL 1</div>
+    </div>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:700;margin-bottom:2px" id="bannerLbl">Ahli Langsung</div>
+      <div style="font-size:11px;color:var(--ice-3)" id="bannerCount">0 ahli</div>
+    </div>
+    <div id="bannerEarn" style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--profit)">RM 0</div>
+  </div>
+
+  <!-- MEMBER / COMMISSION LIST -->
+  <div id="teamList" style="padding:0 var(--pad)">
+    <div class="skel skel-row" style="border-radius:14px;margin-bottom:8px"></div>
+    <div class="skel skel-row" style="border-radius:14px"></div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a href="dashboard.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
+  <a href="investment.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Invest</span></a>
+  <a href="robots.html" class="nav-item" style="position:relative">
+    <span style="position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#5B21B6,#7C3AED);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(124,58,237,.5);pointer-events:none"></span><i class="fas fa-robot"></i><span>Robot</span></a>
+  <a href="mining.html" class="nav-item"><i class="fas fa-microchip"></i><span>Mining</span></a>
+  <a href="profile.html" class="nav-item active"><i class="fas fa-user-circle"></i><span>Profil</span></a>
+</nav>
+
+<script src="js/config.js"></script>
+<script src="js/security.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/lang.js"></script>
+<script>
+let _user, _profile, _curLevel = 1, _netMap = {};
+
+const LV_PCTS = { 1:'10%', 2:'5%', 3:'3%', 4:'2%' };
+const LV_LBLS = { 1:'Ahli Langsung', 2:'Generasi 2', 3:'Generasi 3', 4:'Generasi 4' };
+const RANK_COLORS = { member:'#475569', bronze:'#CD7F32', silver:'#94A3B8', gold:'#EAB308', diamond:'#7C3AED' };
+
+/* ── TAB ─────────────────────────────────────────────────── */
+async function switchLevel(lv, btn) {
+  _curLevel = lv;
+  document.querySelectorAll('.lv-tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+
+  const banner = document.getElementById('levelBanner');
+  if (lv === 0) {
+    banner.style.display='none';
+    loadCommissions();
+  } else {
+    banner.style.display='';
+    document.getElementById('bannerPct').textContent  = LV_PCTS[lv];
+    document.getElementById('bannerLbl').textContent  = LV_LBLS[lv];
+    await loadLevel(lv);
+  }
+}
+
+/* ── BUILD NETWORK MAP (recursive) ──────────────────────── */
+async function buildNetwork() {
+  // Level 1: direct referrals
+  const { data:l1 } = await db.from('profiles').select('id,email,balance,total_deposit,vip_rank,created_at').eq('referral_by', _profile.referral_code);
+  _netMap[1] = l1||[];
+
+  // Level 2-4: chain
+  for (let lv=2; lv<=4; lv++) {
+    const parentList = _netMap[lv-1];
+    if (!parentList.length) { _netMap[lv]=[]; continue; }
+    const codes = parentList.map(u=>u.referral_code).filter(Boolean);
+    if (!codes.length) { _netMap[lv]=[]; continue; }
+    let all = [];
+    for (const code of codes) {
+      const { data } = await db.from('profiles').select('id,email,balance,total_deposit,vip_rank,created_at').eq('referral_by',code);
+      if (data) all = all.concat(data);
+    }
+    _netMap[lv] = all;
+  }
+
+  // Stats
+  const total = (_netMap[1]?.length||0)+(_netMap[2]?.length||0)+(_netMap[3]?.length||0)+(_netMap[4]?.length||0);
+  document.getElementById('heroTotal').textContent = total;
+  document.getElementById('heroL1').textContent    = _netMap[1]?.length||0;
+}
+
+/* ── LEVEL MEMBER LIST ──────────────────────────────────── */
+async function loadLevel(lv) {
+  const el = document.getElementById('teamList');
+  UI.skeleton(el,4,'row');
+  const members = _netMap[lv]||[];
+  document.getElementById('bannerCount').textContent = members.length+' ahli';
+
+  // Calc earnings from commissions table
+  const ids = members.map(m=>m.id);
+  const { data:comms } = ids.length ? await db.from('referral_commissions')
+    .select('amount').eq('referrer_id',_user.id).in('referred_id',ids) : {data:[]};
+  const earned = (comms||[]).reduce((s,c)=>s+(c.amount||0),0);
+  document.getElementById('bannerEarn').textContent = UI.rm(earned);
+
+  if (!members.length) {
+    el.innerHTML=`<div style="text-align:center;padding:40px;color:var(--ice-3)">
+      <div style="font-size:40px;margin-bottom:10px">👥</div>
+      Tiada ahli level ${lv} lagi
+    </div>`; return;
+  }
+
+  el.innerHTML = members.map(u => {
+    const rank  = MV.getRank(u.total_deposit||0);
+    const clr   = RANK_COLORS[rank.id]||'#475569';
+    const init  = (u.email||'?')[0].toUpperCase();
+    return `
+    <div class="member-row">
+      <div class="mr-av" style="background:linear-gradient(135deg,${clr}88,${clr})">${init}</div>
+      <div class="mr-info">
+        <div class="mr-email">${maskEmail(u.email)}</div>
+        <div class="mr-meta">${rank.icon} ${rank.name} · Daftar ${UI.ago(u.created_at)}</div>
+      </div>
+      <div class="mr-right">
+        <div class="mr-dep">${UI.rm(u.total_deposit||0)}</div>
+        <div class="mr-earn">+${UI.rm((u.total_deposit||0)*(MV.REFERRAL_RATES[lv-1]||0))}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── COMMISSION HISTORY ──────────────────────────────────── */
+async function loadCommissions() {
+  const el = document.getElementById('teamList');
+  UI.skeleton(el,5,'row');
+  const { data } = await db.from('referral_commissions').select('*').eq('referrer_id',_user.id).order('created_at',{ascending:false}).limit(40);
+  const total = (data||[]).reduce((s,c)=>s+(c.amount||0),0);
+  document.getElementById('heroComm').textContent = UI.rm(total);
+  document.getElementById('hdrComm').textContent  = `+${UI.rm(total)} komisyen`;
+
+  const LV_CLR = ['#22C55E','#EAB308','#A78BFA','#60A5FA'];
+  const LV_BG  = ['rgba(34,197,94,.1)','rgba(234,179,8,.1)','rgba(124,58,237,.1)','rgba(59,130,246,.1)'];
+  if (!data?.length) { el.innerHTML='<div style="text-align:center;padding:40px;color:var(--ice-3)">Tiada rekod komisyen</div>'; return; }
+  el.innerHTML = data.map(c=>`
+    <div class="comm-row">
+      <div class="cr-lv" style="background:${LV_BG[(c.level||1)-1]};color:${LV_CLR[(c.level||1)-1]}">L${c.level||1}</div>
+      <div class="cr-info">
+        <div class="cr-from">Komisyen daripada ${maskEmail(c.from_email||'ahli')}</div>
+        <div class="cr-meta">${UI.ago(c.created_at)} · ${c.source_type||'deposit'}</div>
+      </div>
+      <div class="cr-amt">+${UI.rm(c.amount)}</div>
+    </div>`).join('');
+}
+
+/* ── HELPERS ─────────────────────────────────────────────── */
+function maskEmail(email='') {
+  const [u,d] = email.split('@');
+  if (!u) return '****';
+  return u.slice(0,3)+'****@'+(d||'?');
+}
+
+function copyCode() {
+  const code = _profile?.referral_code;
+  navigator.clipboard.writeText(code).then(()=>UI.toast('✅ Kod referral disalin!','success'));
+}
+
+function shareWA() {
+  const code = _profile?.referral_code;
+  const link = `${location.origin}/login.html?ref=${code}`;
+  const msg  = encodeURIComponent(`🚀 Join MicroVest - Platform pelaburan automatik terbaik!\n\n💰 Profit harian dari mining & investment\n⛏️ Auto-claim 24 jam\n👑 4 level referral commission\n\nDaftar sekarang: ${link}`);
+  window.open(`https://wa.me/?text=${msg}`, '_blank');
+}
+
+function shareLink() {
+  const code = _profile?.referral_code;
+  const link = `${location.origin}/login.html?ref=${code}`;
+  navigator.clipboard.writeText(link).then(()=>UI.toast('✅ Link referral disalin!','success'));
+}
+
+/* ── INIT ─────────────────────────────────────────────────── */
+async function init() {
+  UI.loading();
+  const { data:{session} } = await db.auth.getSession();
+  if (!session) { location.href='login.html'; return; }
+  _user = session.user;
+  Lang.init();
+  const { data:p } = await db.from('profiles').select('*').eq('id',_user.id).single();
+  _profile = p||{};
+  document.getElementById('myRefCode').textContent = p?.referral_code||'—';
+
+  await buildNetwork();
+  await loadLevel(1);
+
+  // Total commission
+  const { data:comms } = await db.from('referral_commissions').select('amount').eq('referrer_id',_user.id);
+  const totalComm = (comms||[]).reduce((s,c)=>s+(c.amount||0),0);
+  document.getElementById('heroComm').textContent = UI.rm(totalComm);
+  document.getElementById('hdrComm').textContent  = `+${UI.rm(totalComm)} komisyen`;
+
+  UI.unload();
+}
+window.addEventListener('load',init);
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .catch(e => console.warn('SW reg failed:', e));
+  });
+}
+</script>
+</body>
+</html>

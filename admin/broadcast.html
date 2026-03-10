@@ -6,82 +6,8 @@
 <meta name="theme-color" content="#03030A">
 <title>MicroVest v8 | Broadcast — Admin</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="../css/v7.css">
-<style>
-body { background:var(--abyss); }
-.admin-layout { display:flex; min-height:100dvh; }
-.admin-content { flex:1; padding:24px; max-width:860px; }
-.admin-header {
-  display:flex; align-items:center; gap:14px; margin-bottom:28px;
-  padding-bottom:18px; border-bottom:1px solid var(--border);
-}
-.admin-header h1 {
-  font-family:var(--font-display); font-size:28px; letter-spacing:3px; color:var(--glacier);
-}
-.preview-card {
-  background:rgba(3,3,10,0.95); border:1px solid rgba(109,40,217,0.2);
-  border-radius:20px; padding:18px 20px;
-  display:flex; align-items:flex-start; gap:14px; margin-bottom:6px;
-}
-.preview-ico { font-size:28px; flex-shrink:0; }
-.preview-title { font-size:14px; font-weight:800; color:#E0F2FE; margin-bottom:4px; }
-.preview-body  { font-size:12px; color:rgba(226,232,255,0.5); line-height:1.5; }
-.preview-time  { font-size:10px; color:rgba(226,232,255,0.2); margin-top:6px; font-family:var(--font-data); }
-.stat-row { display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
-.st-box {
-  flex:1; min-width:100px;
-  background:var(--glass); border:1px solid var(--border);
-  border-radius:14px; padding:14px; text-align:center;
-}
-.st-val   { font-family:var(--font-data); font-size:24px; font-weight:700; color:var(--glacier); }
-.st-label { font-size:10px; color:var(--ice-3); margin-top:4px; letter-spacing:.5px; }
-.form-section {
-  background:var(--surf); border:1px solid var(--border);
-  border-radius:20px; padding:22px; margin-bottom:16px;
-}
-.form-section h3 {
-  font-family:var(--font-brand); font-weight:800; font-size:13px;
-  letter-spacing:2px; color:var(--plasma-pale); text-transform:uppercase;
-  margin-bottom:16px; display:flex; align-items:center; gap:8px;
-}
-.form-row { margin-bottom:14px; }
-label { display:block; font-size:12px; font-weight:700; color:var(--ice-2); margin-bottom:6px; letter-spacing:.5px; }
-.field { padding-left:18px; }
-textarea.field {
-  resize:vertical; min-height:80px; line-height:1.6;
-  padding:14px 18px;
-}
-.target-grid {
-  display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:8px;
-}
-.tg-item {
-  padding:12px 14px; border-radius:12px; background:var(--glass);
-  border:1.5px solid var(--border); cursor:pointer; transition:.15s;
-  display:flex; align-items:center; gap:8px; font-size:12px; font-weight:700;
-}
-.tg-item:hover { border-color:var(--plasma-border); background:var(--plasma-dim); }
-.tg-item.selected { border-color:var(--plasma-pale); background:rgba(109,40,217,0.15); color:var(--plasma-pale); }
-.type-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:8px; }
-.type-item {
-  padding:12px; border-radius:12px; text-align:center;
-  background:var(--glass); border:1.5px solid var(--border);
-  cursor:pointer; transition:.15s; font-size:20px;
-}
-.type-item:hover { border-color:var(--plasma-border); }
-.type-item.selected { border-color:var(--plasma-pale); background:var(--plasma-dim); }
-.type-item .tl { font-size:10px; font-weight:700; color:var(--ice-2); margin-top:5px; }
-.type-item.selected .tl { color:var(--plasma-pale); }
-.hist-item {
-  display:flex; align-items:center; gap:12px; padding:12px 14px;
-  background:var(--glass); border-radius:12px; margin-bottom:6px;
-}
-.hist-ico  { font-size:20px; flex-shrink:0; }
-.hist-body { flex:1; min-width:0; }
-.hist-title { font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.hist-meta  { font-size:10px; color:var(--ice-3); margin-top:2px; font-family:var(--font-data); }
-.hist-cnt { font-family:var(--font-data); font-size:12px; color:var(--plasma-pale); flex-shrink:0; }
-.char-count { font-size:10px; color:var(--ice-3); text-align:right; margin-top:4px; font-family:var(--font-data); }
-</style>
+<link rel="stylesheet" href="../css/v10.css">
+
 </head>
 <body>
 <div class="admin-layout">
@@ -405,5 +331,13 @@ function saveTemplate() {
   UI.toast('Template disimpan!','success');
 }
 </script>
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js", { scope: "/" })
+        .then(r => console.log("[SW] Registered", r.scope))
+        .catch(e => console.error("[SW] Registration failed", e));
+    }
+  </script>
 </body>
 </html>

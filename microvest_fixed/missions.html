@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#020206">
+<title>MicroVest v8 | Misi & Pencapaian</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="css/v10.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+<body>
+<div class="amb-v"></div><div class="amb-o"></div>
+<div class="shell">
+
+  <!-- HEADER -->
+  <div class="pg-hd anim a1">
+    <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+    <div>
+      <div class="pg-title" data-i18n="missions.title">Misi & Pencapaian</div>
+      <div class="pg-sub">XP · Badge · Ganjaran Harian</div>
+    </div>
+    <div style="margin-left:auto">
+      <div style="font-family:var(--font-data);font-size:13px;font-weight:700;color:var(--v-pale)" id="mvtBal">0 MVT</div>
+      <div style="font-size:9px;color:var(--ice-3)">MVT Token</div>
+    </div>
+  </div>
+
+  <!-- XP HERO -->
+  <div class="xp-hero anim a2">
+    <div class="xp-top">
+      <div class="xp-avatar" id="xpLvlNum">1</div>
+      <div style="flex:1">
+        <div class="xp-level-lbl">LEVEL</div>
+        <div class="xp-level-name" id="xpLvlName">Novis Miner</div>
+        <div class="xp-level-num" id="xpProg">0 / 100 XP</div>
+      </div>
+      <div class="chip chip-v" id="xpPct" style="font-size:11px">0%</div>
+    </div>
+    <div class="xp-bar-wrap">
+      <div class="xp-bar-hd">
+        <span class="xp-bar-lbl">Kemajuan ke level seterusnya</span>
+        <span class="xp-bar-val" id="xpLvlNext">Level 2</span>
+      </div>
+      <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+    </div>
+    <div class="xp-stats">
+      <div class="xp-stat"><span class="xps-v v-pale" id="xpTotal">0</span><span class="xps-l">Total XP</span></div>
+      <div class="xp-stat"><span class="xps-v gold" id="missionDone">0</span><span class="xps-l">Selesai</span></div>
+      <div class="xp-stat"><span class="xps-v profit" id="badgeDone">0</span><span class="xps-l">Badge</span></div>
+    </div>
+  </div>
+
+  <!-- CATEGORY FILTER -->
+  <div class="cat-scroll anim a2">
+    <button class="cat-btn on" onclick="filterCat('all',this)">🎯 Semua</button>
+    <button class="cat-btn" onclick="filterCat('daily',this)">📅 Harian</button>
+    <button class="cat-btn" onclick="filterCat('invest',this)">📈 Pelaburan</button>
+    <button class="cat-btn" onclick="filterCat('mining',this)">⛏️ Mining</button>
+    <button class="cat-btn" onclick="filterCat('team',this)">👥 Pasukan</button>
+    <button class="cat-btn" onclick="filterCat('vip',this)">👑 VIP</button>
+  </div>
+
+  <!-- MISSIONS LIST -->
+  <div class="mi-wrap anim a3" id="missionList">
+    <div class="skel skel-row" style="border-radius:22px;margin-bottom:10px"></div>
+    <div class="skel skel-row" style="border-radius:22px;margin-bottom:10px"></div>
+    <div class="skel skel-row" style="border-radius:22px"></div>
+  </div>
+
+  <!-- BADGES -->
+  <div class="badge-sec anim a4" style="margin-top:28px">
+    <div class="sec" style="padding:0;margin-bottom:14px">
+      <span class="sec-t">Badge Koleksi</span>
+      <span id="badgeCountLbl" style="font-size:12px;color:var(--ice-3);font-weight:700">0/12</span>
+    </div>
+    <div class="badge-grid" id="badgeGrid">
+      <!-- JS rendered -->
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a href="dashboard.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
+  <a href="investment.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Invest</span></a>
+  <a href="robots.html" class="nav-item active" style="position:relative">
+    <span style="position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#5B21B6,#7C3AED);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(124,58,237,.5);pointer-events:none"></span><i class="fas fa-robot"></i><span>Robot</span></a>
+  <a href="mining.html" class="nav-item"><i class="fas fa-microchip"></i><span>Mining</span></a>
+  <a href="profile.html" class="nav-item"><i class="fas fa-user-circle"></i><span>Profil</span></a>
+</nav>
+
+<!-- BADGE DETAIL MODAL -->
+<div id="badgeModal" style="display:none"></div>
+
+<script src="js/config.js"></script>
+<script src="js/security.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/automation.js"></script>
+<script src="js/realtime.js"></script>
+<script src="js/push.js"></script>
+<script src="js/lang.js"></script>
+<script>
+let _user, _doneSet = new Set(), _badgeSet = new Set(), _cat = 'all';
+
+/* ── XP LEVEL SYSTEM ─────────────────────────────────────── */
+const LEVELS = [
+  {lvl:1,  name:'Novis Miner',      xpNeeded:0    },
+  {lvl:2,  name:'Apprentice',       xpNeeded:100  },
+  {lvl:3,  name:'Junior Investor',  xpNeeded:250  },
+  {lvl:4,  name:'Active Miner',     xpNeeded:500  },
+  {lvl:5,  name:'Silver Trader',    xpNeeded:800  },
+  {lvl:6,  name:'Gold Seeker',      xpNeeded:1200 },
+  {lvl:7,  name:'Elite Miner',      xpNeeded:1800 },
+  {lvl:8,  name:'Pro Investor',     xpNeeded:2600 },
+  {lvl:9,  name:'Master Trader',    xpNeeded:3600 },
+  {lvl:10, name:'Diamond Miner',    xpNeeded:5000 },
+  {lvl:11, name:'Crypto Legend',    xpNeeded:7000 },
+  {lvl:12, name:'MicroVest Elite',  xpNeeded:10000},
+];
+
+function getLevel(xp) {
+  let cur = LEVELS[0];
+  for (const l of LEVELS) { if (xp >= l.xpNeeded) cur = l; }
+  const nextIdx = LEVELS.findIndex(l=>l.name===cur.name)+1;
+  const next = LEVELS[Math.min(nextIdx, LEVELS.length-1)];
+  const pct  = next.xpNeeded > cur.xpNeeded
+    ? Math.min(((xp - cur.xpNeeded)/(next.xpNeeded - cur.xpNeeded))*100, 100)
+    : 100;
+  return { current:cur, next, pct };
+}
+
+function renderXP(xp) {
+  const { current, next, pct } = getLevel(xp);
+  document.getElementById('xpLvlNum').textContent  = current.lvl;
+  document.getElementById('xpLvlName').textContent = current.name;
+  document.getElementById('xpProg').textContent     = `${xp} / ${next.xpNeeded} XP`;
+  document.getElementById('xpLvlNext').textContent  = `Level ${next.lvl}`;
+  document.getElementById('xpPct').textContent      = Math.round(pct) + '%';
+  document.getElementById('xpTotal').textContent    = xp;
+  setTimeout(() => { document.getElementById('xpFill').style.width = pct + '%'; }, 300);
+}
+
+/* ── MISSIONS ────────────────────────────────────────────── */
+function filterCat(cat, btn) {
+  _cat = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderMissions();
+}
+
+function renderMissions() {
+  const list = _cat === 'all' ? MV.MISSIONS : MV.MISSIONS.filter(m => m.category === _cat);
+  const el   = document.getElementById('missionList');
+  document.getElementById('missionDone').textContent = _doneSet.size;
+
+  el.innerHTML = list.map(m => {
+    const done = _doneSet.has(m.id);
+    const catColor = { daily:'#22C55E', invest:'#7C3AED', mining:'#F97316', team:'#3B82F6', vip:'#EAB308' }[m.category] || '#7C3AED';
+    return `
+    <div class="mission-item ${done?'completed':'active'}" style="margin-bottom:10px">
+      <div class="mi-top">
+        <div class="mi-icon">${m.icon}</div>
+        <div style="flex:1">
+          <div class="mi-name">${m.name} ${done?'<span style="color:var(--profit);font-size:12px">✓</span>':''}</div>
+          <div class="mi-desc">
+            <span class="chip" style="background:${catColor}15;color:${catColor};border:1px solid ${catColor}30;font-size:8px;padding:2px 8px;margin-right:6px">${m.category.toUpperCase()}</span>
+            ${m.category === 'daily' ? 'Reset setiap hari' : 'Sekali sahaja'}
+          </div>
+        </div>
+      </div>
+      <div class="mi-foot">
+        <div class="mi-prog">
+          <div class="mi-track"><div class="mi-fill" style="width:${done?100:0}%"></div></div>
+          <div class="mi-prog-text">${done?'Selesai':'Belum selesai'}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+          <div style="text-align:right">
+            <div class="mi-reward gold">+RM${m.reward}</div>
+            <div style="font-size:9px;color:var(--v-pale)">+${m.xp}XP +${m.mvt}MVT</div>
+          </div>
+          ${!done ? `<button class="mi-claim ready" onclick="claimMission('${m.id}')">Tuntut</button>` : '<div class="mi-claim done">✓</div>'}
+        </div>
+      </div>
+    </div>`;
+  }).join('') || '<div style="text-align:center;padding:32px;color:var(--ice-3)">Tiada misi dalam kategori ini</div>';
+}
+
+async function claimMission(id) {
+  if (_doneSet.has(id)) { UI.toast('Sudah dituntut!','warning'); return; }
+  const def = MV.MISSIONS.find(m=>m.id===id);
+  if (!def) return;
+
+  // Check if daily mission — only allow if not already done today
+  if (def.category === 'daily') {
+    const today = new Date().toISOString().split('T')[0];
+    const { data } = await db.from('user_missions')
+      .select('id,completed_at').eq('user_id',_user.id).eq('mission_id',id).single().catch(()=>({data:null}));
+    if (data && new Date(data.completed_at).toISOString().split('T')[0] === today) {
+      UI.toast('Misi harian sudah dituntut hari ini!','warning'); return;
+    }
+  }
+
+  await Auto.checkMissions(_user.id, {}, {});
+
+  // Force unlock for user-triggered claim
+  const { data:ex } = await db.from('user_missions').select('id').eq('user_id',_user.id).eq('mission_id',id).single().catch(()=>({data:null}));
+  if (!ex) {
+    await db.from('user_missions').insert([{user_id:_user.id,mission_id:id}]);
+    // Atomic: RPC for balance/MVT, direct for XP (non-financial)
+    if (def.reward > 0) await RPC.creditProfit(_user.id, def.reward);
+    if (def.mvt    > 0) await RPC.incMVT(_user.id, def.mvt);
+    if (def.xp     > 0) await db.rpc('inc_xp', { uid:_user.id, amt:def.xp }).catch(async () => {
+      // fallback: read current xp then update
+      const { data:px } = await db.from('profiles').select('xp').eq('id',_user.id).single();
+      await db.from('profiles').update({ xp:(px?.xp||0)+def.xp }).eq('id',_user.id);
+    });
+  }
+
+  _doneSet.add(id);
+  renderMissions();
+  showClaimResult(def);
+}
+
+function showClaimResult(def) {
+  const m = document.getElementById('badgeModal');
+  m.style.display = 'flex';
+  m.innerHTML = `
+    <div class="claim-modal">
+      <div class="claim-box">
+        <div style="font-size:60px;margin-bottom:14px;animation:float 2s ease-in-out infinite">${def.icon}</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:6px">Misi Selesai!</div>
+        <div style="font-size:13px;color:var(--ice-2);margin-bottom:18px">${def.name}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:22px">
+          <div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);border-radius:14px;padding:12px;text-align:center">
+            <div style="font-family:var(--font-data);font-size:18px;font-weight:700;color:#22C55E">+RM${def.reward}</div>
+            <div style="font-size:9px;color:var(--ice-3);margin-top:3px">REWARD</div>
+          </div>
+          <div style="background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);border-radius:14px;padding:12px;text-align:center">
+            <div style="font-family:var(--font-data);font-size:18px;font-weight:700;color:#A78BFA">+${def.xp}</div>
+            <div style="font-size:9px;color:var(--ice-3);margin-top:3px">XP</div>
+          </div>
+          <div style="background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.2);border-radius:14px;padding:12px;text-align:center">
+            <div style="font-family:var(--font-data);font-size:18px;font-weight:700;color:#EAB308">+${def.mvt}</div>
+            <div style="font-size:9px;color:var(--ice-3);margin-top:3px">MVT</div>
+          </div>
+        </div>
+        <button onclick="document.getElementById('badgeModal').style.display='none'" class="btn btn-v btn-full btn-lg" style="text-decoration:none">
+          🎉 Hebat!
+        </button>
+      </div>
+    </div>
+`;
+  UI.burst(window.innerWidth/2, window.innerHeight/3, 12);
+}
+
+/* ── BADGES ──────────────────────────────────────────────── */
+async function loadBadges(userId) {
+  const { data: earned } = await db.from('user_badges').select('badge_id').eq('user_id',userId);
+  _badgeSet = new Set((earned||[]).map(b=>b.badge_id));
+
+  document.getElementById('badgeDone').textContent     = _badgeSet.size;
+  document.getElementById('badgeCountLbl').textContent = `${_badgeSet.size}/${MV.BADGES.length}`;
+
+  document.getElementById('badgeGrid').innerHTML = MV.BADGES.map(b => {
+    const has = _badgeSet.has(b.id);
+    return `
+    <div class="badge-item ${has?'earned':'locked'}" onclick="showBadge('${b.id}','${has}')">
+      ${has ? '<div class="bi-new"></div>' : ''}
+      <span class="bi-icon">${b.icon}</span>
+      <span class="bi-name">${b.name}</span>
+    </div>`;
+  }).join('');
+}
+
+function showBadge(id, earned) {
+  const b = MV.BADGES.find(x=>x.id===id);
+  if (!b) return;
+  UI.confirm(
+    `${b.icon} ${b.name}`,
+    `${b.desc}<br><br><span style="font-size:11px;color:${earned==='true'?'#22C55E':'#8B95BB'}">${earned==='true'?'✓ Badge sudah diperoleh!':'🔒 Belum diperoleh'}</span>`,
+    async ()=>{}, 'OK'  /* info-only dialog, no async needed */
+  );
+}
+
+/* ── INIT ────────────────────────────────────────────────── */
+async function init() {
+  Lang.init();
+  UI.loading();
+  const { data:{session} } = await db.auth.getSession();
+  if (!session) { location.href='login.html'; return; }
+  _user = session.user;
+
+  const { data:p } = await db.from('profiles').select('xp,mvt_balance').eq('id',_user.id).single();
+  renderXP(p?.xp||0);
+  document.getElementById('mvtBal').textContent = UI.mvt(p?.mvt_balance||0);
+
+  // Load done missions
+  const { data:done } = await db.from('user_missions').select('mission_id').eq('user_id',_user.id);
+  _doneSet = new Set((done||[]).map(m=>m.mission_id));
+
+  renderMissions();
+  await loadBadges(_user.id);
+  UI.unload();
+}
+
+window.addEventListener('load', init);
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .catch(e => console.warn('SW reg failed:', e));
+  });
+}
+</script>
+</body>
+</html>

@@ -6,28 +6,9 @@
 <meta name="theme-color" content="#020206">
 <title>Admin | Tetapan</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="../css/v7.css">
+<link rel="stylesheet" href="../css/v10.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-.set-sec   { padding:0 var(--pad); margin-bottom:24px; }
-.set-title { font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--ice-3);font-weight:800;margin-bottom:12px;padding-left:2px; }
-.set-card  { background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden; }
-.set-row   { display:flex;align-items:center;gap:14px;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.035); }
-.set-row:last-child { border-bottom:none; }
-.set-ico   { width:38px;height:38px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0; }
-.set-info  { flex:1; }
-.set-label { font-size:14px;font-weight:600; }
-.set-sub   { font-size:11px;color:var(--ice-3);margin-top:2px; }
-/* Toggle switch */
-.toggle { position:relative;width:48px;height:26px;flex-shrink:0; }
-.toggle input { opacity:0;width:0;height:0; }
-.toggle-slider { position:absolute;inset:0;background:rgba(255,255,255,.1);border-radius:999px;cursor:pointer;transition:.3s; }
-.toggle-slider::before { content:'';position:absolute;width:20px;height:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s; }
-.toggle input:checked + .toggle-slider { background:var(--v); }
-.toggle input:checked + .toggle-slider::before { transform:translateX(22px); }
-/* Announce card */
-.ann-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);padding:16px;margin-bottom:10px; }
-</style>
+
 </head>
 <body>
 <div class="amb-v"></div>
@@ -305,5 +286,13 @@ async function init() {
 }
 window.addEventListener('load',init);
 </script>
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js", { scope: "/" })
+        .then(r => console.log("[SW] Registered", r.scope))
+        .catch(e => console.error("[SW] Registration failed", e));
+    }
+  </script>
 </body>
 </html>

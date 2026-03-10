@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#03030A">
+<title>MicroVest v9 | Staking Tetap</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="css/v10.css">
+
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <a href="dashboard.html" class="tb-btn"><i class="fas fa-arrow-left"></i></a>
+    <span class="tb-brand">STAKING TETAP</span>
+    <div class="tb-actions">
+      <a href="history.html?type=staking" class="tb-btn"><i class="fas fa-history"></i></a>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div class="staking-hero anim a1">
+    <div style="font-size:10px;letter-spacing:2px;color:rgba(59,130,246,0.7);font-weight:800;margin-bottom:6px">PENDAPATAN TETAP</div>
+    <div style="font-family:var(--font-display);font-size:28px;letter-spacing:2px;color:var(--glacier);margin-bottom:8px">LOCK & EARN</div>
+    <div style="font-size:12px;color:var(--ice-2);line-height:1.7">
+      Kunci dana anda untuk tempoh tetap dan nikmati kadar faedah <strong style="color:var(--sapphire)">APY sehingga 42%</strong>. 
+      Lebih lama kunci, lebih tinggi pulangan.
+    </div>
+    <div style="display:flex;gap:16px;margin-top:14px">
+      <div>
+        <div style="font-family:var(--font-data);font-size:22px;font-weight:700;color:var(--sapphire)" id="heroTVL">RM 0</div>
+        <div style="font-size:10px;color:var(--ice-3)">TOTAL STAKED</div>
+      </div>
+      <div>
+        <div style="font-family:var(--font-data);font-size:22px;font-weight:700;color:var(--profit)" id="heroAPY">36%</div>
+        <div style="font-size:10px;color:var(--ice-3)">MAX APY</div>
+      </div>
+      <div>
+        <div style="font-family:var(--font-data);font-size:22px;font-weight:700;color:var(--glacier)" id="heroStakers">0</div>
+        <div style="font-size:10px;color:var(--ice-3)">STAKERS</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Staking Plans -->
+  <div class="sec-title anim a2">PELAN STAKING</div>
+  <div style="padding:0 var(--pad)" class="anim a2" id="planList">
+    <!-- Rendered by JS -->
+  </div>
+
+  <!-- Calculator -->
+  <div class="sec-title anim a3">KALKULATOR PULANGAN</div>
+  <div class="calculator-box anim a3" style="margin:0 var(--pad) 14px">
+    <div style="font-size:12px;color:var(--ice-2);margin-bottom:10px;font-weight:700">Pilih pelan dan masukkan jumlah:</div>
+    <div class="field-wrap">
+      <i class="fas fa-coins field-icon"></i>
+      <input class="field" id="calcAmt" type="number" placeholder="Jumlah (RM)" min="100" oninput="calcReturns()">
+      <div class="field-r">
+        <button class="amt-max" onclick="setMax()">MAX</button>
+      </div>
+    </div>
+    <div class="calc-result" id="calcResult" style="display:none">
+      <div class="calc-item">
+        <div class="calc-val profit" id="calcProfit">RM 0</div>
+        <div class="calc-lbl">JUMLAH UNTUNG</div>
+      </div>
+      <div class="calc-item">
+        <div class="calc-val glacier" id="calcTotal">RM 0</div>
+        <div class="calc-lbl">JUMLAH TERIMA</div>
+      </div>
+      <div class="calc-item">
+        <div class="calc-val" style="color:var(--sapphire)" id="calcAPY">0%</div>
+        <div class="calc-lbl">APY</div>
+      </div>
+      <div class="calc-item">
+        <div class="calc-val" style="color:var(--torch)" id="calcDuration">0 Hari</div>
+        <div class="calc-lbl">TEMPOH KUNCI</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- My Active Stakings -->
+  <div class="sec-title anim a4">STAKING AKTIF SAYA</div>
+  <div style="padding:0 var(--pad) 80px" id="activeList">
+    <div style="text-align:center;padding:20px;color:var(--ice-3);font-size:13px">
+      <i class="fas fa-spinner fa-spin"></i>
+    </div>
+  </div>
+
+</div>
+
+<!-- Bottom Sheet: Stake -->
+<div class="sheet-overlay hide" id="stakeSheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="sheetTitle">STAKE SEKARANG</div>
+
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:16px;background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);border-radius:14px">
+      <div style="font-size:32px" id="sheetPlanIcon">🔒</div>
+      <div>
+        <div style="font-size:14px;font-weight:800;color:var(--glacier)" id="sheetPlanName">—</div>
+        <div style="font-family:var(--font-data);font-size:22px;font-weight:700;color:var(--sapphire)" id="sheetPlanRate">0%</div>
+        <div style="font-size:10px;color:var(--ice-3)" id="sheetPlanMeta">— hari · Min RM—</div>
+      </div>
+    </div>
+
+    <div style="font-size:11px;color:var(--ice-3);margin-bottom:6px;font-weight:700">BAKI TERSEDIA</div>
+    <div style="font-family:var(--font-data);font-size:20px;font-weight:700;color:var(--glacier);margin-bottom:14px" id="sheetBalance">RM 0.00</div>
+
+    <div class="field-wrap">
+      <i class="fas fa-coins field-icon"></i>
+      <input class="field" id="sheetAmt" type="number" placeholder="Jumlah untuk di-stake" oninput="sheetCalc()">
+      <div class="field-r">
+        <button class="amt-max" onclick="sheetMax()">MAX</button>
+      </div>
+    </div>
+
+    <div style="background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:14px;margin:12px 0 18px;display:none" id="sheetPreview">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">
+        <span style="color:var(--ice-3)">Matang pada</span>
+        <span style="font-family:var(--font-data);font-weight:700" id="sheetMaturity">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">
+        <span style="color:var(--ice-3)">Faedah APY</span>
+        <span style="color:var(--sapphire);font-weight:700" id="sheetAPY">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px">
+        <span style="color:var(--ice-3)">Anggaran pulangan</span>
+        <span style="color:var(--profit);font-weight:700" id="sheetReturn">—</span>
+      </div>
+    </div>
+
+    <div style="background:rgba(244,63,94,0.06);border:1px solid rgba(244,63,94,0.12);border-radius:10px;padding:12px;margin-bottom:18px">
+      <div style="font-size:11px;color:rgba(248,113,113,0.8);line-height:1.6">
+        ⚠️ Dana yang di-stake <strong>tidak boleh dikeluarkan</strong> sebelum tarikh matang. Pengeluaran awal dikenakan penalti <strong id="penaltyInfo">10%</strong>.
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-full" id="sheetStakeBtn" onclick="confirmStake()">
+      <i class="fas fa-lock"></i> Stake Sekarang
+    </button>
+    <div style="height:16px"></div>
+  </div>
+</div>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <a href="dashboard.html"  class="nav-item"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></a>
+  <a href="investment.html" class="nav-item"><span class="nav-icon">💹</span><span class="nav-label">Labur</span></a>
+  <a href="robots.html"     class="nav-hero">🤖</a>
+  <a href="mining.html"     class="nav-item"><span class="nav-icon">⛏️</span><span class="nav-label">Mining</span></a>
+  <a href="profile.html"    class="nav-item"><span class="nav-icon">👤</span><span class="nav-label">Profil</span></a>
+</nav>
+
+<div id="toastStack"></div>
+<div id="confirmModal" class="hide"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/security.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/lang.js"></script>
+<script>
+/* ── STAKING PLANS CONFIG ──────────────────────────────────── */
+const STAKING_PLANS = [
+  { id:'flex',   name:'Fleksibel',    icon:'🌊', days:7,   apy:12, minAmt:50,   penalty:5,  badge:'PERMULAAN', color:'#3B82F6' },
+  { id:'silver', name:'Perak 30H',    icon:'🥈', days:30,  apy:24, minAmt:100,  penalty:8,  badge:'POPULAR',   color:'#94A3B8' },
+  { id:'gold',   name:'Emas 90H',     icon:'🥇', days:90,  apy:36, minAmt:500,  penalty:10, badge:'TERBAIK',   color:'#EAB308' },
+  { id:'plat',   name:'Platinum 180H',icon:'💎', days:180, apy:42, minAmt:2000, penalty:15, badge:'VIP',       color:'#A78BFA' },
+];
+
+let _selPlan  = STAKING_PLANS[0];
+let _profile  = null;
+let _balance  = 0;
+
+/* ── INIT ──────────────────────────────────────────────────── */
+window.addEventListener('load', async () => {
+  Lang.init();
+  const auth = await Security.guardSession();
+  if (!auth) return;
+
+  const { data:prof } = await db.from('profiles')
+    .select('id,balance,total_staked')
+    .eq('id', auth.session.user.id)
+    .single();
+
+  _profile = prof;
+  _balance = parseFloat(prof?.balance || 0);
+
+  renderPlans();
+  loadStats();
+  loadActive();
+});
+
+/* ── RENDER PLANS ──────────────────────────────────────────── */
+function renderPlans() {
+  const el = document.getElementById('planList');
+  el.innerHTML = STAKING_PLANS.map(p => `
+    <div class="stake-card${p.id===_selPlan.id?' selected':''}" onclick="selectPlan('${p.id}',this)">
+      <span class="sc-badge" style="background:${p.color}22;color:${p.color};border:1px solid ${p.color}44">${p.badge}</span>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div style="font-size:36px">${p.icon}</div>
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--glacier)">${p.name}</div>
+          <div class="sc-apy" style="color:${p.color}">${p.apy}%</div>
+          <div class="sc-label">APY / TAHUN</div>
+        </div>
+      </div>
+      <div class="sc-details">
+        <div class="sc-det">Tempoh: <strong>${p.days} hari</strong></div>
+        <div class="sc-det">Min: <strong>RM${p.minAmt}</strong></div>
+        <div class="sc-det">Penalti awal: <strong>${p.penalty}%</strong></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectPlan(id, el) {
+  _selPlan = STAKING_PLANS.find(p=>p.id===id);
+  document.querySelectorAll('.stake-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  calcReturns();
+  openSheet();
+}
+
+/* ── CALCULATOR ────────────────────────────────────────────── */
+function calcReturns() {
+  const amt = parseFloat(document.getElementById('calcAmt')?.value||0);
+  const r   = document.getElementById('calcResult');
+  if (!amt||!_selPlan||!r) return;
+  r.style.display='grid';
+  const profit   = amt * (_selPlan.apy/100) * (_selPlan.days/365);
+  const total    = amt + profit;
+  document.getElementById('calcProfit').textContent   = `RM ${profit.toFixed(2)}`;
+  document.getElementById('calcTotal').textContent    = `RM ${total.toFixed(2)}`;
+  document.getElementById('calcAPY').textContent      = `${_selPlan.apy}%`;
+  document.getElementById('calcDuration').textContent = `${_selPlan.days} Hari`;
+}
+function setMax() {
+  const el = document.getElementById('calcAmt');
+  if (el) { el.value = _balance.toFixed(2); calcReturns(); }
+}
+
+/* ── SHEET ─────────────────────────────────────────────────── */
+function openSheet() {
+  if (!_selPlan) return;
+  document.getElementById('sheetTitle').textContent     = `STAKE ${_selPlan.name.toUpperCase()}`;
+  document.getElementById('sheetPlanIcon').textContent  = _selPlan.icon;
+  document.getElementById('sheetPlanName').textContent  = _selPlan.name;
+  document.getElementById('sheetPlanRate').textContent  = `${_selPlan.apy}% APY`;
+  document.getElementById('sheetPlanMeta').textContent  = `${_selPlan.days} hari · Min RM${_selPlan.minAmt}`;
+  document.getElementById('sheetBalance').textContent   = `RM ${_balance.toFixed(2)}`;
+  document.getElementById('penaltyInfo').textContent    = `${_selPlan.penalty}%`;
+  document.getElementById('sheetAmt').value = '';
+  document.getElementById('sheetPreview').style.display = 'none';
+  document.getElementById('stakeSheet').classList.remove('hide');
+}
+document.getElementById('stakeSheet')?.addEventListener('click', e => {
+  if (e.target === document.getElementById('stakeSheet')) closeSheet();
+});
+function closeSheet() { document.getElementById('stakeSheet').classList.add('hide'); }
+
+function sheetCalc() {
+  const amt = parseFloat(document.getElementById('sheetAmt').value||0);
+  const prev = document.getElementById('sheetPreview');
+  if (!amt||!_selPlan) { prev.style.display='none'; return; }
+  prev.style.display='block';
+  const profit  = amt * (_selPlan.apy/100) * (_selPlan.days/365);
+  const matDate = new Date(Date.now() + _selPlan.days*86400000);
+  document.getElementById('sheetMaturity').textContent = matDate.toLocaleDateString('ms-MY',{day:'2-digit',month:'long',year:'numeric'});
+  document.getElementById('sheetAPY').textContent      = `${_selPlan.apy}%`;
+  document.getElementById('sheetReturn').textContent   = `+RM ${profit.toFixed(2)}`;
+}
+function sheetMax() {
+  const el = document.getElementById('sheetAmt');
+  if (el) { el.value = Math.min(_balance, 999999).toFixed(2); sheetCalc(); }
+}
+
+async function confirmStake() {
+  const amt = parseFloat(document.getElementById('sheetAmt').value||0);
+  if (!amt||!_selPlan) return;
+  
+  const vld = Security.validateAmount(amt, _selPlan.minAmt, _balance);
+  if (!vld.ok) { UI.toast(vld.err,'error'); return; }
+  
+  const rl = Security.checkRateLimit('invest');
+  if (!rl.allowed) { UI.toast(`Cuba lagi dalam ${rl.waitSec}s`,'error'); return; }
+
+  UI.confirm(
+    `🔒 Sahkan Stake`,
+    `Kunci RM ${amt.toFixed(2)} selama ${_selPlan.days} hari?\n\nAPY: ${_selPlan.apy}%\nMatang: +${_selPlan.days} hari`,
+    async () => {
+      const btn = document.getElementById('sheetStakeBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+
+      // Deduct balance
+      const { error } = await RPC.incBalance(_profile.id, -amt);
+      if (error) { UI.toast('Gagal! Baki tidak cukup.','error'); btn.disabled=false; btn.innerHTML='<i class="fas fa-lock"></i> Stake Sekarang'; return; }
+
+      // Create staking record
+      await db.from('user_stakings').insert([{
+        user_id:     _profile.id,
+        plan_id:     _selPlan.id,
+        amount:      amt,
+        apy:         _selPlan.apy,
+        duration:    _selPlan.days,
+        profit_est:  amt*(_selPlan.apy/100)*(_selPlan.days/365),
+        penalty_pct: _selPlan.penalty,
+        matures_at:  new Date(Date.now()+_selPlan.days*86400000).toISOString(),
+        status:      'active',
+      }]).catch(()=>{});
+
+      // Log transaction
+      await db.from('transactions').insert([{
+        user_id:    _profile.id,
+        type:       'staking',
+        amount:     amt,
+        status:     'approved',
+        note:       `Staking: ${_selPlan.name}`,
+      }]).catch(()=>{});
+
+      await Security.audit('stake_create', { plan:_selPlan.id, amount:amt });
+      _balance -= amt;
+      closeSheet();
+      UI.toast(`✅ RM ${amt.toFixed(2)} di-stake! Matang dalam ${_selPlan.days} hari.`,'success');
+      setTimeout(loadActive, 500);
+    },
+    'Ya, Stake!'
+  );
+}
+
+/* ── LOAD STATS ────────────────────────────────────────────── */
+async function loadStats() {
+  const { data } = await db.from('user_stakings')
+    .select('amount,status')
+    .eq('status','active');
+  
+  const total = (data||[]).reduce((s,r)=>s+parseFloat(r.amount||0),0);
+  document.getElementById('heroTVL').textContent    = `RM ${total.toFixed(0)}`;
+  document.getElementById('heroStakers').textContent = data?.length||0;
+}
+
+/* ── LOAD ACTIVE STAKINGS ──────────────────────────────────── */
+async function loadActive() {
+  const uid = Security.getUserId();
+  const { data } = await db.from('user_stakings')
+    .select('*')
+    .eq('user_id', uid)
+    .order('created_at', { ascending:false });
+
+  const el = document.getElementById('activeList');
+  if (!data?.length) {
+    el.innerHTML = `
+      <div style="text-align:center;padding:32px 16px">
+        <div style="font-size:40px;margin-bottom:12px">🔒</div>
+        <div style="font-size:14px;font-weight:800;color:var(--glacier);margin-bottom:6px">Tiada Staking Aktif</div>
+        <div style="font-size:12px;color:var(--ice-3)">Pilih pelan di atas untuk mula</div>
+      </div>`;
+    return;
+  }
+
+  el.innerHTML = data.map(s => {
+    const plan = STAKING_PLANS.find(p=>p.id===s.plan_id)||{name:s.plan_id,icon:'🔒',days:s.duration,color:'#6D28D9'};
+    const now  = Date.now();
+    const start= new Date(s.created_at).getTime();
+    const end  = new Date(s.matures_at).getTime();
+    const pct  = Math.min(100, Math.round((now-start)/(end-start)*100));
+    const daysLeft = Math.max(0, Math.ceil((end-now)/86400000));
+    const earned= parseFloat(s.amount||0)*(plan.apy/100||s.apy/100)*(s.duration/365)*pct/100;
+    const matured = now >= end;
+
+    return `
+      <div class="active-stake">
+        <div class="lock-ico">${plan.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+            <span style="font-size:13px;font-weight:800;color:var(--glacier)">${plan.name}</span>
+            ${matured ? '<span class="chip chip-g" style="font-size:9px;padding:2px 7px">MATANG</span>' : ''}
+          </div>
+          <div style="font-size:10px;color:var(--ice-3);font-family:var(--font-data)">
+            RM ${parseFloat(s.amount||0).toFixed(2)} · ${matured?'Sedia ditarik':'Matang dalam '+daysLeft+' hari'}
+          </div>
+          <div class="stake-prog-bar" style="margin-top:8px">
+            <div class="stake-prog-fill" style="width:${pct}%;background:linear-gradient(90deg,${plan.color}99,${plan.color})"></div>
+          </div>
+          <div style="font-size:9px;color:var(--ice-3);margin-top:4px">${pct}% · +RM ${earned.toFixed(2)} setakat ini</div>
+        </div>
+        ${matured ? `
+          <button onclick="withdrawStake('${s.id}',${s.amount},${s.profit_est||0})" 
+            class="btn btn-sm" style="background:var(--profit-dim);border:1px solid rgba(16,185,129,.2);color:var(--profit);flex-shrink:0">
+            Tarik
+          </button>` : `
+          <button onclick="earlyWithdraw('${s.id}',${s.amount},${plan.penalty||10})"
+            class="btn btn-sm btn-danger" style="flex-shrink:0">
+            Awal
+          </button>`}
+      </div>`;
+  }).join('');
+}
+
+async function withdrawStake(id, amount, profit) {
+  UI.confirm('💰 Tarik Staking', `Terima RM ${(parseFloat(amount)+parseFloat(profit)).toFixed(2)}?`, async () => {
+    const uid = Security.getUserId();
+    await RPC.incBalance(uid, parseFloat(amount)+parseFloat(profit));
+    await db.from('user_stakings').update({status:'completed'}).eq('id',id);
+    UI.toast('✅ Staking berjaya ditarik!','success');
+    loadActive(); loadStats();
+  },'Tarik');
+}
+
+async function earlyWithdraw(id, amount, penaltyPct) {
+  const penalty = parseFloat(amount)*(penaltyPct/100);
+  const net     = parseFloat(amount) - penalty;
+  UI.confirm('⚠️ Tarik Awal',`Penalti ${penaltyPct}% = RM ${penalty.toFixed(2)}\nTerima: RM ${net.toFixed(2)}`, async () => {
+    const uid = Security.getUserId();
+    await RPC.incBalance(uid, net);
+    await db.from('user_stakings').update({status:'withdrawn_early'}).eq('id',id);
+    UI.toast(`Ditarik awal. Penalti RM ${penalty.toFixed(2)} dikenakan.`,'warning');
+    loadActive(); loadStats();
+  },'Teruskan');
+}
+</script>
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js")
+        .then(r => console.log("[SW] Registered", r.scope))
+        .catch(e => console.error("[SW] Registration failed", e));
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#020206">
+<title>MicroVest v8 | Dompet</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="css/v10.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+<body>
+<div class="amb-v"></div><div class="amb-o"></div>
+<div class="shell">
+
+  <!-- HEADER -->
+  <div class="pg-hd anim a1">
+    <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+    <div>
+      <div class="pg-title">Dompet Saya</div>
+      <div class="pg-sub">Multi-Wallet · Deposit · Withdraw</div>
+    </div>
+    <a href="analytics.html" style="margin-left:auto;color:var(--v-pale);text-decoration:none;font-size:12px;font-weight:700">Analitik →</a>
+  </div>
+
+  <!-- WALLET STRIP -->
+  <div class="wallet-strip anim a2">
+    <div class="ws-card ws-m" onclick="selectWallet('main',this)">
+      <div class="ws-icon">💼</div>
+      <span class="ws-lbl" style="color:rgba(167,139,250,0.6)">Main</span>
+      <div class="ws-val v-pale" id="wMain">—</div>
+    </div>
+    <div class="ws-card ws-mi" onclick="selectWallet('mining',this)">
+      <div class="ws-icon">⛏️</div>
+      <span class="ws-lbl" style="color:rgba(253,186,116,0.6)">Mining</span>
+      <div class="ws-val" style="color:#FDBA74" id="wMining">—</div>
+    </div>
+    <div class="ws-card ws-b" onclick="selectWallet('bonus',this)">
+      <div class="ws-icon">🎁</div>
+      <span class="ws-lbl" style="color:rgba(134,239,172,0.6)">Bonus</span>
+      <div class="ws-val" style="color:#86EFAC" id="wBonus">—</div>
+    </div>
+  </div>
+
+  <!-- ACTION TABS -->
+  <div class="act-tabs anim a2">
+    <button class="act-tab on-d" id="tab-d" onclick="switchAct('deposit')">💰 Deposit</button>
+    <button class="act-tab" id="tab-w" onclick="switchAct('withdraw')">💸 Withdraw</button>
+    <button class="act-tab" id="tab-t" onclick="switchAct('transfer')">🔄 Pindah</button>
+    <button class="act-tab" id="tab-h" onclick="switchAct('history')">📋 Rekod</button>
+  </div>
+
+  <!-- ── DEPOSIT FORM ──────────────────────────────────── -->
+  <div id="view-deposit">
+    <div class="form-card anim a3">
+      <div class="form-card-title">💰 Deposit Dana</div>
+      <div class="form-card-sub">Hantar ke akaun bank di bawah dan muat naik resit.</div>
+
+      <!-- STEP INDICATOR -->
+      <div class="steps">
+        <div class="step done"><div class="step-num">✓</div><span>Bank</span></div>
+        <div class="step-line"></div>
+        <div class="step active"><div class="step-num">2</div><span>Transfer</span></div>
+        <div class="step-line"></div>
+        <div class="step wait"><div class="step-num">3</div><span>Hantar</span></div>
+      </div>
+
+      <!-- BANK INFO -->
+      <div class="bank-display">
+        <div style="font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--v-pale);margin-bottom:12px;font-weight:800">MAKLUMAT AKAUN BANK</div>
+        <div class="bank-row">
+          <span class="bank-lbl">Bank</span>
+          <span class="bank-val" id="adminBankName">Maybank Berhad</span>
+        </div>
+        <div class="bank-row">
+          <span class="bank-lbl">Nama Akaun</span>
+          <span class="bank-val">MicroVest Sdn Bhd</span>
+        </div>
+        <div class="bank-row">
+          <span class="bank-lbl">No. Akaun</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="bank-val" id="adminBankNo">1234567890</span>
+            <button class="copy-inline" onclick="copyAcc()"><i class="fas fa-copy"></i></button>
+          </div>
+        </div>
+        <div class="bank-row">
+          <span class="bank-lbl">Min Deposit</span>
+          <span class="bank-val profit">RM 20.00</span>
+        </div>
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-lbl">JUMLAH DEPOSIT (RM)</label>
+        <input class="field" id="depAmt" type="number" min="20" step="10" placeholder="Min RM 20">
+        <div class="amt-presets">
+          <button class="amt-pre" onclick="setAmt('depAmt',50)">RM 50</button>
+          <button class="amt-pre" onclick="setAmt('depAmt',100)">RM 100</button>
+          <button class="amt-pre" onclick="setAmt('depAmt',200)">RM 200</button>
+          <button class="amt-pre" onclick="setAmt('depAmt',500)">RM 500</button>
+        </div>
+      </div>
+
+      <!-- RECEIPT UPLOAD -->
+      <label class="upload-zone" id="uploadZone">
+        <input type="file" accept="image/*" id="receiptFile" onchange="previewReceipt(this)">
+        <div class="upload-icon">📎</div>
+        <div class="upload-lbl">Muat Naik Resit Pembayaran</div>
+        <div class="upload-sub">Gambar JPG / PNG / PDF · Max 5MB</div>
+        <img id="receiptPreview" class="upload-preview">
+      </label>
+
+      <button class="btn btn-profit btn-full btn-lg" onclick="submitDeposit()">
+        📤 Hantar Permohonan Deposit
+      </button>
+      <p style="font-size:11px;color:var(--ice-3);text-align:center;margin-top:12px">
+        Deposit biasanya diproses dalam 1–24 jam waktu bekerja
+      </p>
+    </div>
+  </div>
+
+  <!-- ── WITHDRAW FORM ─────────────────────────────────── -->
+  <div id="view-withdraw" style="display:none">
+    <div class="form-card anim a3">
+      <div class="form-card-title">💸 Pengeluaran Dana</div>
+      <div class="form-card-sub">Withdraw diproses dalam 1–3 hari bekerja.</div>
+
+      <div class="bank-display" style="background:rgba(239,68,68,0.05);border-color:rgba(239,68,68,0.15)">
+        <div style="font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(239,68,68,0.7);margin-bottom:10px;font-weight:800">BAKI TERSEDIA</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700" id="withAvail">RM 0.00</div>
+        <div style="font-size:11px;color:var(--ice-3);margin-top:4px" id="withLimit">Limit: RM 0</div>
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-lbl">JUMLAH PENGELUARAN (RM)</label>
+        <input class="field" id="withAmt" type="number" min="50" placeholder="Min RM 50" oninput="calcFee()">
+        <div class="amt-presets">
+          <button class="amt-pre" onclick="setAmt('withAmt',100)">RM 100</button>
+          <button class="amt-pre" onclick="setAmt('withAmt',200)">RM 200</button>
+          <button class="amt-pre" onclick="setAmt('withAmt',500)">RM 500</button>
+          <button class="amt-pre" onclick="setAll()">Max</button>
+        </div>
+      </div>
+
+      <div class="field-wrap">
+        <label class="field-lbl">NAMA BANK</label>
+        <input class="field" id="withBank" type="text" placeholder="cth: Maybank, CIMB, RHB..." list="bankList">
+        <datalist id="bankList">
+          <option value="Maybank">
+          <option value="CIMB Bank">
+          <option value="Public Bank">
+          <option value="RHB Bank">
+          <option value="Hong Leong Bank">
+          <option value="Bank Islam">
+          <option value="BSN">
+          <option value="AmBank">
+          <option value="Alliance Bank">
+          <option value="Bank Muamalat">
+        </datalist>
+      </div>
+      <div class="field-wrap">
+        <label class="field-lbl">NO. AKAUN BANK</label>
+        <input class="field" id="withAccNo" type="text" placeholder="cth: 1234567890" inputmode="numeric">
+      </div>
+      <div class="field-wrap">
+        <label class="field-lbl">NAMA PENERIMA (SAMA DENGAN IC)</label>
+        <input class="field" id="withAccName" type="text" placeholder="Nama penuh pemilik akaun">
+      </div>
+
+      <!-- Fee preview -->
+      <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:var(--r-l);padding:16px;margin-bottom:18px" id="feeBox" style="display:none">
+        <div style="display:flex;justify-content:space-between;padding:4px 0"><span style="font-size:12px;color:var(--ice-2)">Jumlah Pengeluaran</span><span style="font-family:var(--font-data);font-weight:700" id="feeGross">RM 0</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0"><span style="font-size:12px;color:var(--ice-2)" id="feeLbl">Yuran Proses (3%)</span><span style="font-family:var(--font-data);color:var(--loss)" id="feeAmt">-RM 0</span></div>
+        <div style="height:1px;background:var(--border);margin:8px 0"></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0"><span style="font-size:13px;font-weight:800">Diterima</span><span style="font-family:var(--font-data);font-size:16px;font-weight:700;color:var(--profit)" id="feeNet">RM 0</span></div>
+      </div>
+
+      <button class="btn btn-full btn-lg" style="background:linear-gradient(135deg,#991B1B,#EF4444);color:#fff" onclick="submitWithdraw()">
+        💸 Hantar Permohonan Withdraw
+      </button>
+    </div>
+  </div>
+
+  <!-- ── TRANSFER FORM ─────────────────────────────────── -->
+  <div id="view-transfer" style="display:none">
+    <div class="form-card anim a3">
+      <div class="form-card-title">🔄 Pindah Antara Dompet</div>
+      <div class="form-card-sub">Pindahkan dana dari Dompet Mining atau Bonus ke Dompet Utama.</div>
+
+      <div class="field-wrap">
+        <label class="field-lbl">DARI DOMPET</label>
+        <select class="field" id="transFrom" onchange="updateTransBal()">
+          <option value="mining">⛏️ Mining Wallet</option>
+          <option value="bonus">🎁 Bonus Wallet</option>
+        </select>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+        <div style="flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--r-m);padding:14px;text-align:center">
+          <div style="font-size:9px;color:var(--ice-3);letter-spacing:2px;margin-bottom:4px">BAKI</div>
+          <div style="font-family:var(--font-data);font-size:18px;font-weight:700" id="transBal">RM 0</div>
+        </div>
+        <div style="font-size:22px;color:var(--ice-3)">→</div>
+        <div style="flex:1;background:var(--v-dim);border:1px solid var(--v-border);border-radius:var(--r-m);padding:14px;text-align:center">
+          <div style="font-size:9px;color:var(--v-pale);letter-spacing:2px;margin-bottom:4px">KE</div>
+          <div style="font-family:var(--font-data);font-size:18px;font-weight:700;color:var(--v-pale)">Main</div>
+        </div>
+      </div>
+      <div class="field-wrap">
+        <label class="field-lbl">JUMLAH</label>
+        <input class="field" id="transAmt" type="number" min="1" placeholder="Jumlah untuk dipindahkan">
+        <div class="amt-presets">
+          <button class="amt-pre" onclick="transAll()">Semua</button>
+        </div>
+      </div>
+      <button class="btn btn-v btn-full btn-lg" onclick="submitTransfer()">
+        🔄 Pindah ke Main Wallet
+      </button>
+      <p style="font-size:11px;color:var(--ice-3);text-align:center;margin-top:12px">Pindahan dilakukan segera tanpa yuran</p>
+    </div>
+  </div>
+
+  <!-- ── HISTORY ─────────────────────────────────────────── -->
+  <div id="view-history" style="display:none;padding:0 var(--pad)">
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <button class="amt-pre" onclick="filterTx('all',this)" style="background:var(--v-dim);border-color:var(--v-border);color:var(--v-pale)">Semua</button>
+      <button class="amt-pre" onclick="filterTx('deposit',this)">Deposit</button>
+      <button class="amt-pre" onclick="filterTx('withdraw',this)">Withdraw</button>
+      <button class="amt-pre" onclick="filterTx('mining',this)">Mining</button>
+      <button class="amt-pre" onclick="filterTx('profit',this)">Profit</button>
+      <button class="amt-pre" onclick="filterTx('referral',this)">Referral</button>
+    </div>
+    <div id="txList">
+      <div class="skel skel-row anim a1" style="border-radius:16px;margin-bottom:10px"></div>
+      <div class="skel skel-row anim a2" style="border-radius:16px;margin-bottom:10px"></div>
+      <div class="skel skel-row anim a3" style="border-radius:16px"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a href="dashboard.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
+  <a href="investment.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Invest</span></a>
+  <a href="robots.html" class="nav-item" style="position:relative">
+    <span style="position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#5B21B6,#7C3AED);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(124,58,237,.5);pointer-events:none"></span><i class="fas fa-robot"></i><span>Robot</span></a>
+  <a href="mining.html" class="nav-item"><i class="fas fa-microchip"></i><span>Mining</span></a>
+  <a href="profile.html" class="nav-item active"><i class="fas fa-user-circle"></i><span>Profil</span></a>
+</nav>
+
+<script src="js/config.js"></script>
+<script src="js/security.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/realtime.js"></script>
+<script src="js/push.js"></script>
+<script src="js/lang.js"></script>
+<script>
+let _user, _profile, _wallets = {}, _curAct = 'deposit', _allTx = [];
+
+/* ── TAB SWITCH ─────────────────────────────────────────── */
+function switchAct(act) {
+  _curAct = act;
+  ['deposit','withdraw','transfer','history'].forEach(a => {
+    document.getElementById('view-'+a).style.display = a===act?'':'none';
+    const btn = document.getElementById('tab-'+a[0]);
+    const classes = { deposit:'on-d',withdraw:'on-w',transfer:'on-t',history:'on-h' };
+    btn.className = 'act-tab' + (a===act?' '+classes[a]:'');
+  });
+  if (act === 'history') loadTx();
+  if (act === 'withdraw') fillWithdrawInfo();
+}
+
+/* ── WALLET SELECTION ────────────────────────────────────── */
+function selectWallet(type, el) {
+  document.querySelectorAll('.ws-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+/* ── LOAD WALLETS ────────────────────────────────────────── */
+async function loadWallets() {
+  const { data } = await db.from('wallets').select('*').eq('user_id', _user.id);
+  if (data?.length) {
+    data.forEach(w => { _wallets[w.wallet_type] = w; });
+  } else {
+    // Fallback
+    const { data:p } = await db.from('profiles').select('balance,mining_wallet,bonus_wallet').eq('id',_user.id).single();
+    _wallets = { main:{balance:p?.balance||0}, mining:{balance:p?.mining_wallet||0}, bonus:{balance:p?.bonus_wallet||0} };
+  }
+  document.getElementById('wMain').textContent   = UI.rm(_wallets.main?.balance||0);
+  document.getElementById('wMining').textContent = UI.rm(_wallets.mining?.balance||0);
+  document.getElementById('wBonus').textContent  = UI.rm(_wallets.bonus?.balance||0);
+}
+
+/* ── DEPOSIT ─────────────────────────────────────────────── */
+async function loadAdminBank() {
+  const { data } = await db.from('system_settings').select('value').eq('key','admin_bank').single().catch(()=>({data:null}));
+  if (data?.value) {
+    const b = data.value;
+    if (b.bank)   document.getElementById('adminBankName').textContent = b.bank;
+    if (b.accNo)  document.getElementById('adminBankNo').textContent   = b.accNo;
+  }
+}
+function copyAcc() {
+  const acc = document.getElementById('adminBankNo').textContent;
+  navigator.clipboard.writeText(acc).then(() => UI.toast('✅ No. akaun disalin!','success'));
+}
+function setAmt(id, val) { document.getElementById(id).value = val; if(id==='withAmt')calcFee(); }
+function setAll() { const v=parseFloat(_wallets.main?.balance||0); document.getElementById('withAmt').value=v.toFixed(2);calcFee(); }
+
+let _receiptFile = null;
+function previewReceipt(input) {
+  const file = input.files[0]; if (!file) return;
+  _receiptFile = file;
+  const prev = document.getElementById('receiptPreview');
+  const reader = new FileReader();
+  reader.onload = e => { prev.src = e.target.result; prev.style.display='block'; };
+  reader.readAsDataURL(file);
+  document.querySelector('.upload-lbl').textContent = file.name;
+  document.querySelector('.upload-icon').textContent = '✅';
+}
+
+async function submitDeposit() {
+  const amt = parseFloat(document.getElementById('depAmt').value||0);
+  if (amt < 20)     { UI.toast('Minimum deposit RM 20','error'); return; }
+  if (!_receiptFile){ UI.toast('Sila muat naik resit pembayaran','error'); return; }
+  UI.loading('Menghantar permohonan...');
+
+  // Upload receipt
+  let proofUrl = null;
+  try {
+    const ext  = _receiptFile.name.split('.').pop();
+    const path = `receipts/${_user.id}/${Date.now()}.${ext}`;
+    const { data: up } = await db.storage.from('receipts').upload(path, _receiptFile, { upsert:true });
+    const { data: url } = db.storage.from('receipts').getPublicUrl(path);
+    proofUrl = url.publicUrl;
+  } catch(e) { console.warn('Upload failed:', e); }
+
+  await db.from('transactions').insert([{
+    user_id:  _user.id,
+    type:     'deposit',
+    amount:   amt,
+    status:   'pending',
+    proof_url: proofUrl,
+  }]);
+
+  await db.from('notifications').insert([{
+    user_id: _user.id, type:'deposit',
+    message: `📥 Permohonan deposit RM${amt.toFixed(2)} sedang diproses. Admin akan mengesahkan dalam 24 jam.`,
+  }]);
+
+  UI.unload();
+  UI.toast('✅ Permohonan deposit dihantar! Tunggu pengesahan admin.','success',5000);
+  document.getElementById('depAmt').value = '';
+  _receiptFile = null;
+  document.getElementById('receiptPreview').style.display='none';
+  document.querySelector('.upload-lbl').textContent = 'Muat Naik Resit Pembayaran';
+  document.querySelector('.upload-icon').textContent = '📎';
+}
+
+/* ── WITHDRAW ────────────────────────────────────────────── */
+async function fillWithdrawInfo() {
+  const { data:p } = await db.from('profiles').select('balance,total_deposit,vip_rank').eq('id',_user.id).single();
+  const rank  = MV.getRank(p?.total_deposit||0);
+  const bal   = p?.balance||0;
+  const limit = rank.maxWithdraw;
+  document.getElementById('withAvail').textContent = UI.rm(bal);
+  document.getElementById('withLimit').textContent = `Limit withdraw: ${UI.rm(limit)} · Fee: ${(rank.withdrawFee*100).toFixed(1)}%`;
+
+  // Pre-fill saved bank
+  const { data:bank } = await db.from('bank_accounts').select('*').eq('user_id',_user.id).single().catch(()=>({data:null}));
+  if (bank) {
+    document.getElementById('withBank').value    = bank.bank_name||'';
+    document.getElementById('withAccNo').value   = bank.account_number||'';
+    document.getElementById('withAccName').value = bank.account_name||'';
+  }
+}
+
+function calcFee() {
+  const amt = parseFloat(document.getElementById('withAmt')?.value||0);
+  if (!amt||amt<=0) return;
+  const rank = MV.getRank(_profile?.total_deposit||0);
+  const fee  = amt * rank.withdrawFee;
+  const net  = amt - fee;
+  document.getElementById('feeGross').textContent = UI.rm(amt);
+  document.getElementById('feeAmt').textContent   = '-'+UI.rm(fee);
+  document.getElementById('feeNet').textContent   = UI.rm(net);
+  document.getElementById('feeLbl').textContent   = `Yuran Proses (${(rank.withdrawFee*100).toFixed(1)}%)`;
+  document.getElementById('feeBox').style.display = '';
+}
+
+async function hashPIN(pin) {
+  const enc = new TextEncoder().encode(pin + _user.id);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function submitWithdraw() {
+  const amt  = parseFloat(document.getElementById('withAmt')?.value||0);
+  const bank = document.getElementById('withBank').value.trim();
+  const acc  = document.getElementById('withAccNo').value.trim();
+  const name = document.getElementById('withAccName').value.trim();
+
+  if (amt < 50)  { UI.toast('Minimum withdraw RM 50','error'); return; }
+  if (!bank||!acc||!name) { UI.toast('Lengkapkan maklumat bank','error'); return; }
+
+  const { data:p } = await db.from('profiles').select('balance,total_deposit').eq('id',_user.id).single();
+  const rank = MV.getRank(p?.total_deposit||0);
+  if (amt > rank.maxWithdraw) { UI.toast(`Melebihi limit withdraw RM${rank.maxWithdraw}!`,'error'); return; }
+  if ((p?.balance||0) < amt) { UI.toast('Baki tidak mencukupi!','error'); return; }
+
+  // ── PIN check (if enabled) ──────────────────────────────
+  const { data: pinSetting } = await db.from('system_settings').select('value').eq('key','withdraw_pin_required').single().catch(()=>({data:{value:'false'}}));
+  const pinRequired = String(pinSetting?.value).replace(/"/g,'') === 'true';
+  const hasPIN = _profile?.pin_hash;
+
+  if (pinRequired && hasPIN) {
+    const enteredPin = await new Promise(resolve => {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.9);backdrop-filter:blur(20px);z-index:9999;display:flex;align-items:center;justify-content:center';
+      overlay.innerHTML = `
+        <div style="background:linear-gradient(175deg,#0A0A16,#04040C);border:1px solid rgba(255,255,255,.08);border-radius:28px;padding:32px 28px;width:min(340px,90vw);text-align:center">
+          <div style="font-size:40px;margin-bottom:16px">🔐</div>
+          <div style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:8px">Masukkan PIN Withdraw</div>
+          <div style="font-size:12px;color:rgba(226,232,255,.5);margin-bottom:22px">6 digit PIN untuk sahkan withdraw</div>
+          <input id="pinEntry" type="password" inputmode="numeric" maxlength="6" placeholder="••••••"
+            style="width:100%;padding:16px;border-radius:14px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#E2E8FF;font-family:JetBrains Mono,monospace;font-size:22px;text-align:center;letter-spacing:8px;outline:none;box-sizing:border-box"
+            oninput="this.value=this.value.replace(/\D/g,'')">
+          <div id="pinErr" style="color:#EF4444;font-size:11px;margin:8px 0 0;min-height:16px"></div>
+          <div style="display:flex;gap:10px;margin-top:18px">
+            <button onclick="this.closest('div[style]').parentElement.remove();document.dispatchEvent(new CustomEvent('pinResult',{detail:null}))"
+              style="flex:1;padding:13px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#94A3B8;font-weight:700;cursor:pointer;font-family:Instrument Sans,sans-serif">Batal</button>
+            <button id="pinOkBtn"
+              onclick="(async()=>{const pin=document.getElementById('pinEntry').value;if(pin.length!==6){document.getElementById('pinErr').textContent='PIN mesti 6 digit';return;}document.getElementById('pinOkBtn').disabled=true;document.dispatchEvent(new CustomEvent('pinResult',{detail:pin}))})()"
+              style="flex:1;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#5B21B6,#7C3AED);color:#fff;font-weight:800;cursor:pointer;font-family:Instrument Sans,sans-serif">Sahkan</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      document.addEventListener('pinResult', async function h(e) {
+        document.removeEventListener('pinResult', h);
+        overlay.remove();
+        resolve(e.detail);
+      });
+    });
+
+    if (!enteredPin) return; // User cancelled
+
+    const enteredHash = await hashPIN(enteredPin);
+    if (enteredHash !== hasPIN) {
+      UI.toast('❌ PIN salah! Cuba semula.', 'error', 4000);
+      return;
+    }
+  }
+
+  UI.confirm('Sahkan Withdraw', `Withdraw ${UI.rm(amt)} ke akaun ${bank} ${acc}?`, async () => {
+    UI.loading('Memproses...');
+    await RPC.incBalance(_user.id, -amt);  // atomic deduct
+    await db.from('transactions').insert([{
+      user_id:_user.id, type:'withdraw', amount:amt, status:'pending',
+      bank_name:bank, account_number:acc,
+    }]);
+    await db.from('bank_accounts').upsert([{
+      user_id:_user.id, bank_name:bank, account_number:acc, account_name:name,
+    }], {onConflict:'user_id'});
+    await db.from('notifications').insert([{
+      user_id:_user.id, type:'withdraw',
+      message:`💸 Permohonan withdraw RM${amt.toFixed(2)} dihantar. Dijangka selesai 1–3 hari bekerja.`,
+    }]);
+    await loadWallets();
+    UI.unload();
+    UI.toast('✅ Permohonan withdraw dihantar!','success',5000);
+    document.getElementById('withAmt').value='';
+    document.getElementById('feeBox').style.display='none';
+    fillWithdrawInfo();
+  });
+}
+
+/* ── TRANSFER ────────────────────────────────────────────── */
+function updateTransBal() {
+  const type = document.getElementById('transFrom').value;
+  document.getElementById('transBal').textContent = UI.rm(_wallets[type]?.balance||0);
+}
+function transAll() {
+  const type = document.getElementById('transFrom').value;
+  document.getElementById('transAmt').value = (_wallets[type]?.balance||0).toFixed(2);
+}
+async function submitTransfer() {
+  const from = document.getElementById('transFrom').value;
+  const amt  = parseFloat(document.getElementById('transAmt').value||0);
+  if (!amt||amt<=0)               { UI.toast('Masukkan jumlah yang sah','error'); return; }
+  if (amt>(_wallets[from]?.balance||0)) { UI.toast('Baki tidak mencukupi!','error'); return; }
+
+  UI.loading();
+  // Update wallets
+  // Atomic transfer via RPC
+  await RPC.incWallet(_user.id, from, -amt);
+  await RPC.incWallet(_user.id, 'main', amt);
+  await db.from('wallet_transfers').insert([{ user_id:_user.id, from_wallet:from, to_wallet:'main', amount:amt }]).catch(()=>{});
+
+  // Sync profile.balance if transferring from non-main wallet
+
+  _wallets[from].balance -= amt;
+  _wallets.main.balance  = (_wallets.main.balance||0)+amt;
+  await loadWallets();
+  updateTransBal();
+  UI.unload();
+  UI.toast(`✅ RM${amt.toFixed(2)} dipindahkan ke Main Wallet!`,'success');
+  document.getElementById('transAmt').value='';
+}
+
+/* ── TX HISTORY ──────────────────────────────────────────── */
+async function loadTx(type='all') {
+  const el = document.getElementById('txList');
+  UI.skeleton(el, 4, 'row');
+  let q = db.from('transactions').select('*').eq('user_id',_user.id).order('created_at',{ascending:false}).limit(40);
+  if (type!=='all') q = q.eq('type',type);
+  const { data } = await q;
+  _allTx = data||[];
+  renderTx(_allTx);
+}
+function filterTx(type, btn) {
+  document.querySelectorAll('.amt-pre').forEach(b=>b.style.background='');
+  btn.style.background='rgba(124,58,237,0.15)';btn.style.borderColor='rgba(124,58,237,0.35)';btn.style.color='#A78BFA';
+  if (type==='all') renderTx(_allTx); else renderTx(_allTx.filter(t=>t.type===type));
+}
+function renderTx(txs) {
+  const el = document.getElementById('txList');
+  const icons  = {deposit:'💰',withdraw:'💸',mining:'⛏️',profit:'📈',referral:'👥',bonus:'🎁',invest:'📊'};
+  const colors = {deposit:'rgba(34,197,94,0.12)',withdraw:'rgba(239,68,68,0.1)',mining:'rgba(249,115,22,0.1)',profit:'rgba(124,58,237,0.1)',referral:'rgba(59,130,246,0.1)',bonus:'rgba(234,179,8,0.1)'};
+  const stColors= {approved:'var(--profit)',pending:'var(--gold)',rejected:'var(--loss)'};
+  const stBg    = {approved:'rgba(34,197,94,0.1)',pending:'rgba(234,179,8,0.1)',rejected:'rgba(239,68,68,0.1)'};
+  if (!txs.length) { el.innerHTML='<div style="text-align:center;padding:40px;color:var(--ice-3)">Tiada rekod transaksi</div>'; return; }
+  el.innerHTML = txs.map(t => `
+    <div class="tx-item">
+      <div class="tx-icon" style="background:${colors[t.type]||'rgba(255,255,255,0.04)'}">${icons[t.type]||'💱'}</div>
+      <div class="tx-info">
+        <div class="tx-type">${t.type.charAt(0).toUpperCase()+t.type.slice(1)}</div>
+        <div class="tx-date">${UI.date(t.created_at)} · ${UI.time(t.created_at)}</div>
+      </div>
+      <div class="tx-right">
+        <div class="tx-amt ${['deposit','mining','profit','referral','bonus'].includes(t.type)?'profit':'loss'}">
+          ${['deposit','mining','profit','referral','bonus'].includes(t.type)?'+':'-'}${UI.rm(t.amount)}
+        </div>
+        <div class="tx-status" style="background:${stBg[t.status]||''};color:${stColors[t.status]||'var(--ice-3)'}">
+          ${t.status==='approved'?'✓ Approved':t.status==='pending'?'⏳ Pending':'✕ Rejected'}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+/* ── INIT ─────────────────────────────────────────────────── */
+async function init() {
+  UI.loading();
+  const { data:{session} } = await db.auth.getSession();
+  if (!session) { location.href='login.html'; return; }
+  _user = session.user;
+  Lang.init();
+  const { data:p } = await db.from('profiles').select('*').eq('id',_user.id).single();
+  _profile = p;
+  await loadWallets();
+  await loadAdminBank();
+
+  // Check ?tab= param
+  const tab = new URLSearchParams(location.search).get('tab');
+  if (['deposit','withdraw','transfer','history'].includes(tab)) switchAct(tab);
+
+  UI.unload();
+}
+window.addEventListener('load', init);
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .catch(e => console.warn('SW reg failed:', e));
+  });
+}
+</script>
+</body>
+</html>

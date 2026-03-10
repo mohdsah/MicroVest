@@ -6,52 +6,10 @@
 <meta name="theme-color" content="#020206">
 <title>MicroVest Admin — Laporan</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="../css/v7.css">
+<link rel="stylesheet" href="../css/v10.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<style>
-body { max-width: 900px; margin: 0 auto; }
-.adm-hd { display:flex; align-items:center; gap:14px; padding:22px var(--pad) 16px; border-bottom:1px solid var(--border); }
-.adm-title { font-family:'DM Serif Display',serif; font-size:24px; }
-.adm-sub { font-size:11px; color:var(--ice-3); margin-top:2px; }
-.back-lnk { color:var(--ice-3); font-size:20px; text-decoration:none; transition:.2s; }
-.back-lnk:hover { color:var(--v-pale); }
 
-/* KPI grid */
-.kpi-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; padding:18px var(--pad); }
-.kpi { background:var(--surf); border:1px solid var(--border); border-radius:var(--r-xl); padding:16px; }
-.kpi-lbl { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--ice-3); margin-bottom:8px; }
-.kpi-val { font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:700; }
-.kpi-sub { font-size:10px; color:var(--ice-3); margin-top:4px; }
-
-/* Section */
-.section { padding:0 var(--pad) 24px; }
-.sec-title { font-size:13px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--ice-2); margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; }
-.chart-wrap { background:var(--surf); border:1px solid var(--border); border-radius:var(--r-xl); padding:18px; margin-bottom:14px; }
-
-/* Filter row */
-.period-row { display:flex; gap:8px; margin-bottom:16px; }
-.period-btn { padding:8px 16px; border-radius:999px; border:1px solid var(--border); background:transparent; color:var(--ice-3); font-size:11px; font-weight:800; cursor:pointer; font-family:'Instrument Sans',sans-serif; transition:.2s; }
-.period-btn.on { background:var(--v-dim); border-color:var(--v-border); color:var(--v-pale); }
-
-/* Table */
-.rpt-table { width:100%; border-collapse:collapse; font-size:12px; }
-.rpt-table th { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--ice-3); font-weight:800; padding:8px 12px; text-align:left; border-bottom:1px solid var(--border); }
-.rpt-table td { padding:11px 12px; border-bottom:1px solid rgba(255,255,255,.03); color:var(--ice-2); }
-.rpt-table tr:hover td { background:rgba(255,255,255,.015); }
-.badge-rank { padding:3px 8px; border-radius:6px; font-size:9px; font-weight:800; letter-spacing:1px; }
-
-/* Export */
-.export-row { display:flex; gap:10px; margin-bottom:16px; }
-.export-btn { display:flex; align-items:center; gap:6px; padding:9px 16px; border-radius:10px; border:1px solid var(--border); background:rgba(255,255,255,.03); color:var(--ice-2); font-size:11px; font-weight:800; cursor:pointer; font-family:'Instrument Sans',sans-serif; transition:.2s; }
-.export-btn:hover { border-color:var(--v-border); background:var(--v-dim); color:var(--v-pale); }
-
-/* Summary cards */
-.summary-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
-.sum-card { background:var(--surf); border:1px solid var(--border); border-radius:14px; padding:14px; text-align:center; }
-.sum-lbl { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ice-3); margin-bottom:6px; }
-.sum-val { font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700; }
-</style>
 </head>
 <body>
 <div class="amb-v"></div>
@@ -479,5 +437,13 @@ async function init() {
 
 window.addEventListener('load', init);
 </script>
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js", { scope: "/" })
+        .then(r => console.log("[SW] Registered", r.scope))
+        .catch(e => console.error("[SW] Registration failed", e));
+    }
+  </script>
 </body>
 </html>

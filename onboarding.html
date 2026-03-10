@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#03030A">
+<title>MicroVest v9 | Selamat Datang</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="css/v10.css">
+<style>
+.ob-wrap {
+  min-height:100dvh; display:flex; flex-direction:column;
+  align-items:center; justify-content:flex-start;
+  padding:0; max-width:520px; margin:0 auto;
+  position:relative; z-index:1;
+}
+
+/* Progress bar */
+.ob-progress {
+  width:100%; padding:24px var(--pad) 0;
+  display:flex; align-items:center; gap:8px;
+}
+.ob-step-dot {
+  height:4px; flex:1; border-radius:4px;
+  background:var(--border-hi); transition:background .4s;
+}
+.ob-step-dot.done   { background:var(--profit); }
+.ob-step-dot.active { background:var(--plasma); animation:prog-pulse 1.5s infinite; }
+@keyframes prog-pulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+/* Slides container */
+.ob-slides {
+  flex:1; width:100%; overflow:hidden; position:relative;
+  min-height:80dvh;
+}
+.ob-slide {
+  position:absolute; inset:0; padding:32px var(--pad) 120px;
+  display:flex; flex-direction:column;
+  opacity:0; transform:translateX(60px) scale(.97);
+  transition:all .4s var(--smooth); pointer-events:none;
+}
+.ob-slide.active {
+  opacity:1; transform:none; pointer-events:auto;
+}
+.ob-slide.out {
+  opacity:0; transform:translateX(-60px) scale(.97);
+}
+
+/* Hero icon */
+.ob-icon {
+  width:88px; height:88px; border-radius:28px; margin:0 auto 24px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:44px; flex-shrink:0;
+}
+.ob-icon-v { background:linear-gradient(135deg,rgba(109,40,217,0.25),rgba(109,40,217,0.08)); border:1px solid var(--plasma-border); }
+.ob-icon-g { background:linear-gradient(135deg,rgba(16,185,129,0.2),rgba(16,185,129,0.05)); border:1px solid rgba(16,185,129,0.2); }
+.ob-icon-t { background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(245,158,11,0.05)); border:1px solid rgba(245,158,11,0.2); }
+.ob-icon-b { background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(59,130,246,0.05)); border:1px solid rgba(59,130,246,0.2); }
+
+.ob-title {
+  font-family:var(--font-display); font-size:32px; letter-spacing:3px;
+  color:var(--glacier); text-align:center; margin-bottom:10px;
+}
+.ob-sub {
+  font-size:13px; color:var(--ice-2); text-align:center;
+  line-height:1.75; margin-bottom:28px; max-width:340px; margin-left:auto; margin-right:auto;
+}
+
+/* Feature list */
+.ob-features { display:flex; flex-direction:column; gap:10px; margin-bottom:28px; }
+.ob-feat {
+  display:flex; align-items:center; gap:14px; padding:14px 16px;
+  background:var(--glass); border:1px solid var(--border);
+  border-radius:16px; transition:.2s;
+}
+.ob-feat:hover { background:var(--glass-hi); }
+.ob-feat-ico {
+  width:42px; height:42px; border-radius:14px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:20px;
+}
+.ob-feat-body h4 { font-size:13px; font-weight:800; color:var(--glacier); }
+.ob-feat-body p  { font-size:11px; color:var(--ice-3); margin-top:2px; line-height:1.5; }
+
+/* Plan preview cards */
+.ob-plans { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:24px; }
+.ob-plan {
+  background:var(--glass); border:1.5px solid var(--border);
+  border-radius:16px; padding:16px 14px; cursor:pointer; transition:.2s;
+  position:relative; overflow:hidden;
+}
+.ob-plan::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+  border-radius:0 3px 3px 0; transition:.2s;
+}
+.ob-plan.selected { border-color:var(--plasma-border); }
+.ob-plan.selected::before { width:4px; }
+.plan-c1::before { background:#3B82F6; } .plan-c1.selected { border-color:rgba(59,130,246,.3); }
+.plan-c2::before { background:#94A3B8; } .plan-c2.selected { border-color:rgba(148,163,184,.3); }
+.plan-c3::before { background:#EAB308; } .plan-c3.selected { border-color:rgba(234,179,8,.3); }
+.plan-c4::before { background:#8B5CF6; } .plan-c4.selected { border-color:rgba(139,92,246,.3); }
+.ob-plan-name { font-size:12px; font-weight:800; color:var(--glacier); margin-bottom:4px; }
+.ob-plan-rate { font-family:var(--font-data); font-size:18px; font-weight:700; color:var(--plasma-pale); }
+.ob-plan-from { font-size:10px; color:var(--ice-3); margin-top:2px; }
+.ob-check {
+  position:absolute; top:10px; right:10px; width:18px; height:18px;
+  border-radius:50%; background:var(--plasma); border:1px solid var(--plasma-border);
+  display:none; align-items:center; justify-content:center;
+  font-size:9px; color:#fff;
+}
+.ob-plan.selected .ob-check { display:flex; }
+
+/* Bottom CTA */
+.ob-cta {
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:520px;
+  background:linear-gradient(to top, var(--abyss) 70%, transparent);
+  padding:16px var(--pad) max(24px,env(safe-area-inset-bottom));
+  z-index:100;
+}
+.ob-cta-row { display:flex; gap:10px; }
+.ob-skip {
+  padding:16px 20px; border-radius:14px;
+  background:var(--glass); border:1px solid var(--border);
+  color:var(--ice-3); font-family:var(--font-body); font-weight:700; font-size:13px;
+  cursor:pointer; white-space:nowrap;
+}
+.ob-skip:hover { color:var(--ice-2); background:var(--glass-hi); }
+.ob-next {
+  flex:1; padding:16px; border-radius:14px;
+  background:linear-gradient(135deg,var(--plasma),var(--plasma-bright));
+  color:#fff; font-family:var(--font-body); font-weight:800; font-size:15px;
+  border:none; cursor:pointer;
+  box-shadow:0 10px 28px var(--plasma-glow); transition:.2s;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.ob-next:hover { transform:translateY(-1px); box-shadow:0 14px 36px rgba(109,40,217,.5); }
+.ob-next:disabled { opacity:.5; cursor:default; transform:none; }
+
+/* Step counter */
+.ob-counter {
+  text-align:center; font-family:var(--font-data); font-size:10px;
+  color:var(--ice-3); letter-spacing:2px; margin:0 auto 16px;
+}
+
+/* Avatar selector */
+.ob-avatars {
+  display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:20px;
+}
+.ob-avatar-opt {
+  width:56px; height:56px; border-radius:18px; border:2px solid var(--border);
+  display:flex; align-items:center; justify-content:center; font-size:28px;
+  cursor:pointer; transition:.2s; background:var(--glass);
+}
+.ob-avatar-opt.picked { border-color:var(--plasma-pale); background:var(--plasma-dim); box-shadow:0 0 0 3px var(--plasma-dim); }
+.ob-avatar-opt:hover  { transform:scale(1.08); }
+</style>
+</head>
+<body>
+<div class="ob-wrap">
+
+  <!-- Progress -->
+  <div class="ob-progress">
+    <div class="ob-step-dot active" id="dot0"></div>
+    <div class="ob-step-dot"        id="dot1"></div>
+    <div class="ob-step-dot"        id="dot2"></div>
+    <div class="ob-step-dot"        id="dot3"></div>
+  </div>
+  <div class="ob-counter" id="stepCounter">LANGKAH 1 DARI 4</div>
+
+  <!-- Slides -->
+  <div class="ob-slides">
+
+    <!-- ── SLIDE 0: Welcome ──────────────────────────────── -->
+    <div class="ob-slide active" id="slide0">
+      <div class="ob-icon ob-icon-v">⚡</div>
+      <div class="ob-title">SELAMAT DATANG</div>
+      <p class="ob-sub">Platform pelaburan & mining premium Malaysia. Mulakan perjalanan kewangan anda hari ini.</p>
+
+      <div class="ob-features">
+        <div class="ob-feat">
+          <div class="ob-feat-ico" style="background:var(--plasma-dim)">💹</div>
+          <div class="ob-feat-body">
+            <h4>Pelaburan Harian</h4>
+            <p>Keuntungan 2.8%–3.5% setiap hari. Withdraw bila-bila masa.</p>
+          </div>
+        </div>
+        <div class="ob-feat">
+          <div class="ob-feat-ico" style="background:var(--profit-dim)">🤖</div>
+          <div class="ob-feat-body">
+            <h4>AI Robot Trading</h4>
+            <p>Robot auto-trade 24/7. Claim keuntungan setiap hari.</p>
+          </div>
+        </div>
+        <div class="ob-feat">
+          <div class="ob-feat-ico" style="background:var(--torch-dim)">👥</div>
+          <div class="ob-feat-body">
+            <h4>Komisen MLM 4 Tahap</h4>
+            <p>Jana pasif income dari rangkaian anda. Sehingga 5% komisen.</p>
+          </div>
+        </div>
+        <div class="ob-feat">
+          <div class="ob-feat-ico" style="background:rgba(59,130,246,0.1)">⛏️</div>
+          <div class="ob-feat-body">
+            <h4>Cloud Mining</h4>
+            <p>5 jenis mesin. Mulai RM30. Mining 24/7 tanpa gangguan.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 1: Personalize ──────────────────────────── -->
+    <div class="ob-slide" id="slide1">
+      <div class="ob-icon ob-icon-b">👤</div>
+      <div class="ob-title">PERSONALKAN</div>
+      <p class="ob-sub">Pilih avatar dan tetapkan nama paparan anda.</p>
+
+      <div class="ob-avatars" id="avatarGrid">
+        <div class="ob-avatar-opt picked" data-av="⚡" onclick="pickAv(this)">⚡</div>
+        <div class="ob-avatar-opt" data-av="🚀" onclick="pickAv(this)">🚀</div>
+        <div class="ob-avatar-opt" data-av="💎" onclick="pickAv(this)">💎</div>
+        <div class="ob-avatar-opt" data-av="🔥" onclick="pickAv(this)">🔥</div>
+        <div class="ob-avatar-opt" data-av="⚜️" onclick="pickAv(this)">⚜️</div>
+        <div class="ob-avatar-opt" data-av="👑" onclick="pickAv(this)">👑</div>
+        <div class="ob-avatar-opt" data-av="🌟" onclick="pickAv(this)">🌟</div>
+        <div class="ob-avatar-opt" data-av="🎯" onclick="pickAv(this)">🎯</div>
+      </div>
+
+      <div class="field-wrap">
+        <i class="fas fa-user field-icon"></i>
+        <input class="field" id="obName" type="text" placeholder="Nama paparan (contoh: Amir MV)" maxlength="30">
+      </div>
+
+      <div class="field-wrap" style="margin-top:10px">
+        <i class="fas fa-phone field-icon"></i>
+        <input class="field" id="obPhone" type="tel" placeholder="No. telefon (pilihan)" maxlength="15">
+      </div>
+
+      <!-- Theme preference -->
+      <div style="margin-top:16px">
+        <div style="font-size:11px;color:var(--ice-3);letter-spacing:1px;font-weight:700;margin-bottom:10px">TEMA ANTARA MUKA</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <button class="ob-theme-btn active" data-theme="dark" onclick="pickTheme(this)">
+            🌙 Gelap
+          </button>
+          <button class="ob-theme-btn" data-theme="light" onclick="pickTheme(this)">
+            ☀️ Cerah
+          </button>
+          <button class="ob-theme-btn" data-theme="auto" onclick="pickTheme(this)">
+            🔄 Auto
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 2: First Deposit intro ─────────────────── -->
+    <div class="ob-slide" id="slide2">
+      <div class="ob-icon ob-icon-g">💰</div>
+      <div class="ob-title">DEPOSIT PERTAMA</div>
+      <p class="ob-sub">Deposit minimum RM20 untuk mula melabur. Proses dalam 5–30 minit.</p>
+
+      <!-- Bank info preview -->
+      <div style="background:var(--glass);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:16px">
+        <div style="font-size:10px;letter-spacing:2px;color:var(--plasma-pale);font-weight:800;margin-bottom:12px">MAKLUMAT AKAUN BANK</div>
+        <div style="display:flex;flex-direction:column;gap:10px" id="obBankInfo">
+          <div style="font-size:13px;color:var(--ice-3)"><i class="fas fa-spinner fa-spin"></i> Memuatkan...</div>
+        </div>
+      </div>
+
+      <!-- Steps -->
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--glass);border-radius:12px">
+          <div style="width:28px;height:28px;border-radius:8px;background:var(--plasma-dim);display:flex;align-items:center;justify-content:center;font-family:var(--font-data);font-size:12px;font-weight:700;color:var(--plasma-pale);flex-shrink:0">1</div>
+          <div style="font-size:12px;color:var(--ice-2)">Transfer ke akaun bank di atas</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--glass);border-radius:12px">
+          <div style="width:28px;height:28px;border-radius:8px;background:var(--plasma-dim);display:flex;align-items:center;justify-content:center;font-family:var(--font-data);font-size:12px;font-weight:700;color:var(--plasma-pale);flex-shrink:0">2</div>
+          <div style="font-size:12px;color:var(--ice-2)">Muat naik resit di halaman Wallet</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--glass);border-radius:12px">
+          <div style="width:28px;height:28px;border-radius:8px;background:var(--plasma-dim);display:flex;align-items:center;justify-content:center;font-family:var(--font-data);font-size:12px;font-weight:700;color:var(--plasma-pale);flex-shrink:0">3</div>
+          <div style="font-size:12px;color:var(--ice-2)">Admin sahkan & kredit dalam 30 minit</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SLIDE 3: Choose first plan ───────────────────── -->
+    <div class="ob-slide" id="slide3">
+      <div class="ob-icon ob-icon-t">🎯</div>
+      <div class="ob-title">PILIH PELAN</div>
+      <p class="ob-sub">Pilih pelan pelaburan pertama anda. Boleh tukar bila-bila masa.</p>
+
+      <div class="ob-plans" id="obPlanGrid"></div>
+
+      <div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:14px;padding:14px;margin-bottom:16px">
+        <div style="font-size:12px;color:rgba(16,185,129,0.8);font-weight:700;margin-bottom:4px">💡 Tips Pelabur Bijak</div>
+        <div style="font-size:11px;color:var(--ice-3);line-height:1.6">Mulai dengan Starter atau Silver untuk rasa cara platform berfungsi. Naik taraf bila sudah bersedia.</div>
+      </div>
+    </div>
+
+  </div><!-- /ob-slides -->
+
+  <!-- CTA -->
+  <div class="ob-cta">
+    <div class="ob-cta-row">
+      <button class="ob-skip" id="obSkip" onclick="skip()">Langkau</button>
+      <button class="ob-next" id="obNext" onclick="nextStep()">
+        <span id="obNextTxt">Seterusnya</span>
+        <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+</div><!-- /ob-wrap -->
+
+<div id="toastStack"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/security.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/lang.js"></script>
+
+<script>
+/* ── STATE ─────────────────────────────────────────────────── */
+let _step    = 0;
+let _uid     = null;
+let _av      = '⚡';
+let _theme   = 'dark';
+let _selPlan = null;
+const STEPS  = 4;
+
+/* ── INIT ──────────────────────────────────────────────────── */
+window.addEventListener('load', async () => {
+  Lang.init();
+  const auth = await Security.guardSession();
+  if (!auth) return;
+  _uid = auth.session.user.id;
+
+  // Check if already onboarded
+  const { data:prof } = await db.from('profiles')
+    .select('onboarded,full_name')
+    .eq('id', _uid)
+    .single();
+  
+  if (prof?.onboarded) {
+    location.href = 'dashboard.html';
+    return;
+  }
+
+  loadBankInfo();
+  buildPlanGrid();
+});
+
+/* ── PLAN GRID ─────────────────────────────────────────────── */
+function buildPlanGrid() {
+  const el = document.getElementById('obPlanGrid');
+  if (!el) return;
+  const plans = (typeof MV !== 'undefined' ? MV.PLANS : []).slice(0,4);
+  const colors = ['plan-c1','plan-c2','plan-c3','plan-c4'];
+  el.innerHTML = plans.map((p,i) => `
+    <div class="ob-plan ${colors[i]}" onclick="pickPlan(this,'${p.id}')">
+      <div class="ob-check">✓</div>
+      <div style="font-size:22px;margin-bottom:8px">${p.icon}</div>
+      <div class="ob-plan-name">${p.name}</div>
+      <div class="ob-plan-rate">${(p.dailyRate*100).toFixed(1)}%</div>
+      <div class="ob-plan-from">Dari RM${p.price}</div>
+    </div>
+  `).join('');
+}
+
+function pickPlan(el, id) {
+  document.querySelectorAll('.ob-plan').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  _selPlan = id;
+}
+
+/* ── BANK INFO ─────────────────────────────────────────────── */
+async function loadBankInfo() {
+  const { data } = await db.from('system_settings')
+    .select('key,value')
+    .in('key',['bank_name','bank_account','bank_holder']);
+  
+  const map = {};
+  (data||[]).forEach(r => map[r.key] = JSON.parse(r.value||'""'));
+  
+  const el = document.getElementById('obBankInfo');
+  if (!el) return;
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:11px;color:var(--ice-3)">Bank</span>
+      <span style="font-size:13px;font-weight:800;color:var(--glacier)">${map.bank_name||'—'}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:11px;color:var(--ice-3)">Nombor Akaun</span>
+      <span style="font-family:var(--font-data);font-size:15px;font-weight:700;color:var(--profit)">${map.bank_account||'—'}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:11px;color:var(--ice-3)">Nama Pemilik</span>
+      <span style="font-size:13px;font-weight:700;color:var(--glacier)">${map.bank_holder||'—'}</span>
+    </div>`;
+}
+
+/* ── AVATAR & THEME ────────────────────────────────────────── */
+function pickAv(el) {
+  document.querySelectorAll('.ob-avatar-opt').forEach(e=>e.classList.remove('picked'));
+  el.classList.add('picked');
+  _av = el.dataset.av;
+}
+function pickTheme(el) {
+  document.querySelectorAll('.ob-theme-btn').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  _theme = el.dataset.theme;
+  Theme.set(_theme);
+}
+
+/* ── STEP NAVIGATION ───────────────────────────────────────── */
+function goToStep(n) {
+  const prev = document.getElementById(`slide${_step}`);
+  const next = document.getElementById(`slide${n}`);
+  if (!next) return;
+  prev?.classList.add('out');
+  setTimeout(() => { prev?.classList.remove('active','out'); }, 380);
+  next.classList.add('active');
+  _step = n;
+
+  // Update dots
+  for (let i=0; i<STEPS; i++) {
+    const d = document.getElementById(`dot${i}`);
+    if (!d) continue;
+    d.classList.remove('done','active');
+    if (i < _step) d.classList.add('done');
+    if (i === _step) d.classList.add('active');
+  }
+
+  document.getElementById('stepCounter').textContent = `LANGKAH ${_step+1} DARI ${STEPS}`;
+
+  const lastStep = _step === STEPS - 1;
+  const txt = document.getElementById('obNextTxt');
+  if (lastStep) { txt.textContent = 'Mula Sekarang!'; }
+  else          { txt.textContent = 'Seterusnya'; }
+}
+
+async function nextStep() {
+  const btn = document.getElementById('obNext');
+
+  // Step 1: save name + theme
+  if (_step === 1) {
+    const name  = document.getElementById('obName').value.trim();
+    const phone = document.getElementById('obPhone').value.trim();
+    if (name && _uid) {
+      btn.disabled = true;
+      await db.from('profiles').update({
+        full_name: name,
+        phone:     phone||null,
+        ui_theme:  _theme,
+      }).eq('id', _uid).catch(()=>{});
+      btn.disabled = false;
+    }
+  }
+
+  // Last step: mark onboarded, go to dashboard
+  if (_step === STEPS - 1) {
+    btn.disabled = true;
+    await db.from('profiles').update({
+      onboarded:   true,
+      onboarded_at: new Date().toISOString(),
+    }).eq('id', _uid).catch(()=>{});
+
+    // Track preferred plan
+    if (_selPlan && typeof Security !== 'undefined') {
+      Security.audit('onboarding_complete', { plan: _selPlan, theme: _theme });
+    }
+
+    UI.toast('Selamat datang ke MicroVest! 🎉', 'success');
+    setTimeout(() => {
+      location.href = _selPlan ? `investment.html?plan=${_selPlan}` : 'wallet.html';
+    }, 1000);
+    return;
+  }
+
+  goToStep(_step + 1);
+}
+
+function skip() {
+  // Skip onboarding entirely
+  if (_uid) {
+    db.from('profiles').update({ onboarded:true }).eq('id', _uid).catch(()=>{});
+  }
+  location.href = 'dashboard.html';
+}
+</script>
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js")
+        .then(r => console.log("[SW] Registered", r.scope))
+        .catch(e => console.error("[SW] Registration failed", e));
+    }
+  </script>
+</body>
+</html>

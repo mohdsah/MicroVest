@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#03030A">
+<title>MicroVest — Tiada Sambungan</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="css/v10.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="wifi-container">
+    <div class="pulse-rings">
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="ring"></div>
+    </div>
+    <div class="wifi-wrap">📡</div>
+  </div>
+
+  <h1>TIADA SAMBUNGAN</h1>
+  <p class="sub">
+    Anda kini dalam mod <strong>luar talian</strong>.<br>
+    Halaman yang telah dikache boleh dibuka.<br>
+    Semak sambungan internet anda dan cuba semula.
+  </p>
+
+  <div class="offline-links" id="linkList">
+    <!-- Populated by JS -->
+  </div>
+
+  <button class="retry-btn" onclick="retryConnection()">
+    <i class="fas fa-rotate-right" style="margin-right:8px"></i>Cuba Semula
+  </button>
+
+  <div class="status-row">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusTxt">Tiada sambungan</span>
+  </div>
+</div>
+
+<script>
+const cachedPages = [
+  { url:'/dashboard.html',   label:'Dashboard',    icon:'📊' },
+  { url:'/investment.html',  label:'Pelaburan',    icon:'💹' },
+  { url:'/mining.html',      label:'Perlombongan', icon:'⛏️' },
+  { url:'/wallet.html',      label:'Wallet',       icon:'👛' },
+  { url:'/profile.html',     label:'Profil',       icon:'👤' },
+  { url:'/missions.html',    label:'Misi',         icon:'🎯' },
+];
+
+async function buildLinks() {
+  const list = document.getElementById('linkList');
+  for (const p of cachedPages) {
+    const cached = await caches.match(p.url).catch(() => null);
+    const div = document.createElement('a');
+    div.href = p.url;
+    div.className = 'ol-link';
+    div.innerHTML = `
+      <span class="ol-icon">${p.icon}</span>
+      <span class="ol-lbl">${p.label}</span>
+      <span class="ol-status ${cached?'ol-cached':'ol-nocache'}">
+        ${cached ? '✓ KACHE' : 'TIADA KACHE'}
+      </span>`;
+    if (!cached) div.onclick = e => { e.preventDefault(); }; 
+    list.appendChild(div);
+  }
+}
+
+async function retryConnection() {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusTxt');
+  dot.className = 'status-dot checking';
+  txt.textContent = 'Menyambung semula...';
+
+  try {
+    await fetch('/', { mode:'no-cors', cache:'no-store' });
+    dot.className = 'status-dot online';
+    txt.textContent = 'Disambung semula! Memuatkan...';
+    setTimeout(() => location.reload(), 800);
+  } catch(_) {
+    dot.className = 'status-dot';
+    txt.textContent = 'Masih tiada sambungan';
+  }
+}
+
+// Auto-retry every 30s
+setInterval(() => {
+  fetch('/', { mode:'no-cors', cache:'no-store' })
+    .then(() => location.reload())
+    .catch(() => {});
+}, 30000);
+
+// Monitor online event
+window.addEventListener('online', () => {
+  document.getElementById('statusDot').className = 'status-dot online';
+  document.getElementById('statusTxt').textContent = 'Disambung! Memuatkan...';
+  setTimeout(() => location.reload(), 600);
+});
+
+if ('caches' in window) buildLinks();
+</script>
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js")
+        .then(r => console.log("[SW] Registered", r.scope))
+        .catch(e => console.error("[SW] Registration failed", e));
+    }
+  </script>
+</body>
+</html>

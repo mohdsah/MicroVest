@@ -6,79 +6,10 @@
 <meta name="theme-color" content="#020206">
 <title>MicroVest v8 | Admin</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="../css/v7.css">
+<link rel="stylesheet" href="../css/v10.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<style>
-/* Admin topbar */
-.adm-bar {
-  display:flex;align-items:center;justify-content:space-between;
-  padding:18px var(--pad) 14px;
-  background:linear-gradient(to bottom,rgba(2,2,6,0.99) 70%,transparent);
-  backdrop-filter:blur(24px); position:sticky; top:0; z-index:200;
-  border-bottom:1px solid rgba(239,68,68,0.08);
-}
-.adm-logo { display:flex;align-items:center;gap:10px; }
-.adm-badge { background:linear-gradient(135deg,#991B1B,#EF4444); color:#fff; font-size:9px; font-weight:800; letter-spacing:2px; padding:3px 10px; border-radius:999px; }
 
-/* KPI row */
-.kpi-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 var(--pad); margin-bottom:16px; }
-.kpi-box {
-  border-radius:var(--r-xl); padding:18px;
-  position:relative; overflow:hidden;
-}
-.kpi-box::before { content:''; position:absolute;top:0;left:0;right:0;height:2px; }
-.k-users  { background:linear-gradient(135deg,#0A0A1A,#120030); border:1px solid rgba(124,58,237,0.2); }
-.k-users::before { background:linear-gradient(90deg,transparent,#7C3AED,transparent); }
-.k-dep    { background:linear-gradient(135deg,#001A08,#060A06); border:1px solid rgba(34,197,94,0.2); }
-.k-dep::before { background:linear-gradient(90deg,transparent,#22C55E,transparent); }
-.k-with   { background:linear-gradient(135deg,#1A0000,#0A0000); border:1px solid rgba(239,68,68,0.2); }
-.k-with::before { background:linear-gradient(90deg,transparent,#EF4444,transparent); }
-.k-mine   { background:linear-gradient(135deg,#1A0800,#0A0400); border:1px solid rgba(249,115,22,0.2); }
-.k-mine::before { background:linear-gradient(90deg,transparent,#F97316,transparent); }
-.kpi-ico { font-size:24px; margin-bottom:8px; display:block; }
-.kpi-v   { font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:700; display:block; margin-bottom:3px; }
-.kpi-l   { font-size:9px; letter-spacing:2px; text-transform:uppercase; opacity:.5; }
-.kpi-delta { font-size:10px; margin-top:4px; font-weight:700; }
-
-/* Pending alert card */
-.alert-card {
-  margin:0 var(--pad) 16px;
-  background:rgba(234,179,8,0.06); border:1px solid rgba(234,179,8,0.2);
-  border-radius:var(--r-l); padding:14px 18px;
-  display:flex; align-items:center; gap:14px; cursor:pointer;
-  transition:background .2s;
-}
-.alert-card:active { background:rgba(234,179,8,0.1); }
-
-/* Admin nav */
-.adm-nav { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; padding:0 var(--pad); margin-bottom:22px; }
-.adm-navitem {
-  display:flex;flex-direction:column;align-items:center;gap:5px;
-  background:var(--glass);border:1px solid var(--border);border-radius:var(--r-l);
-  padding:14px 6px; text-decoration:none; color:var(--ice-2);
-  font-size:9px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;
-  transition:all .2s var(--spring);
-}
-.adm-navitem:active { transform:scale(0.88); }
-.adm-navitem i { font-size:17px; }
-.adm-navitem.red  { border-color:rgba(239,68,68,0.2);  background:rgba(239,68,68,0.06);  color:#FCA5A5; }
-.adm-navitem.grn  { border-color:rgba(34,197,94,0.2);  background:rgba(34,197,94,0.06);  color:#86EFAC; }
-.adm-navitem.yel  { border-color:rgba(234,179,8,0.2);  background:rgba(234,179,8,0.06);  color:#FDE68A; }
-.adm-navitem.blu  { border-color:rgba(59,130,246,0.2); background:rgba(59,130,246,0.06); color:#93C5FD; }
-.adm-navitem.vio  { border-color:rgba(124,58,237,0.2); background:rgba(124,58,237,0.08); color:#C4B5FD; }
-.badge-dot { background:#EF4444;color:#fff;border-radius:999px;font-size:8px;font-weight:800;padding:1px 5px;position:absolute;top:-2px;right:-2px; }
-
-/* Recent tx row */
-.rec-tx { display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--border); }
-.rtx-ico { width:38px;height:38px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0; }
-.rtx-info { flex:1; }
-.rtx-user { font-size:12px;font-weight:700;margin-bottom:2px; }
-.rtx-meta { font-size:10px;color:var(--ice-3); }
-.rtx-right { text-align:right; }
-.rtx-amt  { font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700; }
-.rtx-st   { font-size:9px;padding:2px 8px;border-radius:999px;margin-top:2px;display:inline-block; }
-</style>
 </head>
 <body>
 <div class="amb-v"></div><div class="amb-o"></div>
@@ -386,5 +317,13 @@ async function init() {
 }
 window.addEventListener('load', init);
 </script>
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js", { scope: "/" })
+        .then(r => console.log("[SW] Registered", r.scope))
+        .catch(e => console.error("[SW] Registration failed", e));
+    }
+  </script>
 </body>
 </html>

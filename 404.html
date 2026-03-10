@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#020206">
 <title>MicroVest — Halaman Tidak Dijumpai</title>
-<link rel="stylesheet" href="css/v7.css">
+<link rel="stylesheet" href="css/v10.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 .err-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 24px;text-align:center}
@@ -41,5 +41,13 @@ db.auth.getSession().then(({ data:{ session }}) => {
   if (!session) location.href = 'login.html';
 });
 </script>
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js")
+        .then(r => console.log("[SW] Registered", r.scope))
+        .catch(e => console.error("[SW] Registration failed", e));
+    }
+  </script>
 </body>
 </html>

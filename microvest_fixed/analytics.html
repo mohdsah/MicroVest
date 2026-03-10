@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#020206">
+<title>MicroVest v8 | Analitik</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="css/v10.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+</head>
+<body>
+<div class="amb-v"></div><div class="amb-o"></div>
+<div class="shell">
+
+  <!-- HEADER -->
+  <div class="pg-hd anim a1">
+    <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+    <div>
+      <div class="pg-title">Analitik Saya</div>
+      <div class="pg-sub">Prestasi Pelaburan & Mining</div>
+    </div>
+    <div class="chip chip-v" style="font-size:9px;margin-left:auto">LIVE</div>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="kpi-grid anim a2">
+    <div class="kpi-card kpi-main">
+      <span class="kpi-lbl" style="color:rgba(167,139,250,0.6)">Total Deposit</span>
+      <span class="kpi-val" style="color:#A78BFA" id="kpiDep">RM 0</span>
+      <span class="kpi-sub" style="color:rgba(167,139,250,0.4)">Semua masa</span>
+    </div>
+    <div class="kpi-card kpi-profit">
+      <span class="kpi-lbl" style="color:rgba(134,239,172,0.6)">Total Profit</span>
+      <span class="kpi-val" style="color:#86EFAC" id="kpiProfit">RM 0</span>
+      <span class="kpi-sub" style="color:rgba(134,239,172,0.4)">Semua sumber</span>
+    </div>
+    <div class="kpi-card kpi-mining">
+      <span class="kpi-lbl" style="color:rgba(253,186,116,0.6)">Mining Profit</span>
+      <span class="kpi-val" style="color:#FDBA74" id="kpiMine">RM 0</span>
+      <span class="kpi-sub" style="color:rgba(253,186,116,0.4)">Semua mesin</span>
+    </div>
+    <div class="kpi-card kpi-bonus">
+      <span class="kpi-lbl" style="color:rgba(196,181,253,0.6)">Komisen</span>
+      <span class="kpi-val" style="color:#C4B5FD" id="kpiRef">RM 0</span>
+      <span class="kpi-sub" style="color:rgba(196,181,253,0.4)">Referral bonus</span>
+    </div>
+  </div>
+
+  <!-- PROFIT TREND CHART -->
+  <div class="chart-section anim a3">
+    <div class="ch-card">
+      <div class="ch-top">
+        <div>
+          <div class="ch-t">Trend Profit</div>
+          <div class="ch-sub">30 hari terakhir</div>
+        </div>
+        <div class="ch-sum">
+          <div class="ch-sum-v profit" id="trend30Total">RM 0</div>
+          <div class="ch-sum-l">30H Total</div>
+        </div>
+      </div>
+      <canvas id="trendChart" height="130"></canvas>
+    </div>
+
+    <!-- DEPOSIT HISTORY CHART -->
+    <div class="ch-card">
+      <div class="ch-top">
+        <div>
+          <div class="ch-t">Sejarah Deposit</div>
+          <div class="ch-sub">Aktiviti bulanan</div>
+        </div>
+        <div class="ch-sum">
+          <div class="ch-sum-v v-pale" id="depMonthTotal">RM 0</div>
+          <div class="ch-sum-l">Bulan Ini</div>
+        </div>
+      </div>
+      <canvas id="depChart" height="110"></canvas>
+    </div>
+
+    <!-- MINING PERFORMANCE -->
+    <div class="ch-card">
+      <div class="ch-top">
+        <div>
+          <div class="ch-t">Prestasi Mining</div>
+          <div class="ch-sub">Mesin aktif</div>
+        </div>
+        <div class="ch-sum">
+          <div class="ch-sum-v" style="color:var(--o-bright)" id="mineDaily">RM 0/hari</div>
+          <div class="ch-sum-l">Profit Harian</div>
+        </div>
+      </div>
+      <div id="miningPerf">
+        <div style="text-align:center;padding:24px;color:var(--ice-3);font-size:12px">Tiada mesin aktif</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVESTMENT SUMMARY -->
+  <div class="chart-section anim a4">
+    <div style="font-family:'DM Serif Display',serif;font-size:17px;margin-bottom:14px">Ringkasan Pelaburan</div>
+    <div class="sum-row">
+      <div class="sum-box"><span class="sum-v v-pale" id="sumActive">0</span><span class="sum-l">Aktif</span></div>
+      <div class="sum-box"><span class="sum-v gold"    id="sumCompleted">0</span><span class="sum-l">Selesai</span></div>
+      <div class="sum-box"><span class="sum-v profit"  id="sumROI">0%</span><span class="sum-l">ROI</span></div>
+    </div>
+
+    <!-- Investment by plan donut -->
+    <div class="ch-card">
+      <div class="ch-top">
+        <div><div class="ch-t">Agihan Plan</div><div class="ch-sub">Nilai mengikut plan</div></div>
+      </div>
+      <canvas id="planDonut" height="160"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a href="dashboard.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
+  <a href="investment.html" class="nav-item active"><i class="fas fa-chart-line"></i><span>Invest</span></a>
+  <a href="robots.html" class="nav-item" style="position:relative">
+    <span style="position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#5B21B6,#7C3AED);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(124,58,237,.5);pointer-events:none"></span><i class="fas fa-robot"></i><span>Robot</span></a>
+  <a href="mining.html" class="nav-item"><i class="fas fa-microchip"></i><span>Mining</span></a>
+  <a href="profile.html" class="nav-item"><i class="fas fa-user-circle"></i><span>Profil</span></a>
+</nav>
+
+<script src="js/config.js"></script>
+<script src="js/security.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/lang.js"></script>
+<script>
+let _user;
+
+/* ── COMMON CHART OPTIONS ─────────────────────────────────── */
+const baseOpts = {
+  responsive:true, maintainAspectRatio:false,
+  plugins:{ legend:{display:false} },
+  scales:{
+    x:{ grid:{color:'rgba(255,255,255,0.03)'}, ticks:{color:'#3D4466',font:{size:10}} },
+    y:{ grid:{color:'rgba(255,255,255,0.03)'}, ticks:{color:'#3D4466',font:{size:10}} },
+  },
+};
+
+function makeGrad(ctx, top, bottom) {
+  const g = ctx.createLinearGradient(0,0,0,130);
+  g.addColorStop(0, top); g.addColorStop(1, bottom); return g;
+}
+
+/* ── TREND CHART (30 days profit) ────────────────────────── */
+async function buildTrendChart(userId) {
+  const since = new Date(Date.now()-30*86400000).toISOString();
+  const { data } = await db.from('transactions')
+    .select('amount,created_at,type').eq('user_id',userId).eq('status','approved')
+    .gte('created_at',since).in('type',['profit','mining','bonus','referral']);
+
+  const buckets = Array(30).fill(0);
+  (data||[]).forEach(tx => {
+    const d = Math.floor((Date.now()-new Date(tx.created_at))/86400000);
+    if (d<30) buckets[29-d] += tx.amount||0;
+  });
+  const labels = Array.from({length:30},(_,i)=>{
+    const d = new Date(Date.now()-(29-i)*86400000);
+    return i%5===0?d.toLocaleDateString('ms-MY',{day:'2-digit',month:'short'}):'';
+  });
+  const total = buckets.reduce((s,v)=>s+v,0);
+  document.getElementById('trend30Total').textContent = UI.rm(total);
+
+  const ctx = document.getElementById('trendChart').getContext('2d');
+  new Chart(ctx,{
+    type:'bar',
+    data:{labels,datasets:[{
+      data:buckets, backgroundColor: buckets.map(v=>v>0?'rgba(34,197,94,0.7)':'rgba(239,68,68,0.5)'),
+      borderRadius:5, borderSkipped:false,
+    }]},
+    options:{...baseOpts},
+  });
+}
+
+/* ── DEPOSIT CHART (monthly buckets) ─────────────────────── */
+async function buildDepChart(userId) {
+  const { data } = await db.from('transactions')
+    .select('amount,created_at').eq('user_id',userId).eq('type','deposit').eq('status','approved')
+    .gte('created_at',new Date(Date.now()-180*86400000).toISOString());
+
+  const months = Array.from({length:6},(_,i)=>{
+    const d = new Date(); d.setMonth(d.getMonth()-5+i);
+    return {label:d.toLocaleDateString('ms-MY',{month:'short',year:'2-digit'}),total:0};
+  });
+  (data||[]).forEach(tx=>{
+    const mIdx = months.findIndex(m=>{
+      const td = new Date(tx.created_at);
+      return td.getMonth()===new Date(m.label+' 20').getMonth();
+    });
+    if(mIdx>=0) months[mIdx].total+=tx.amount||0;
+  });
+  const monthNow = months[months.length-1].total;
+  document.getElementById('depMonthTotal').textContent = UI.rm(monthNow);
+
+  const ctx = document.getElementById('depChart').getContext('2d');
+  const g = makeGrad(ctx,'rgba(124,58,237,0.5)','rgba(124,58,237,0)');
+  new Chart(ctx,{
+    type:'line',
+    data:{labels:months.map(m=>m.label),datasets:[{
+      data:months.map(m=>m.total), borderColor:'#7C3AED', backgroundColor:g,
+      borderWidth:2, pointRadius:5, pointBackgroundColor:'#7C3AED', fill:true, tension:0.4,
+    }]},
+    options:{...baseOpts, scales:{...baseOpts.scales,y:{...baseOpts.scales.y,ticks:{...baseOpts.scales.y.ticks,callback:v=>'RM'+UI.k(v)}}}},
+  });
+}
+
+/* ── MINING PERFORMANCE ──────────────────────────────────── */
+async function buildMiningPerf(userId) {
+  const { data:machines } = await db.from('user_machines').select('*').eq('user_id',userId).eq('status','active');
+  if (!machines?.length) return;
+  const total = machines.reduce((s,m)=>s+(m.daily_profit||0),0);
+  document.getElementById('mineDaily').textContent = 'RM '+total.toFixed(2)+'/hari';
+  document.getElementById('kpiMine').textContent   = 'RM '+total.toFixed(2);
+
+  document.getElementById('miningPerf').innerHTML = machines.map(m=>{
+    const def = MV.getMachine(m.machine_id)||{icon:'⛏️',name:m.machine_id,color:'#F97316'};
+    const pct = (m.daily_profit/total*100).toFixed(0);
+    return `
+    <div class="perf-row">
+      <div class="perf-icon">${def.icon}</div>
+      <div style="flex:1">
+        <div class="perf-name">${def.name}</div>
+        <div style="margin-top:6px"><div class="prog-t"><div class="prog-f prog-o" style="width:${pct}%"></div></div></div>
+      </div>
+      <div class="perf-daily">+${UI.rm(m.daily_profit)}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── INVESTMENT SUMMARY + DONUT ──────────────────────────── */
+async function buildInvestSummary(userId) {
+  const { data } = await db.from('investments').select('plan_id,amount,status,total_claimed,total_return').eq('user_id',userId);
+  if (!data?.length) return;
+  const active    = data.filter(i=>i.status==='active').length;
+  const completed = data.filter(i=>i.status==='completed').length;
+  const totalIn   = data.reduce((s,i)=>s+(i.amount||0),0);
+  const totalOut  = data.reduce((s,i)=>s+(i.total_claimed||0),0);
+  const roi = totalIn>0?((totalOut/totalIn)*100).toFixed(1):0;
+
+  document.getElementById('sumActive').textContent    = active;
+  document.getElementById('sumCompleted').textContent = completed;
+  document.getElementById('sumROI').textContent       = roi+'%';
+
+  // Plan breakdown donut
+  const planMap = {};
+  data.forEach(i=>{ planMap[i.plan_id]=(planMap[i.plan_id]||0)+(i.amount||0); });
+  const plans  = Object.keys(planMap);
+  const colors = ['#7C3AED','#F97316','#22C55E','#EAB308','#3B82F6'];
+
+  const ctx = document.getElementById('planDonut').getContext('2d');
+  new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      labels:plans.map(p=>MV.getPlan(p)?.name||p),
+      datasets:[{data:plans.map(p=>planMap[p]),backgroundColor:colors.slice(0,plans.length),borderWidth:2,borderColor:'#06060E'}]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:true,position:'bottom',labels:{color:'#8B95BB',font:{size:11},boxWidth:12}},
+      },
+      cutout:'60%',
+    },
+  });
+}
+
+/* ── LOAD KPIs ───────────────────────────────────────────── */
+async function loadKPIs(userId) {
+  const { data:p } = await db.from('profiles').select('total_deposit,total_earned').eq('id',userId).single();
+  const { data:ref } = await db.from('referral_commissions').select('amount').eq('referrer_id',userId);
+  const refTotal = (ref||[]).reduce((s,r)=>s+(r.amount||0),0);
+
+  document.getElementById('kpiDep').textContent    = UI.rm(p?.total_deposit||0);
+  document.getElementById('kpiProfit').textContent = UI.rm(p?.total_earned||0);
+  document.getElementById('kpiRef').textContent    = UI.rm(refTotal);
+}
+
+async function init() {
+  UI.loading();
+  const { data:{session} } = await db.auth.getSession();
+  if (!session) { location.href='login.html'; return; }
+  _user = session.user;
+  Lang.init();
+  await Promise.all([
+    loadKPIs(_user.id),
+    buildTrendChart(_user.id),
+    buildDepChart(_user.id),
+    buildMiningPerf(_user.id),
+    buildInvestSummary(_user.id),
+  ]);
+  UI.unload();
+}
+
+async function loadRobotAnalytics(userId) {
+  const { data:robots } = await db.from('user_robots')
+    .select('robot_id, daily_profit, total_earned, status, created_at, expires_at')
+    .eq('user_id', userId).order('created_at', { ascending:false });
+
+  const el = document.getElementById('robotAnalytics');
+  if (!el) return;
+
+  if (!robots?.length) {
+    el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--ice-3);font-size:12px">Tiada robot aktif. <a href="robots.html" style="color:var(--v-pale)">Aktifkan sekarang →</a></div>';
+    return;
+  }
+
+  const active   = robots.filter(r => r.status === 'active');
+  const expired  = robots.filter(r => r.status === 'expired');
+  const daily    = active.reduce((s,r) => s + Number(r.daily_profit||0), 0);
+  const earned   = robots.reduce((s,r) => s + Number(r.total_earned||0), 0);
+  const invested = robots.reduce((s,r) => {
+    const cfg = MV.getRobot(r.robot_id);
+    return s + (cfg?.price||0);
+  }, 0);
+
+  const BOT_ICONS = { scout:'🤖', alpha:'🦾', nexus:'🧠', quantum:'⚛️', sovereign:'👑' };
+  const BOT_COLS  = { scout:'#60A5FA', alpha:'#F97316', nexus:'#22C55E', quantum:'#A78BFA', sovereign:'#FB923C' };
+
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div style="background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:14px;padding:14px;text-align:center">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:#A78BFA">${active.length}</div>
+        <div style="font-size:9px;color:var(--ice-3);margin-top:3px;text-transform:uppercase;letter-spacing:1px">Bot Aktif</div>
+      </div>
+      <div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:14px;padding:14px;text-align:center">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--profit)">RM ${daily.toFixed(2)}</div>
+        <div style="font-size:9px;color:var(--ice-3);margin-top:3px;text-transform:uppercase;letter-spacing:1px">Per Hari</div>
+      </div>
+      <div style="background:rgba(249,115,22,.06);border:1px solid rgba(249,115,22,.15);border-radius:14px;padding:14px;text-align:center">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:#F97316">RM ${earned.toFixed(2)}</div>
+        <div style="font-size:9px;color:var(--ice-3);margin-top:3px;text-transform:uppercase;letter-spacing:1px">Total Dikutip</div>
+      </div>
+      <div style="background:rgba(234,179,8,.06);border:1px solid rgba(234,179,8,.15);border-radius:14px;padding:14px;text-align:center">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:#EAB308">${invested > 0 ? ((earned/invested)*100).toFixed(1)+'%' : '0%'}</div>
+        <div style="font-size:9px;color:var(--ice-3);margin-top:3px;text-transform:uppercase;letter-spacing:1px">ROI Semasa</div>
+      </div>
+    </div>
+    <div style="background:var(--surf);border:1px solid var(--border);border-radius:14px;overflow:hidden">
+      ${robots.slice(0,5).map(r => {
+        const bot  = MV.getRobot(r.robot_id);
+        const col  = BOT_COLS[r.robot_id] || '#7C3AED';
+        const days = r.expires_at ? Math.max(0, Math.ceil((new Date(r.expires_at)-new Date())/86400000)) : 0;
+        return '<div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.04)">' +
+          '<div style="font-size:22px">' + (BOT_ICONS[r.robot_id]||'🤖') + '</div>' +
+          '<div style="flex:1"><div style="font-size:12px;font-weight:700">' + (bot?.name||r.robot_id) + '</div>' +
+          '<div style="font-size:10px;color:var(--ice-3)">' + (r.status==='active'?days+'h lagi':'Tamat') + ' · RM' + Number(r.daily_profit||0).toFixed(2) + '/hari</div></div>' +
+          '<div style="text-align:right"><div style="font-family:monospace;font-size:12px;font-weight:700;color:var(--profit)">RM ' + Number(r.total_earned||0).toFixed(2) + '</div>' +
+          '<div style="font-size:9px;color:var(--ice-3)">dikutip</div></div></div>';
+      }).join('')}
+    </div>`;
+}
+
+window.addEventListener('load', init);
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .catch(e => console.warn('SW reg failed:', e));
+  });
+}
+</script>
+</body>
+</html>

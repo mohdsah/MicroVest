@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="../favicon.ico">
+  <link rel="apple-touch-icon" href="../icons/icon-192.png">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#020206">
+<title>MicroVest Admin — Laporan</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../css/v10.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+</head>
+<body>
+<div class="amb-v"></div>
+
+<!-- HEADER -->
+<div class="adm-hd">
+  <a href="dashboard.html" class="back-lnk"><i class="fas fa-arrow-left"></i></a>
+  <a href="robots.html" style="color:#FB923C;font-size:11px;font-weight:800;text-decoration:none;display:flex;align-items:center;gap:5px;padding:7px 12px;border:1px solid rgba(251,146,60,.2);border-radius:9px;background:rgba(251,146,60,.06)">🤖 Robot</a>
+    <a href="tickets.html" style="color:var(--v-pale);font-size:11px;font-weight:800;text-decoration:none;display:flex;align-items:center;gap:5px;padding:7px 12px;border:1px solid rgba(124,58,237,.2);border-radius:9px;background:rgba(124,58,237,.06)">🎫 Tiket</a>
+  <div>
+    <div class="adm-title">📊 Laporan Platform</div>
+    <div class="adm-sub" id="reportDate">Memuatkan...</div>
+  </div>
+  <div style="margin-left:auto; display:flex; gap:8px;">
+    <button class="export-btn" onclick="exportAll()"><i class="fas fa-download"></i> Export CSV</button>
+  </div>
+</div>
+
+<!-- PERIOD FILTER -->
+<div style="padding:14px var(--pad) 0;">
+  <div class="period-row">
+    <button class="period-btn on" onclick="setPeriod(7,this)">7 Hari</button>
+    <button class="period-btn"    onclick="setPeriod(30,this)">30 Hari</button>
+    <button class="period-btn"    onclick="setPeriod(90,this)">3 Bulan</button>
+    <button class="period-btn"    onclick="setPeriod(365,this)">1 Tahun</button>
+  </div>
+</div>
+
+<!-- KPI CARDS -->
+<div class="kpi-grid">
+  <div class="kpi">
+    <div class="kpi-lbl">Total Deposit</div>
+    <div class="kpi-val" id="kpiDeposit" style="color:#22C55E">RM 0</div>
+    <div class="kpi-sub" id="kpiDepositCnt">0 transaksi</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-lbl">Total Withdraw</div>
+    <div class="kpi-val" id="kpiWithdraw" style="color:#EF4444">RM 0</div>
+    <div class="kpi-sub" id="kpiWithdrawCnt">0 transaksi</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-lbl">Net Cashflow</div>
+    <div class="kpi-val" id="kpiNet" style="color:#7C3AED">RM 0</div>
+    <div class="kpi-sub">Deposit - Withdraw</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-lbl">Pengguna Baru</div>
+    <div class="kpi-val" id="kpiUsers" style="color:#F97316">0</div>
+    <div class="kpi-sub">Pendaftaran baru</div>
+  </div>
+</div>
+
+<!-- CASHFLOW CHART -->
+<div class="section">
+  <div class="sec-title">Aliran Tunai Harian</div>
+  <div class="chart-wrap">
+    <canvas id="cashflowChart" height="100"></canvas>
+  </div>
+</div>
+
+<!-- TRANSACTION TYPE BREAKDOWN -->
+<div class="section">
+  <div class="sec-title">
+    Breakdown Transaksi
+    <span id="txTotal" style="font-size:10px;color:var(--ice-3);text-transform:none;letter-spacing:0"></span>
+  </div>
+  <div class="summary-row">
+    <div class="sum-card">
+      <div class="sum-lbl">💰 Deposit</div>
+      <div class="sum-val" id="sumDeposit" style="color:#22C55E">RM 0</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-lbl">⛏️ Mining</div>
+      <div class="sum-val" id="sumMining" style="color:#F97316">RM 0</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-lbl">📈 Pelaburan</div>
+      <div class="sum-val" id="sumInvest" style="color:#7C3AED">RM 0</div>
+    </div>
+  </div>
+  <div class="summary-row">
+    <div class="sum-card">
+      <div class="sum-lbl">👥 Referral</div>
+      <div class="sum-val" id="sumReferral" style="color:#3B82F6">RM 0</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-lbl">🎁 Bonus</div>
+      <div class="sum-val" id="sumBonus" style="color:#EAB308">RM 0</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-lbl">💸 Withdraw</div>
+      <div class="sum-val" id="sumWithdraw" style="color:#EF4444">RM 0</div>
+    </div>
+  </div>
+</div>
+
+<!-- VIP RANK DISTRIBUTION -->
+<div class="section">
+  <div class="sec-title">Taburan VIP Rank</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+    <div class="chart-wrap" style="padding:14px">
+      <canvas id="rankChart" height="140"></canvas>
+    </div>
+    <div id="rankList" style="display:flex;flex-direction:column;gap:6px;justify-content:center"></div>
+  </div>
+</div>
+
+<!-- TOP USERS TABLE -->
+<div class="section">
+  <div class="sec-title">
+    Top 10 Pengguna
+    <select id="topSort" onchange="renderTopUsers()" style="background:var(--surf);border:1px solid var(--border);color:var(--ice-2);border-radius:8px;padding:4px 8px;font-size:10px;font-weight:700;cursor:pointer">
+      <option value="total_deposit">By Deposit</option>
+      <option value="total_earned">By Profit</option>
+      <option value="mvt_balance">By MVT</option>
+    </select>
+  </div>
+  <div class="chart-wrap" style="padding:0;overflow:hidden">
+    <table class="rpt-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Pengguna</th>
+          <th>VIP</th>
+          <th>Total Deposit</th>
+          <th>Total Profit</th>
+          <th>MVT</th>
+        </tr>
+      </thead>
+      <tbody id="topUsersBody">
+        <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--ice-3)">Memuatkan...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PENDING SUMMARY -->
+<div class="section">
+  <div class="sec-title">Status Pending</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+    <div class="kpi" style="cursor:pointer" onclick="location.href='deposits.html'">
+      <div class="kpi-lbl">💰 Deposit Pending</div>
+      <div class="kpi-val" id="pendingDep" style="color:#EAB308">0</div>
+      <div class="kpi-sub">Klik untuk semak →</div>
+    </div>
+    <div class="kpi" style="cursor:pointer" onclick="location.href='withdraws.html'">
+      <div class="kpi-lbl">💸 Withdraw Pending</div>
+      <div class="kpi-val" id="pendingWith" style="color:#EAB308">0</div>
+      <div class="kpi-sub">Klik untuk semak →</div>
+    </div>
+  </div>
+</div>
+
+<!-- RECENT TRANSACTIONS TABLE -->
+<div class="section">
+  <div class="sec-title">
+    Transaksi Terkini
+    <div class="export-row" style="margin:0">
+      <button class="export-btn" onclick="exportTransactions()"><i class="fas fa-file-csv"></i> CSV</button>
+    </div>
+  </div>
+  <div class="chart-wrap" style="padding:0;overflow:hidden">
+    <table class="rpt-table">
+      <thead>
+        <tr>
+          <th>Tarikh</th>
+          <th>Pengguna</th>
+          <th>Jenis</th>
+          <th>Jumlah</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="recentTxBody">
+        <tr><td colspan="5" style="text-align:center;padding:20px;color:var(--ice-3)">Memuatkan...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div style="height:40px"></div>
+
+<script src="../js/config.js"></script>
+<script src="../js/security.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+let _days = 7, _allTx = [], _allUsers = [];
+const RM = v => 'RM ' + Number(v||0).toLocaleString('ms-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmt = n => Number(n||0).toLocaleString();
+
+const RANK_CFG = {
+  member:  { color:'#475569', label:'Member'  },
+  bronze:  { color:'#CD7F32', label:'Bronze'  },
+  silver:  { color:'#94A3B8', label:'Silver'  },
+  gold:    { color:'#EAB308', label:'Gold'     },
+  diamond: { color:'#7C3AED', label:'Diamond' },
+};
+
+let cashChart = null, rankChart = null;
+
+/* ── PERIOD ──────────────────────────────────────────────────── */
+function setPeriod(days, btn) {
+  _days = days;
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  loadAll();
+}
+
+/* ── LOAD ALL ─────────────────────────────────────────────────── */
+async function loadAll() {
+  const since = new Date(Date.now() - _days * 86400000).toISOString();
+  document.getElementById('reportDate').textContent =
+    `Data ${_days} hari terakhir · Dikemaskini ${new Date().toLocaleTimeString('ms-MY')}`;
+
+  // Load transactions
+  const { data: txs } = await db.from('transactions')
+    .select('type,amount,status,created_at,user_id')
+    .gte('created_at', since)
+    .order('created_at', { ascending: false });
+  _allTx = txs || [];
+
+  // Load all users (for top table + VIP chart)
+  const { data: users } = await db.from('profiles')
+    .select('id,email,vip_rank,total_deposit,total_earned,mvt_balance,created_at')
+    .eq('is_admin', false)
+    .order('total_deposit', { ascending: false });
+  _allUsers = users || [];
+
+  // Pending counts
+  const { count: depPending }  = await db.from('transactions').select('*',{count:'exact',head:true}).eq('type','deposit').eq('status','pending');
+  const { count: withPending } = await db.from('transactions').select('*',{count:'exact',head:true}).eq('type','withdraw').eq('status','pending');
+  document.getElementById('pendingDep').textContent  = depPending  || 0;
+  document.getElementById('pendingWith').textContent = withPending || 0;
+
+  // New users in period
+  const newUsers = (_allUsers || []).filter(u => new Date(u.created_at) >= new Date(since)).length;
+
+  renderKPIs(newUsers);
+  renderCashflowChart(since);
+  renderBreakdown();
+  renderRankChart();
+  renderTopUsers();
+  renderRecentTx();
+}
+
+/* ── KPIs ─────────────────────────────────────────────────────── */
+function renderKPIs(newUsers) {
+  const approved = _allTx.filter(t => t.status === 'approved');
+  const deps   = approved.filter(t => t.type === 'deposit');
+  const withs  = approved.filter(t => t.type === 'withdraw');
+  const totDep  = deps.reduce((s,t)=>s+Number(t.amount),0);
+  const totWith = withs.reduce((s,t)=>s+Number(t.amount),0);
+
+  document.getElementById('kpiDeposit').textContent    = RM(totDep);
+  document.getElementById('kpiDepositCnt').textContent = `${deps.length} transaksi`;
+  document.getElementById('kpiWithdraw').textContent   = RM(totWith);
+  document.getElementById('kpiWithdrawCnt').textContent= `${withs.length} transaksi`;
+  document.getElementById('kpiNet').textContent        = RM(totDep - totWith);
+  document.getElementById('kpiNet').style.color        = (totDep - totWith) >= 0 ? '#22C55E' : '#EF4444';
+  document.getElementById('kpiUsers').textContent      = newUsers;
+}
+
+/* ── CASHFLOW CHART ───────────────────────────────────────────── */
+function renderCashflowChart(since) {
+  // Build daily buckets
+  const days = _days <= 30 ? _days : 30;
+  const labels = [], depData = [], withData = [];
+
+  for (let i = days - 1; i >= 0; i--) {
+    const d   = new Date(Date.now() - i * 86400000);
+    const key = d.toLocaleDateString('ms-MY',{day:'2-digit',month:'short'});
+    labels.push(key);
+
+    const dayStr = d.toISOString().slice(0,10);
+    const dayTx  = _allTx.filter(t => t.created_at?.slice(0,10) === dayStr && t.status === 'approved');
+    depData.push( dayTx.filter(t=>t.type==='deposit').reduce((s,t)=>s+Number(t.amount),0) );
+    withData.push(dayTx.filter(t=>t.type==='withdraw').reduce((s,t)=>s+Number(t.amount),0));
+  }
+
+  if (cashChart) cashChart.destroy();
+  cashChart = new Chart(document.getElementById('cashflowChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label:'Deposit', data:depData,  backgroundColor:'rgba(34,197,94,.35)', borderColor:'#22C55E', borderWidth:1.5, borderRadius:6 },
+        { label:'Withdraw',data:withData, backgroundColor:'rgba(239,68,68,.25)', borderColor:'#EF4444', borderWidth:1.5, borderRadius:6 },
+      ],
+    },
+    options: {
+      responsive:true, maintainAspectRatio:true,
+      plugins:{ legend:{ labels:{ color:'rgba(226,232,255,.5)', font:{size:10} } } },
+      scales:{
+        x:{ grid:{ color:'rgba(255,255,255,.04)' }, ticks:{ color:'rgba(226,232,255,.4)', font:{size:9} } },
+        y:{ grid:{ color:'rgba(255,255,255,.04)' }, ticks:{ color:'rgba(226,232,255,.4)', font:{size:9}, callback:v=>'RM '+v } },
+      },
+    },
+  });
+}
+
+/* ── BREAKDOWN ────────────────────────────────────────────────── */
+function renderBreakdown() {
+  const ap = _allTx.filter(t=>t.status==='approved');
+  const sum = type => ap.filter(t=>t.type===type).reduce((s,t)=>s+Number(t.amount),0);
+  document.getElementById('sumDeposit').textContent  = RM(sum('deposit'));
+  document.getElementById('sumMining').textContent   = RM(sum('mining'));
+  document.getElementById('sumInvest').textContent   = RM(sum('invest'));
+  document.getElementById('sumReferral').textContent = RM(sum('referral'));
+  document.getElementById('sumBonus').textContent    = RM(sum('bonus'));
+  document.getElementById('sumWithdraw').textContent = RM(sum('withdraw'));
+  document.getElementById('txTotal').textContent     = `${ap.length} transaksi diluluskan`;
+}
+
+/* ── RANK CHART ───────────────────────────────────────────────── */
+function renderRankChart() {
+  const counts = {};
+  (_allUsers||[]).forEach(u => { counts[u.vip_rank||'member'] = (counts[u.vip_rank||'member']||0)+1; });
+  const ranks  = Object.keys(RANK_CFG);
+  const labels = ranks.map(r => RANK_CFG[r].label);
+  const data   = ranks.map(r => counts[r]||0);
+  const colors = ranks.map(r => RANK_CFG[r].color);
+  const total  = data.reduce((s,v)=>s+v,0);
+
+  if (rankChart) rankChart.destroy();
+  rankChart = new Chart(document.getElementById('rankChart'), {
+    type:'doughnut',
+    data:{ labels, datasets:[{ data, backgroundColor:colors.map(c=>c+'BB'), borderColor:colors, borderWidth:1.5 }] },
+    options:{
+      cutout:'65%', responsive:true, maintainAspectRatio:true,
+      plugins:{ legend:{ display:false } },
+    },
+  });
+
+  // Legend list
+  document.getElementById('rankList').innerHTML = ranks.map((r,i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:10px;height:10px;border-radius:3px;background:${colors[i]};flex-shrink:0"></div>
+        <span style="font-size:12px;color:var(--ice-2)">${labels[i]}</span>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700">${data[i]}</span>
+        <span style="font-size:10px;color:var(--ice-3)">${total>0?((data[i]/total)*100).toFixed(0):0}%</span>
+      </div>
+    </div>`).join('');
+}
+
+/* ── TOP USERS ────────────────────────────────────────────────── */
+function renderTopUsers() {
+  const sort = document.getElementById('topSort').value;
+  const sorted = [..._allUsers].sort((a,b)=>Number(b[sort]||0)-Number(a[sort]||0)).slice(0,10);
+  const RANK_ICONS = {member:'🆓',bronze:'🥉',silver:'🥈',gold:'🥇',diamond:'💎'};
+
+  document.getElementById('topUsersBody').innerHTML = sorted.map((u,i) => `
+    <tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-weight:700;color:${i<3?'#EAB308':'var(--ice-3)'}">
+        ${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}
+      </td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px">
+        ${(u.email||'—').replace(/(.{3}).+(@.+)/, '$1***$2')}
+      </td>
+      <td>
+        <span style="font-size:14px">${RANK_ICONS[u.vip_rank]||'🆓'}</span>
+      </td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#22C55E">${RM(u.total_deposit)}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#7C3AED">${RM(u.total_earned)}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#A78BFA">${fmt(u.mvt_balance)} MVT</td>
+    </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;padding:16px;color:var(--ice-3)">Tiada data</td></tr>';
+}
+
+/* ── RECENT TX ────────────────────────────────────────────────── */
+function renderRecentTx() {
+  const recent = _allTx.slice(0, 50);
+  const TYPE_ICONS  = { deposit:'💰', withdraw:'💸', mining:'⛏️', invest:'📈', referral:'👥', bonus:'🎁', profit:'📊' };
+  const STATUS_STYLE = { approved:'color:#22C55E', pending:'color:#EAB308', rejected:'color:#EF4444', processing:'color:#3B82F6' };
+
+  document.getElementById('recentTxBody').innerHTML = recent.map(t => `
+    <tr>
+      <td style="font-size:10px;color:var(--ice-3)">${new Date(t.created_at).toLocaleDateString('ms-MY',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:10px">${(t.user_id||'').substring(0,8)}...</td>
+      <td>${TYPE_ICONS[t.type]||'•'} <span style="font-size:10px;text-transform:capitalize">${t.type}</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700">${RM(t.amount)}</td>
+      <td><span style="font-size:10px;font-weight:700;${STATUS_STYLE[t.status]||''}">${t.status}</span></td>
+    </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--ice-3)">Tiada transaksi</td></tr>';
+}
+
+/* ── EXPORTS ─────────────────────────────────────────────────── */
+function exportTransactions() {
+  const rows = [['Tarikh','UserID','Jenis','Jumlah','Status']];
+  _allTx.forEach(t => rows.push([
+    new Date(t.created_at).toLocaleString('ms-MY'),
+    t.user_id, t.type, t.amount, t.status
+  ]));
+  downloadCSV(rows, `transactions_${_days}d_${Date.now()}.csv`);
+}
+
+function exportAll() {
+  const rows = [['Email','VIP Rank','Total Deposit','Total Profit','MVT Balance','Joined']];
+  _allUsers.forEach(u => rows.push([
+    u.email, u.vip_rank, u.total_deposit, u.total_earned, u.mvt_balance,
+    new Date(u.created_at).toLocaleDateString('ms-MY')
+  ]));
+  downloadCSV(rows, `users_report_${Date.now()}.csv`);
+}
+
+function downloadCSV(rows, filename) {
+  const csv = rows.map(r => r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a    = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: filename });
+  a.click(); URL.revokeObjectURL(a.href);
+  UI.toast('📥 CSV dimuat turun!', 'success');
+}
+
+/* ── INIT ─────────────────────────────────────────────────────── */
+async function init() {
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) { location.href = '../login.html'; return; }
+  const { data: profile } = await db.from('profiles').select('is_admin').eq('id', session.user.id).single();
+  if (!profile?.is_admin) { location.href = '../dashboard.html'; return; }
+
+  await loadAll();
+
+  // Auto-refresh every 60s
+  setInterval(loadAll, 60000);
+}
+
+window.addEventListener('load', init);
+</script>
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js", { scope: "/" })
+        .then(r => console.log("[SW] Registered", r.scope))
+        .catch(e => console.error("[SW] Registration failed", e));
+    }
+  </script>
+</body>
+</html>

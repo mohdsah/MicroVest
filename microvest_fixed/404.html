@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#020206">
+<title>MicroVest — Halaman Tidak Dijumpai</title>
+<link rel="stylesheet" href="css/v10.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<div class="amb-v"></div>
+<div class="err-wrap">
+  <div class="err-code glitch" data-text="404">404</div>
+  <div class="err-title">Halaman Tidak Dijumpai</div>
+  <div class="err-sub">Halaman yang anda cari tidak wujud atau telah dipindahkan.</div>
+  <a href="dashboard.html" class="btn btn-v" style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px">
+    <i class="fas fa-house"></i> Kembali ke Dashboard
+  </a>
+  <div style="margin-top:20px">
+    <a href="support.html" style="font-size:12px;color:rgba(226,232,255,.4);text-decoration:none">Perlukan bantuan? →</a>
+  </div>
+</div>
+<script src="js/config.js"></script>
+<script src="js/security.js"></script>
+<script>
+// Auto-redirect if logged in
+db.auth.getSession().then(({ data:{ session }}) => {
+  if (!session) location.href = 'login.html';
+});
+</script>
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js")
+        .then(r => console.log("[SW] Registered", r.scope))
+        .catch(e => console.error("[SW] Registration failed", e));
+    }
+  </script>
+</body>
+</html>

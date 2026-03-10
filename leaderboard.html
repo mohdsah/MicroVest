@@ -6,52 +6,9 @@
 <meta name="theme-color" content="#020206">
 <title>MicroVest v8 | Papan Lider</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="css/v7.css">
+<link rel="stylesheet" href="css/v10.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-/* Top 3 podium */
-.podium { display:flex; align-items:flex-end; justify-content:center; gap:12px; padding:28px var(--pad) 20px; }
-.pod-col { display:flex; flex-direction:column; align-items:center; }
-.pod-av  {
-  border-radius:50%; display:flex; align-items:center; justify-content:center;
-  font-family:'Bebas Neue',sans-serif; color:#fff; font-size:20px;
-  position:relative; margin-bottom:8px; flex-shrink:0;
-}
-.pod-crown { position:absolute; top:-18px; left:50%; transform:translateX(-50%); font-size:20px; }
-.pod-name  { font-size:10px; font-weight:700; text-align:center; margin-bottom:4px; max-width:70px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.pod-val   { font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; }
-.pod-base  { border-radius:14px 14px 0 0; width:100%; display:flex; align-items:center; justify-content:center; padding:10px 0; }
-.pod-rank  { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:2px; }
 
-/* Rank list */
-.rank-tabs { display:flex; gap:6px; padding:0 var(--pad); margin-bottom:18px;
-  position:sticky; top:72px; z-index:100;
-  background:linear-gradient(rgba(2,2,6,.97) 80%,transparent); padding-bottom:12px; }
-.rtab { flex:1; padding:11px; border-radius:14px; border:1px solid var(--border); background:transparent; color:var(--ice-3); font-family:'Instrument Sans',sans-serif; font-weight:700; font-size:12px; cursor:pointer; transition:.2s; }
-.rtab.on { background:var(--v-dim); border-color:var(--v-border); color:var(--v-pale); }
-
-/* List row */
-.lb-row {
-  display:flex; align-items:center; gap:12px;
-  padding:14px var(--pad); border-bottom:1px solid rgba(255,255,255,.03);
-  position:relative; transition:background .15s;
-}
-.lb-row.me { background:rgba(124,58,237,.06); border:1px solid rgba(124,58,237,.12); border-radius:var(--r-l); margin:4px var(--pad); padding:14px; }
-.lb-num  { width:28px; text-align:center; font-family:'Bebas Neue',sans-serif; font-size:18px; flex-shrink:0; }
-.lb-av   { width:44px; height:44px; border-radius:15px; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:20px; color:#fff; flex-shrink:0; }
-.lb-info { flex:1; }
-.lb-name { font-size:13px; font-weight:700; margin-bottom:3px; }
-.lb-rank { font-size:10px; color:var(--ice-3); }
-.lb-val  { font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700; text-align:right; }
-.lb-delta{ font-size:9px; text-align:right; margin-top:2px; font-weight:700; }
-
-/* My position strip */
-.my-pos {
-  margin:12px var(--pad); background:var(--v-dim); border:1px solid var(--v-border);
-  border-radius:var(--r-l); padding:14px 18px;
-  display:flex; align-items:center; gap:12px;
-}
-</style>
 </head>
 <body>
 <div class="amb-v"></div>

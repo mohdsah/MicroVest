@@ -6,21 +6,9 @@
 <meta name="theme-color" content="#020206">
 <title>Admin | Withdraw</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="../css/v7.css">
+<link rel="stylesheet" href="../css/v10.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-.wth-card { background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:20px;margin-bottom:12px; }
-.wth-card.pending  { border-left:3px solid var(--gold); }
-.wth-card.approved { border-left:3px solid var(--profit);opacity:.7; }
-.wth-card.rejected { border-left:3px solid var(--loss);opacity:.6; }
-.filter-row { display:flex;gap:8px;overflow-x:auto;padding:0 var(--pad) 16px; }
-.filter-btn { padding:8px 16px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--ice-3);font-size:11px;font-weight:700;cursor:pointer;font-family:'Instrument Sans',sans-serif;white-space:nowrap;flex-shrink:0;transition:.2s; }
-.filter-btn.on { background:var(--v-dim);border-color:var(--v-border);color:var(--v-pale); }
-.bank-box { background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--r-m);padding:14px;margin:12px 0; }
-.bb-row  { display:flex;justify-content:space-between;padding:4px 0; }
-.bb-l    { font-size:11px;color:var(--ice-3); }
-.bb-v    { font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700; }
-</style>
+
 </head>
 <body>
 <div class="amb-v"></div>
@@ -162,5 +150,13 @@ async function init() {
 }
 window.addEventListener('load',init);
 </script>
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js", { scope: "/" })
+        .then(r => console.log("[SW] Registered", r.scope))
+        .catch(e => console.error("[SW] Registration failed", e));
+    }
+  </script>
 </body>
 </html>

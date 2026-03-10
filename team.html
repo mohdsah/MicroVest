@@ -6,72 +6,9 @@
 <meta name="theme-color" content="#020206">
 <title>MicroVest v8 | Pasukan</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="css/v7.css">
+<link rel="stylesheet" href="css/v10.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-/* Referral hero */
-.ref-hero {
-  margin: 0 var(--pad) 22px;
-  background: linear-gradient(135deg,#040014,#080020);
-  border: 1px solid rgba(124,58,237,.35); border-radius: 28px;
-  padding: 24px; position: relative; overflow: hidden;
-}
-.ref-hero::before { content:''; position:absolute; top:-80px; right:-80px;
-  width:250px; height:250px; border-radius:50%;
-  background:radial-gradient(rgba(124,58,237,.12),transparent 65%); }
-.rh-code { 
-  display:flex; align-items:center; gap:10px;
-  background:rgba(124,58,237,.1); border:1px solid var(--v-border);
-  border-radius: var(--r-l); padding: 14px 18px; margin-bottom: 16px;
-}
-.rh-code-val { font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:700; color:#C4B5FD; flex:1; letter-spacing:3px; }
-.copy-btn { background:var(--v); border:none; color:#fff; padding:8px 16px; border-radius:10px; font-size:11px; font-weight:800; cursor:pointer; transition:.2s; }
-.copy-btn:active { transform:scale(.93); }
-.rh-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
-.rs-box   { background:rgba(0,0,0,.4); border-radius:12px; padding:12px; text-align:center; }
-.rs-v     { font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:700; color:var(--v-pale); display:block; margin-bottom:3px; }
-.rs-l     { font-size:8px; letter-spacing:2px; text-transform:uppercase; opacity:.45; }
 
-/* Share buttons */
-.share-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.share-btn { padding:12px; border-radius:14px; border:none; font-size:12px; font-weight:800; cursor:pointer; font-family:'Instrument Sans',sans-serif; transition:.2s var(--spring); display:flex; align-items:center; justify-content:center; gap:8px; }
-.share-btn:active { transform:scale(.93); }
-
-/* Level indicators */
-.level-tabs { display:flex; gap:8px; overflow-x:auto; padding:0 var(--pad); margin-bottom:18px; }
-.lv-tab { padding:9px 18px; border-radius:999px; border:1px solid var(--border); background:transparent; color:var(--ice-3); font-size:11px; font-weight:800; cursor:pointer; font-family:'Instrument Sans',sans-serif; white-space:nowrap; transition:.2s; }
-.lv-tab.on { background:var(--v-dim); border-color:var(--v-border); color:var(--v-pale); }
-
-/* Commission level card */
-.lv-banner {
-  display:flex; align-items:center; gap:12px;
-  margin: 0 var(--pad) 16px;
-  background:rgba(124,58,237,.07); border:1px solid var(--v-border);
-  border-radius:var(--r-l); padding:14px 18px;
-}
-.lv-pct { font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:2px; color:var(--v-pale); }
-
-/* Member row */
-.member-row {
-  display:flex; align-items:center; gap:12px;
-  padding: 14px 0; border-bottom: 1px solid var(--border);
-}
-.mr-av    { width:42px; height:42px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:20px; color:#fff; flex-shrink:0; }
-.mr-info  { flex:1; }
-.mr-email { font-size:12px; font-weight:700; margin-bottom:2px; }
-.mr-meta  { font-size:10px; color:var(--ice-3); }
-.mr-right { text-align:right; }
-.mr-dep   { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; }
-.mr-earn  { font-size:10px; color:var(--profit); margin-top:2px; }
-
-/* Commission history */
-.comm-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
-.cr-lv    { width:36px; height:36px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; flex-shrink:0; }
-.cr-info  { flex:1; }
-.cr-from  { font-size:12px; font-weight:700; margin-bottom:2px; }
-.cr-meta  { font-size:10px; color:var(--ice-3); }
-.cr-amt   { font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700; color:var(--profit); }
-</style>
 </head>
 <body>
 <div class="amb-v"></div>

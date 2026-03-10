@@ -6,30 +6,9 @@
 <meta name="theme-color" content="#020206">
 <title>Admin | Deposit</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="../css/v7.css">
+<link rel="stylesheet" href="../css/v10.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-.dep-card {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:var(--r-xl); padding:20px; margin-bottom:12px;
-  position:relative; overflow:hidden;
-  transition:border-color .2s;
-}
-.dep-card.pending  { border-left:3px solid var(--gold); }
-.dep-card.approved { border-left:3px solid var(--profit); opacity:.7; }
-.dep-card.rejected { border-left:3px solid var(--loss);  opacity:.6; }
-.dep-top { display:flex;align-items:center;justify-content:space-between;margin-bottom:14px; }
-.dep-email { font-size:13px;font-weight:700;margin-bottom:3px; }
-.dep-meta  { font-size:10px;color:var(--ice-3); }
-.dep-amt   { font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--profit); }
-.dep-actions { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px; }
-.proof-thumb { width:100%;border-radius:var(--r-m);margin:10px 0;cursor:pointer;max-height:140px;object-fit:cover;border:1px solid var(--border-hi); }
-.filter-row { display:flex;gap:8px;overflow-x:auto;padding:0 var(--pad) 16px; }
-.filter-btn { padding:8px 16px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--ice-3);font-size:11px;font-weight:700;cursor:pointer;font-family:'Instrument Sans',sans-serif;white-space:nowrap;flex-shrink:0;transition:.2s; }
-.filter-btn.on { background:var(--v-dim);border-color:var(--v-border);color:var(--v-pale); }
-.proof-modal { position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px; }
-.proof-modal img { max-width:100%;max-height:90vh;border-radius:var(--r-m); }
-</style>
+
 </head>
 <body>
 <div class="amb-v"></div>
@@ -207,5 +186,13 @@ async function init() {
 }
 window.addEventListener('load',init);
 </script>
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js", { scope: "/" })
+        .then(r => console.log("[SW] Registered", r.scope))
+        .catch(e => console.error("[SW] Registration failed", e));
+    }
+  </script>
 </body>
 </html>

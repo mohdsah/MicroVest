@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="../favicon.ico">
+  <link rel="apple-touch-icon" href="../icons/icon-192.png">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#020206">
+<title>MicroVest v8 | Admin</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../css/v10.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+</head>
+<body>
+<div class="amb-v"></div><div class="amb-o"></div>
+<div class="shell">
+
+  <!-- ADMIN TOPBAR -->
+  <div class="adm-bar anim a1">
+    <div class="adm-logo">
+      <div class="logo-icon" style="width:30px;height:30px;font-size:14px">⚡</div>
+      <div>
+        <div class="logo-text" style="font-size:16px">MICROVEST</div>
+        <div class="adm-badge">ADMIN v6</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <div id="liveIndicator" style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--profit);font-weight:700">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--profit);animation:blink 1.6s infinite"></div>LIVE
+      </div>
+      <a href="../dashboard.html" class="icon-btn" style="font-size:12px" title="Exit Admin"><i class="fas fa-door-open"></i></a>
+    </div>
+  </div>
+
+  <!-- PENDING ALERTS -->
+  <div id="alertBar"></div>
+
+  <!-- KPI CARDS -->
+  <div class="kpi-row anim a2">
+    <div class="kpi-box k-users">
+      <span class="kpi-ico">👥</span>
+      <span class="kpi-v v-pale" id="kTotal">—</span>
+      <span class="kpi-l">Total Users</span>
+      <div class="kpi-delta v-pale" id="kNewToday">+0 hari ini</div>
+    </div>
+    <div class="kpi-box k-dep">
+      <span class="kpi-ico">💰</span>
+      <span class="kpi-v profit" id="kDeposit">—</span>
+      <span class="kpi-l">Total Deposit</span>
+      <div class="kpi-delta profit" id="kDepToday">+RM 0 hari ini</div>
+    </div>
+    <div class="kpi-box k-with">
+      <span class="kpi-ico">💸</span>
+      <span class="kpi-v loss" id="kWithdraw">—</span>
+      <span class="kpi-l">Total Withdraw</span>
+      <div class="kpi-delta loss" id="kWithToday">+RM 0 hari ini</div>
+    </div>
+    <div class="kpi-box k-mine">
+      <span class="kpi-ico">⛏️</span>
+      <span class="kpi-v" style="color:var(--o-bright)" id="kMining">—</span>
+      <span class="kpi-l">Mining Paid</span>
+      <div class="kpi-delta" style="color:var(--o-bright)" id="kActiveMine">0 aktif</div>
+    </div>
+  </div>
+
+  <!-- SUPPORT TICKETS ALERT -->
+  <div id="ticketAlert" style="display:none;margin:0 var(--pad) 12px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:var(--r-xl);padding:14px 18px;cursor:pointer" onclick="location.href='../support.html'">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:22px">🎫</span>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:800;color:var(--v-pale)">Tiket Sokongan Terbuka</div>
+        <div style="font-size:11px;color:var(--ice-3)" id="ticketAlertMsg">Memuatkan...</div>
+      </div>
+      <i class="fas fa-chevron-right" style="color:var(--ice-3)"></i>
+    </div>
+  </div>
+
+  <!-- ADMIN NAVIGATION -->
+  <div class="adm-nav anim a2">
+    <a href="robots.html" style="color:#FB923C;font-size:11px;font-weight:800;text-decoration:none;display:flex;align-items:center;gap:5px;padding:7px 12px;border:1px solid rgba(251,146,60,.2);border-radius:9px;background:rgba(251,146,60,.06)">🤖 Robot</a>
+    <a href="tickets.html" class="adm-navitem" style="background:rgba(124,58,237,.08);border-color:rgba(124,58,237,.2)"><i class="fas fa-ticket-alt" style="color:#A78BFA"></i><span style="color:#C4B5FD">Tiket</span></a>
+    <a href="reports.html" class="adm-navitem" style="background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.25)"><i class="fas fa-chart-bar" style="color:#A78BFA"></i><span style="color:#C4B5FD">Laporan</span></a>
+    <a href="deposits.html"  class="adm-navitem grn" style="position:relative"><i class="fas fa-arrow-down"></i><span>Deposit</span><span id="depBadge" class="badge-dot" style="display:none">0</span></a>
+    <a href="withdraws.html" class="adm-navitem red"  style="position:relative"><i class="fas fa-arrow-up"></i><span>Withdraw</span><span id="wthBadge" class="badge-dot" style="display:none">0</span></a>
+    <a href="users.html"     class="adm-navitem blu"><i class="fas fa-users"></i><span>Users</span></a>
+    <a href="settings.html"  class="adm-navitem yel"><i class="fas fa-gear"></i><span>Setting</span></a>
+    <a href="../analytics.html" class="adm-navitem vio"><i class="fas fa-chart-bar"></i><span>Chart</span></a>
+  </div>
+
+  <!-- REVENUE CHART -->
+  <div class="chart-card anim a3" style="margin:0 var(--pad) 20px">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Aliran Dana 7 Hari</div>
+        <div style="font-size:10px;color:var(--ice-3);margin-top:2px">Deposit vs Withdraw</div>
+      </div>
+      <div style="display:flex;gap:10px;font-size:10px;font-weight:700">
+        <span style="color:var(--profit)">▬ Deposit</span>
+        <span style="color:var(--loss)">▬ Withdraw</span>
+      </div>
+    </div>
+    <canvas id="flowChart" height="130"></canvas>
+  </div>
+
+  <!-- PLATFORM HEALTH -->
+  <div style="padding:0 var(--pad);margin-bottom:20px" class="anim a3">
+    <div class="sec-t" style="margin-bottom:14px;font-family:'DM Serif Display',serif;font-size:17px">Kesihatan Platform</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <div class="stat-box"><span class="stat-v profit" id="phProfit">—%</span><span class="stat-l">Profit Ratio</span></div>
+      <div class="stat-box"><span class="stat-v gold"   id="phMVT">—</span><span class="stat-l">MVT Beredar</span></div>
+      <div class="stat-box"><span class="stat-v v-pale" id="phOnline">—</span><span class="stat-l">Aktif Miner</span></div>
+    </div>
+  </div>
+
+  <!-- RANK DISTRIBUTION -->
+  <div style="padding:0 var(--pad);margin-bottom:20px" class="anim a4">
+    <div style="font-family:'DM Serif Display',serif;font-size:17px;margin-bottom:14px">Agihan Rank</div>
+    <div id="rankDist"></div>
+  </div>
+
+  <!-- RECENT TRANSACTIONS -->
+  <div style="padding:0 var(--pad);margin-bottom:30px" class="anim a4">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-family:'DM Serif Display',serif;font-size:17px">Transaksi Terkini</div>
+      <a href="deposits.html" style="font-size:11px;color:var(--v-pale);font-weight:700;text-decoration:none">Lihat Semua →</a>
+    </div>
+    <div id="recentTx">
+      <div class="skel skel-row" style="border-radius:16px;margin-bottom:8px"></div>
+      <div class="skel skel-row" style="border-radius:16px;margin-bottom:8px"></div>
+      <div class="skel skel-row" style="border-radius:16px"></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/security.js"></script>
+<script src="../js/ui.js"></script>
+<script src="../js/realtime.js"></script>
+<script>
+let _user;
+
+/* ── AUTH GUARD ──────────────────────────────────────────── */
+async function guardAdmin() {
+  const { data:{session} } = await db.auth.getSession();
+  if (!session) { location.href='../login.html'; return null; }
+  const { data:p } = await db.from('profiles').select('is_admin').eq('id',session.user.id).single();
+  if (!p?.is_admin) { location.href='../dashboard.html'; return null; }
+  return session.user;
+}
+
+/* ── KPI CARDS ───────────────────────────────────────────── */
+async function loadKPIs() {
+  const today = new Date().toISOString().split('T')[0];
+  const [uc, utod, txAll, txTod, machines, robots] = await Promise.all([
+    db.from('profiles').select('id',{count:'exact',head:true}).eq('is_admin',false),
+    db.from('profiles').select('id',{count:'exact',head:true}).gte('created_at',today),
+    db.from('transactions').select('type,amount,status'),
+    db.from('transactions').select('type,amount,status').gte('created_at',today),
+    db.from('user_machines').select('id',{count:'exact',head:true}).eq('status','active'),
+    db.from('user_robots').select('id',{count:'exact',head:true}).eq('status','active'),
+  ]);
+  const txA = txAll.data||[], txT = txTod.data||[];
+  const sum = (arr,type,status='approved') => arr.filter(t=>t.type===type&&t.status===status).reduce((s,t)=>s+(t.amount||0),0);
+
+  document.getElementById('kTotal').textContent   = UI.big(uc.count||0);
+  document.getElementById('kNewToday').textContent = `+${utod.count||0} hari ini`;
+  document.getElementById('kDeposit').textContent  = 'RM '+UI.k(sum(txA,'deposit'));
+  document.getElementById('kDepToday').textContent = '+RM '+sum(txT,'deposit').toFixed(0)+' hari ini';
+  document.getElementById('kWithdraw').textContent = 'RM '+UI.k(sum(txA,'withdraw'));
+  document.getElementById('kWithToday').textContent = '+RM '+sum(txT,'withdraw').toFixed(0)+' hari ini';
+  document.getElementById('kMining').textContent   = 'RM '+UI.k(sum(txA,'mining')+sum(txA,'profit'));
+  document.getElementById('kActiveMine').textContent = `${machines.count||0} mesin · ${robots.count||0} bot aktif`;
+
+  // Pending alerts
+  const pendDep = txA.filter(t=>t.type==='deposit'&&t.status==='pending').length;
+  const pendWth = txA.filter(t=>t.type==='withdraw'&&t.status==='pending').length;
+  if (pendDep||pendWth) {
+    document.getElementById('alertBar').innerHTML = `
+      <a href="${pendDep?'deposits.html':'withdraws.html'}" style="text-decoration:none">
+        <div class="alert-card anim a1">
+          <div style="font-size:28px">⚠️</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:800;color:#FDE68A;margin-bottom:2px">Tindakan Diperlukan!</div>
+            <div style="font-size:11px;color:var(--ice-2)">${pendDep?pendDep+' deposit':''}${pendDep&&pendWth?' · ':''}${pendWth?pendWth+' withdraw':''} menunggu kelulusan</div>
+          </div>
+          <i class="fas fa-chevron-right" style="color:rgba(234,179,8,0.5)"></i>
+        </div>
+      </a>`;
+    if (pendDep) { const b=document.getElementById('depBadge'); b.textContent=pendDep; b.style.display=''; }
+    if (pendWth) { const b=document.getElementById('wthBadge'); b.textContent=pendWth; b.style.display=''; }
+  }
+
+  // Health metrics
+  const totalDep = sum(txA,'deposit');
+  const totalWith = sum(txA,'withdraw');
+  const profitRatio = totalDep > 0 ? ((totalDep-totalWith)/totalDep*100).toFixed(1) : 0;
+  document.getElementById('phProfit').textContent = profitRatio+'%';
+
+  const { data:mvts } = await db.from('profiles').select('mvt_balance');
+  const totalMVT = (mvts||[]).reduce((s,p)=>s+(p.mvt_balance||0),0);
+  document.getElementById('phMVT').textContent = UI.k(totalMVT)+' MVT';
+  document.getElementById('phOnline').textContent = machines.count||0;
+}
+
+/* ── FLOW CHART ──────────────────────────────────────────── */
+async function buildFlowChart() {
+  const since = new Date(Date.now()-7*86400000).toISOString();
+  const { data } = await db.from('transactions').select('type,amount,created_at,status')
+    .gte('created_at',since).eq('status','approved').in('type',['deposit','withdraw']);
+
+  const deps  = Array(7).fill(0);
+  const withs = Array(7).fill(0);
+  const labels = Array.from({length:7},(_,i)=>{
+    const d = new Date(Date.now()-(6-i)*86400000);
+    return d.toLocaleDateString('ms-MY',{weekday:'short'});
+  });
+  (data||[]).forEach(t=>{
+    const di = Math.floor((Date.now()-new Date(t.created_at))/86400000);
+    if (di<7) {
+      if (t.type==='deposit')  deps[6-di]  += t.amount||0;
+      if (t.type==='withdraw') withs[6-di] += t.amount||0;
+    }
+  });
+
+  const ctx = document.getElementById('flowChart').getContext('2d');
+  new Chart(ctx,{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'Deposit', data:deps,  backgroundColor:'rgba(34,197,94,0.6)',  borderRadius:5},
+      {label:'Withdraw',data:withs, backgroundColor:'rgba(239,68,68,0.55)', borderRadius:5},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,0.03)'},ticks:{color:'#3D4466',font:{size:10}}},
+        y:{grid:{color:'rgba(255,255,255,0.03)'},ticks:{color:'#3D4466',font:{size:10},callback:v=>'RM'+UI.k(v)}},
+        stacked:false,
+      },
+    },
+  });
+}
+
+/* ── RANK DISTRIBUTION ───────────────────────────────────── */
+async function loadRankDist() {
+  const { data } = await db.from('profiles').select('vip_rank').eq('is_admin',false);
+  const counts = {member:0,bronze:0,silver:0,gold:0,diamond:0};
+  (data||[]).forEach(p => { if(p.vip_rank) counts[p.vip_rank]=(counts[p.vip_rank]||0)+1; });
+  const total = Object.values(counts).reduce((s,v)=>s+v,0)||1;
+  const colors = {member:'#475569',bronze:'#CD7F32',silver:'#94A3B8',gold:'#EAB308',diamond:'#7C3AED'};
+  document.getElementById('rankDist').innerHTML = MV.RANKS.map(r=>{
+    const n = counts[r.id]||0;
+    const pct = (n/total*100).toFixed(1);
+    return `
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 0">
+      <div style="font-size:18px;width:26px;text-align:center">${r.icon}</div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;margin-bottom:5px">
+          <span>${r.name}</span><span style="color:${colors[r.id]}">${n} orang (${pct}%)</span>
+        </div>
+        <div style="height:5px;background:rgba(255,255,255,0.05);border-radius:999px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${colors[r.id]};border-radius:999px;transition:width 1.2s cubic-bezier(.22,1,.36,1)"></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── RECENT TX ───────────────────────────────────────────── */
+async function loadRecentTx() {
+  const { data } = await db.from('transactions').select('*').order('created_at',{ascending:false}).limit(8);
+  const el = document.getElementById('recentTx');
+  const icons = {deposit:'💰',withdraw:'💸',mining:'⛏️',profit:'📈',referral:'👥'};
+  const ibg   = {deposit:'rgba(34,197,94,0.1)',withdraw:'rgba(239,68,68,0.1)',mining:'rgba(249,115,22,0.1)',profit:'rgba(124,58,237,0.1)',referral:'rgba(59,130,246,0.1)'};
+  const stC   = {approved:'var(--profit)',pending:'var(--gold)',rejected:'var(--loss)'};
+  const stBg  = {approved:'rgba(34,197,94,0.1)',pending:'rgba(234,179,8,0.1)',rejected:'rgba(239,68,68,0.1)'};
+  if (!data?.length) { el.innerHTML='<div style="text-align:center;padding:28px;color:var(--ice-3)">Tiada transaksi</div>'; return; }
+  el.innerHTML = data.map(t=>`
+    <div class="rec-tx">
+      <div class="rtx-ico" style="background:${ibg[t.type]||'rgba(255,255,255,0.04)'}">${icons[t.type]||'💱'}</div>
+      <div class="rtx-info">
+        <div class="rtx-user">${t.user_id.slice(0,8)}… · ${t.type}</div>
+        <div class="rtx-meta">${UI.ago(t.created_at)}</div>
+      </div>
+      <div class="rtx-right">
+        <div class="rtx-amt ${t.type==='withdraw'?'loss':'profit'}">${t.type==='withdraw'?'-':'+'}${UI.rm(t.amount)}</div>
+        <span class="rtx-st" style="background:${stBg[t.status]||''};color:${stC[t.status]||'var(--ice-3)'}">
+          ${t.status==='approved'?'✓':t.status==='pending'?'⏳':'✕'} ${t.status}
+        </span>
+      </div>
+    </div>`).join('');
+}
+
+/* ── REALTIME: NEW TX LIVE ───────────────────────────────── */
+function listenLive() {
+  db.channel('admin-feed')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'transactions'},p=>{
+      const t=p.new;
+      if (t.status==='pending') {
+        const dot=document.getElementById('liveIndicator');
+        dot.style.color='#F97316';
+        setTimeout(()=>dot.style.color='var(--profit)',600);
+        loadKPIs();
+      }
+    })
+    .subscribe();
+}
+
+async function init() {
+  UI.loading();
+  _user = await guardAdmin();
+  if (!_user) return;
+  await Promise.all([loadKPIs(), buildFlowChart(), loadRankDist(), loadRecentTx()]);
+  listenLive();
+  UI.unload();
+}
+window.addEventListener('load', init);
+</script>
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js", { scope: "/" })
+        .then(r => console.log("[SW] Registered", r.scope))
+        .catch(e => console.error("[SW] Registration failed", e));
+    }
+  </script>
+</body>
+</html>

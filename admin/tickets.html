@@ -6,25 +6,9 @@
 <meta name="theme-color" content="#020206">
 <title>MicroVest Admin — Tiket Sokongan</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="../css/v7.css">
+<link rel="stylesheet" href="../css/v10.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-body { max-width:900px; margin:0 auto; }
-.adm-hd { display:flex; align-items:center; gap:14px; padding:22px var(--pad) 16px; border-bottom:1px solid var(--border); }
-.adm-title { font-family:'DM Serif Display',serif; font-size:22px; }
-.filter-row { display:flex; gap:8px; padding:14px var(--pad); border-bottom:1px solid var(--border); overflow-x:auto; }
-.fp { padding:8px 16px; border-radius:999px; border:1px solid var(--border); background:transparent; color:var(--ice-3); font-size:11px; font-weight:800; cursor:pointer; font-family:'Instrument Sans',sans-serif; white-space:nowrap; transition:.2s; }
-.fp.on { background:var(--v-dim); border-color:var(--v-border); color:var(--v-pale); }
-.ticket-row { padding:16px var(--pad); border-bottom:1px solid rgba(255,255,255,.04); cursor:pointer; transition:.15s; }
-.ticket-row:hover { background:rgba(255,255,255,.02); }
-.tr-head { display:flex; align-items:center; gap:12px; margin-bottom:6px; }
-.tr-badge { padding:3px 8px; border-radius:6px; font-size:9px; font-weight:800; }
-.st-open    { background:rgba(34,197,94,.15);  color:#22C55E; }
-.st-pending { background:rgba(234,179,8,.12);  color:#EAB308; }
-.st-closed  { background:rgba(100,116,139,.15);color:#64748B; }
-.reply-box { padding:0 var(--pad) 16px; display:none; }
-.reply-box.show { display:block; }
-</style>
+
 </head>
 <body>
 <div class="amb-v"></div>
@@ -157,5 +141,13 @@ async function init() {
 }
 window.addEventListener('load', init);
 </script>
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js", { scope: "/" })
+        .then(r => console.log("[SW] Registered", r.scope))
+        .catch(e => console.error("[SW] Registration failed", e));
+    }
+  </script>
 </body>
 </html>

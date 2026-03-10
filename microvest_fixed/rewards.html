@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#020206">
+<title>MicroVest v8 | Ganjaran</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="css/v10.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="amb-v"></div><div class="amb-o"></div>
+<div class="shell">
+
+  <!-- HEADER -->
+  <div class="pg-hd anim a1">
+    <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+    <div><div class="pg-title">Ganjaran & Spin</div><div class="pg-sub">Spin Harian · Check-in Streak</div></div>
+    <div class="chip chip-g anim a1" id="hdrSpins" style="margin-left:auto">1 Spin</div>
+  </div>
+
+  <!-- SPIN TAB BAR -->
+  <div style="display:flex;gap:6px;padding:0 var(--pad);margin-bottom:22px" class="anim a2">
+    <button class="tb-btn on" id="tb-spin"   onclick="switchRTab('spin')">🎰 Spin Roda</button>
+    <button class="tb-btn"   id="tb-checkin" onclick="switchRTab('checkin')">📅 Check-in</button>
+    <button class="tb-btn"   id="tb-history" onclick="switchRTab('history')">📋 Rekod</button>
+  </div>
+  
+
+  <!-- ── SPIN VIEW ─────────────────────────────────────── -->
+  <div id="view-spin">
+    <div class="wheel-wrap anim a3">
+      <div class="wheel-outer">
+        <div class="wheel-pointer">⬇️</div>
+        <canvas id="wheelCanvas" class="wheel-canvas" width="280" height="280"></canvas>
+      </div>
+
+      <div style="text-align:center;margin-bottom:16px">
+        <div style="font-size:12px;color:var(--ice-3);margin-bottom:6px">Spin tersedia hari ini</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--v-pale)" id="spinsLeft">—</div>
+      </div>
+
+      <div id="spinCountdownBox" style="display:none;margin-bottom:12px;text-align:center">
+      <div style="font-size:11px;color:var(--ice-3);margin-bottom:4px">Spin seterusnya dalam</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--v-pale)" id="nextSpinCountdown">00:00:00</div>
+    </div>
+    <button class="spin-btn" id="spinBtn" onclick="doSpin()">🎰 Putar Roda!</button>
+
+      <div style="margin-top:14px;font-size:11px;color:var(--ice-3);text-align:center">
+        Spin percuma 1x sehari · Bonus spin daripada misi
+      </div>
+    </div>
+
+    <!-- Prizes list -->
+    <div style="padding:0 var(--pad);margin-bottom:20px">
+      <div style="font-family:'DM Serif Display',serif;font-size:17px;margin-bottom:12px">Senarai Hadiah</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="prizeGrid"></div>
+    </div>
+  </div>
+
+  <!-- ── CHECK-IN VIEW ─────────────────────────────────── -->
+  <div id="view-checkin" style="display:none">
+    <div class="checkin-wrap anim a3">
+      <div class="ci-header">
+        <div style="font-family:'DM Serif Display',serif;font-size:17px">Check-in Harian</div>
+        <div class="ci-streak">
+          <span style="font-size:18px">🔥</span>
+          <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--gold)" id="streakNum">0</div>
+            <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;opacity:.5">Hari Berturut</div>
+          </div>
+        </div>
+      </div>
+      <div class="ci-grid" id="ciGrid"></div>
+
+      <button class="btn btn-v btn-full btn-lg" style="margin-top:18px" id="ciBtn" onclick="doCheckIn()">
+        ✅ Check-in Hari Ini
+      </button>
+      <div style="font-size:11px;color:var(--ice-3);text-align:center;margin-top:10px" id="ciMsg">—</div>
+    </div>
+
+    <!-- Streak milestones -->
+    <div style="padding:0 var(--pad)">
+      <div style="font-family:'DM Serif Display',serif;font-size:17px;margin-bottom:12px">Ganjaran Streak</div>
+      <div style="display:grid;gap:8px">
+        ${[
+          [7,'🎁','RM 5 + 50 XP','7 Hari'],
+          [14,'💎','RM 12 + 100 XP + 20 MVT','14 Hari'],
+          [30,'👑','RM 30 + 300 XP + 50 MVT','30 Hari'],
+        ].map(([days,icon,reward,label])=>`
+          <div style="display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);padding:14px 16px">
+            <div style="font-size:28px">${icon}</div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:700">${label} Berturut-turut</div>
+              <div style="font-size:11px;color:var(--profit)">${reward}</div>
+            </div>
+            <div id="milestone-${days}" style="font-size:10px;font-weight:800;color:var(--ice-3)">Dalam proses</div>
+          </div>`).join('')}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── HISTORY VIEW ───────────────────────────────────── -->
+  <div id="view-history" style="display:none;padding:0 var(--pad)">
+    <div id="rewHistory">
+      <div class="skel skel-row" style="border-radius:14px;margin-bottom:8px"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <a href="dashboard.html" class="nav-item active"><i class="fas fa-house"></i><span>Home</span></a>
+  <a href="investment.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Invest</span></a>
+  <a href="robots.html" class="nav-item" style="position:relative">
+    <span style="position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#5B21B6,#7C3AED);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(124,58,237,.5);pointer-events:none"></span><i class="fas fa-robot"></i><span>Robot</span></a>
+  <a href="mining.html" class="nav-item"><i class="fas fa-microchip"></i><span>Mining</span></a>
+  <a href="profile.html" class="nav-item"><i class="fas fa-user-circle"></i><span>Profil</span></a>
+</nav>
+
+<!-- RESULT POPUP -->
+<div id="resultPop" style="display:none"></div>
+
+<script src="js/config.js"></script>
+<script src="js/security.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/lang.js"></script>
+<script>
+let _user, _profile, _spinning=false;
+
+/* ── SPIN PRIZES ─────────────────────────────────────────── */
+const PRIZES = MV.SPIN_PRIZES || [
+  { label:'RM 0.50',  value:0.50,  type:'cash',  color:'#22C55E', prob:30 },
+  { label:'RM 1.00',  value:1.00,  type:'cash',  color:'#3B82F6', prob:25 },
+  { label:'RM 2.00',  value:2.00,  type:'cash',  color:'#7C3AED', prob:18 },
+  { label:'RM 5.00',  value:5.00,  type:'cash',  color:'#F97316', prob:12 },
+  { label:'RM 10.00', value:10.00, type:'cash',  color:'#EAB308', prob:7  },
+  { label:'20 MVT',   value:20,    type:'mvt',   color:'#A78BFA', prob:5  },
+  { label:'RM 0.20',  value:0.20,  type:'cash',  color:'#64748B', prob:2  },
+  { label:'RM 50',    value:50.00, type:'cash',  color:'#EF4444', prob:1  },
+];
+
+/* ── DRAW WHEEL ──────────────────────────────────────────── */
+function drawWheel(rotation=0) {
+  const canvas = document.getElementById('wheelCanvas');
+  const ctx    = canvas.getContext('2d');
+  const cx=140, cy=140, r=134;
+  const seg = (2*Math.PI)/PRIZES.length;
+
+  ctx.clearRect(0,0,280,280);
+  PRIZES.forEach((p,i) => {
+    const start = rotation + i*seg;
+    const end   = start + seg;
+    // Slice
+    ctx.beginPath(); ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,start,end);
+    ctx.closePath();
+    ctx.fillStyle = p.color+'CC';
+    ctx.fill();
+    ctx.strokeStyle = '#020206';
+    ctx.lineWidth   = 2;
+    ctx.stroke();
+    // Text
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.rotate(start+seg/2);
+    ctx.textAlign='right';
+    ctx.fillStyle='#fff';
+    ctx.font='bold 11px "Instrument Sans",sans-serif';
+    ctx.fillText(p.label, r-10, 4);
+    ctx.restore();
+  });
+  // Center circle
+  ctx.beginPath(); ctx.arc(cx,cy,22,0,2*Math.PI);
+  ctx.fillStyle='#020206'; ctx.fill();
+  ctx.strokeStyle='rgba(124,58,237,.5)'; ctx.lineWidth=2; ctx.stroke();
+  ctx.fillStyle='#7C3AED'; ctx.font='bold 14px "Bebas Neue"'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('SPIN',cx,cy);
+}
+
+function renderPrizeGrid() {
+  document.getElementById('prizeGrid').innerHTML = PRIZES.map(p=>`
+    <div style="background:${p.color}12;border:1px solid ${p.color}30;border-radius:var(--r-l);padding:12px;display:flex;align-items:center;gap:8px">
+      <div style="width:10px;height:10px;border-radius:50%;background:${p.color};flex-shrink:0"></div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:${p.color}">${p.label}</span>
+      <span style="font-size:9px;color:var(--ice-3);margin-left:auto">${p.prob}%</span>
+    </div>`).join('');
+}
+
+/* ── DO SPIN ─────────────────────────────────────────────── */
+async function doSpin() {
+  if (_spinning) return;
+  const { data:pr } = await db.from('profiles').select('last_spin_at,spin_count,balance,mvt_balance').eq('id',_user.id).single();
+  const today = new Date().toISOString().split('T')[0];
+  const lastSpin = pr?.last_spin_at ? new Date(pr.last_spin_at).toISOString().split('T')[0] : null;
+  if (pr?.last_spin_at) updateSpinCountdown(pr.last_spin_at);
+  if (lastSpin===today) { UI.toast('Sudah spin hari ini! Cuba esok.','warning',3000); return; }
+
+  _spinning=true;
+  document.getElementById('spinBtn').disabled=true;
+
+  // Pick weighted prize
+  const total = PRIZES.reduce((s,p)=>s+p.prob,0);
+  let rand = Math.random()*total, idx=0;
+  for (let i=0;i<PRIZES.length;i++) { rand-=PRIZES[i].prob; if(rand<=0){idx=i;break;} }
+  const prize = PRIZES[idx];
+
+  // Animate
+  const seg    = (2*Math.PI)/PRIZES.length;
+  const target = (2*Math.PI*5) + (Math.PI*1.5 - idx*seg - seg/2); // land on idx
+  const duration = 4200;
+  const start  = performance.now();
+  let lastRot  = 0;
+
+  function animate(now) {
+    const elapsed = now - start;
+    const progress= Math.min(elapsed/duration,1);
+    const ease    = 1 - Math.pow(1-progress,4);
+    const rot     = target * ease;
+    lastRot = rot;
+    drawWheel(rot);
+    if (progress < 1) requestAnimationFrame(animate);
+    else finishSpin(prize, rot);
+  }
+  requestAnimationFrame(animate);
+}
+
+async function finishSpin(prize, finalRot) {
+  _spinning=false;
+  // Credit reward
+  const { data:pr } = await db.from('profiles').select('balance,mvt_balance,total_earned').eq('id',_user.id).single();
+  if (prize.type==='cash') {
+    await RPC.creditProfit(_user.id, prize.value);
+    await db.from('profiles').update({ last_spin_at: new Date().toISOString() }).eq('id',_user.id);
+  } else {
+    await RPC.incMVT(_user.id, prize.value);
+    await db.from('profiles').update({ last_spin_at: new Date().toISOString() }).eq('id',_user.id);
+  }
+  await db.from('transactions').insert([{ user_id:_user.id, type:'bonus', amount:prize.type==='cash'?prize.value:0, status:'approved', description:`Spin reward: ${prize.label}` }]);
+
+  // Show result popup
+  showResult(prize);
+  document.getElementById('spinsLeft').textContent = '0';
+  document.getElementById('hdrSpins').textContent  = '0 Spin';
+  loadSpin();
+}
+
+function showResult(prize) {
+  const pop = document.getElementById('resultPop');
+  pop.style.display='flex';
+  pop.innerHTML = `
+    <div class="result-pop" onclick="closeResult()">
+      <div class="result-box" onclick="event.stopPropagation()">
+        <span class="result-icon">${prize.type==='mvt'?'🪙':prize.value>=10?'🤑':prize.value>=5?'💰':'🎉'}</span>
+        <div class="result-amt" style="background:linear-gradient(90deg,#fff,${prize.color});-webkit-background-clip:text;-webkit-text-fill-color:transparent">
+          ${prize.label}
+        </div>
+        <div class="result-lbl">${prize.type==='cash'?`+RM${prize.value.toFixed(2)} telah dikreditkan ke baki anda!`:`+${prize.value} MVT Token dikreditkan!`}</div>
+        <button onclick="closeResult()" class="btn btn-v btn-full btn-lg">Syukur! 🙏</button>
+      </div>
+    </div>`;
+  UI.burst(window.innerWidth/2, window.innerHeight/2, 16);
+}
+function closeResult() { document.getElementById('resultPop').style.display='none'; document.getElementById('resultPop').innerHTML=''; }
+
+/* ── LOAD SPIN STATUS ────────────────────────────────────── */
+async function loadSpin() {
+  const { data:pr } = await db.from('profiles').select('last_spin_at').eq('id',_user.id).single();
+  const today    = new Date().toISOString().split('T')[0];
+  const lastSpin = pr?.last_spin_at ? new Date(pr.last_spin_at).toISOString().split('T')[0] : null;
+  const canSpin  = lastSpin !== today;
+  document.getElementById('spinBtn').disabled    = !canSpin;
+  document.getElementById('spinsLeft').textContent = canSpin?'1':'0';
+  document.getElementById('hdrSpins').textContent  = canSpin?'1 Spin':'0 Spin';
+}
+
+/* ── CHECK-IN ─────────────────────────────────────────────── */
+const CI_REWARDS = [
+  {day:1,icon:'🎁',rm:0.10,xp:5,mvt:0},
+  {day:2,icon:'⭐',rm:0.20,xp:8,mvt:0},
+  {day:3,icon:'💫',rm:0.30,xp:10,mvt:0},
+  {day:4,icon:'✨',rm:0.50,xp:15,mvt:5},
+  {day:5,icon:'🌟',rm:0.80,xp:20,mvt:5},
+  {day:6,icon:'💎',rm:1.20,xp:30,mvt:10},
+  {day:7,icon:'👑',rm:2.00,xp:50,mvt:20},
+];
+
+async function loadCheckIn() {
+  const { data:pr } = await db.from('profiles').select('login_streak,last_login_date,total_login_days').eq('id',_user.id).single();
+  const streak  = pr?.login_streak||0;
+  const today   = new Date().toISOString().split('T')[0];
+  const lastCI  = pr?.last_login_date||'';
+  const doneToday = lastCI===today;
+
+  document.getElementById('streakNum').textContent = streak;
+
+  // Build grid (show 7 days rolling, current streak day highlighted)
+  const grid = document.getElementById('ciGrid');
+  grid.innerHTML = CI_REWARDS.map((r,i) => {
+    const done   = i < streak % 7;
+    const isToday= i === streak % 7 && !doneToday;
+    const locked = i > streak % 7;
+    return `
+    <div class="ci-day ${done?'done':isToday?'today':'locked'}">
+      <div class="ci-day-num">H${r.day}</div>
+      <div class="ci-day-rew">${r.icon}</div>
+      <div class="ci-day-amt">RM${r.rm}</div>
+    </div>`;
+  }).join('');
+
+  const btn = document.getElementById('ciBtn');
+  const msg = document.getElementById('ciMsg');
+  if (doneToday) {
+    btn.disabled=true; btn.style.opacity='.5'; btn.textContent='✓ Sudah Check-in Hari Ini';
+    msg.textContent='Kembali esok untuk hari '+(streak+1);
+  } else {
+    btn.disabled=false; btn.style.opacity='1'; btn.textContent='✅ Check-in Hari Ini';
+    msg.textContent=streak>0?`🔥 Streak ${streak} hari! Teruskan!`:'Mulakan streak check-in hari ini!';
+  }
+
+  // Milestones
+  [7,14,30].forEach(d=>{
+    const el=document.getElementById('milestone-'+d);
+    if (!el) return;
+    if (streak>=d) { el.textContent='✅ Diterima!'; el.style.color='var(--profit)'; }
+    else { el.textContent=`${streak}/${d} hari`; }
+  });
+}
+
+async function doCheckIn() {
+  const { data:pr } = await db.from('profiles').select('login_streak,last_login_date,balance,xp,mvt_balance').eq('id',_user.id).single();
+  const today   = new Date().toISOString().split('T')[0];
+  if (pr?.last_login_date===today) { UI.toast('Sudah check-in hari ini!','warning'); return; }
+
+  const streak    = (pr?.login_streak||0)+1;
+  const dayReward = CI_REWARDS[(streak-1)%7];
+  UI.loading();
+  // Streak + login metadata (non-financial)
+  await db.from('profiles').update({
+    login_streak:    streak,
+    last_login_date: today,
+    total_login_days:(pr?.total_login_days||0)+1,
+    xp:              (pr?.xp||0)+dayReward.xp,
+  }).eq('id',_user.id);
+
+  // Atomic balance + MVT credit
+  if (dayReward.rm  > 0) await RPC.creditProfit(_user.id, dayReward.rm);
+  if (dayReward.mvt > 0) await RPC.incMVT(_user.id, dayReward.mvt);
+
+  await db.from('transactions').insert([{ user_id:_user.id, type:'bonus', amount:dayReward.rm, status:'approved', description:`Check-in hari ${streak}: +RM${dayReward.rm} +${dayReward.xp}XP` }]);
+
+  // Streak milestone bonuses
+  if ([7,14,30].includes(streak)) {
+    const milestones = {7:{rm:5,xp:50,mvt:0}, 14:{rm:12,xp:100,mvt:20}, 30:{rm:30,xp:300,mvt:50}};
+    const bonus = milestones[streak];
+    // RPC for atomic financial credits (newBal/newXP/newMVT are out of scope here)
+    if (bonus.rm  > 0) await RPC.creditProfit(_user.id, bonus.rm);
+    if (bonus.mvt > 0) await RPC.incMVT(_user.id, bonus.mvt);
+    if (bonus.xp  > 0) {
+      const { data:px } = await db.from('profiles').select('xp').eq('id',_user.id).single();
+      await db.from('profiles').update({ xp:(px?.xp||0)+bonus.xp }).eq('id',_user.id);
+    }
+    await db.from('notifications').insert([{ user_id:_user.id, type:'achievement', message:`🎉 Streak ${streak} hari! Bonus +RM${bonus.rm} +${bonus.xp}XP +${bonus.mvt}MVT!` }]);
+  }
+
+  UI.unload();
+  UI.toast(`✅ Check-in! +RM${dayReward.rm} +${dayReward.xp}XP ${dayReward.mvt?'+'+dayReward.mvt+'MVT':''}`,'success',4000);
+  UI.burst(window.innerWidth/2,200,12);
+  loadCheckIn();
+}
+
+/* ── HISTORY ─────────────────────────────────────────────── */
+async function loadHistory() {
+  const el = document.getElementById('rewHistory');
+  UI.skeleton(el,5,'row');
+  const { data } = await db.from('transactions').select('*').eq('user_id',_user.id).in('type',['bonus','checkin']).order('created_at',{ascending:false}).limit(30);
+  if (!data?.length) { el.innerHTML='<div style="text-align:center;padding:40px;color:var(--ice-3)">Tiada rekod ganjaran</div>'; return; }
+  el.innerHTML = data.map(t=>`
+    <div class="rew-row">
+      <div style="width:40px;height:40px;border-radius:13px;background:rgba(234,179,8,.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">
+        ${(t.description||'').includes('Spin')?'🎰':(t.description||'').includes('Check')?'📅':'🎁'}
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700">${t.description||'Ganjaran'}</div>
+        <div style="font-size:10px;color:var(--ice-3)">${UI.ago(t.created_at)}</div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--gold)">+${UI.rm(t.amount)}</div>
+    </div>`).join('');
+}
+
+/* ── TAB SWITCH ─────────────────────────────────────────── */
+function switchRTab(t) {
+  ['spin','checkin','history'].forEach(k=>{
+    document.getElementById('tb-'+k).className='tb-btn'+(t===k?' on':'');
+    document.getElementById('view-'+k).style.display=t===k?'':'none';
+  });
+  if(t==='checkin') loadCheckIn();
+  if(t==='history') loadHistory();
+}
+
+/* ── INIT ─────────────────────────────────────────────────── */
+async function init() {
+  UI.loading();
+  const { data:{session} } = await db.auth.getSession();
+  if (!session) { location.href='login.html'; return; }
+  _user = session.user;
+  Lang.init();
+  const { data:p } = await db.from('profiles').select('*').eq('id',_user.id).single();
+  _profile = p||{};
+  drawWheel(0);
+  renderPrizeGrid();
+  await loadSpin();
+  UI.unload();
+}
+window.addEventListener('load',init);
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .catch(e => console.warn('SW reg failed:', e));
+  });
+}
+</script>
+</body>
+</html>
