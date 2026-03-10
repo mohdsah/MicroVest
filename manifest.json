@@ -1,7 +1,7 @@
 {
   "name": "MicroVest",
   "short_name": "MicroVest",
-  "description": "MicroVest \u2014 NOVA ULTRA v10 Investment Platform",
+  "description": "MicroVest — NOVA ULTRA v10 Investment Platform",
   "start_url": "/dashboard.html",
   "display": "standalone",
   "display_override": [
@@ -20,7 +20,7 @@
     "business",
     "productivity"
   ],
-  "id": "microvest-v7",
+  "id": "microvest-v10",
   "icons": [
     {
       "src": "icons/icon-72.png",
@@ -139,6 +139,13 @@
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Pasaran Crypto"
+    },
+    {
+      "src": "screenshots/desktop.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Admin Dashboard"
     }
   ],
   "prefer_related_applications": false,

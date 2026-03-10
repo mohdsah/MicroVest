@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════
-# MicroVest v8 — .github/workflows/deploy.yml
+# MicroVest v10 — .github/workflows/deploy.yml
 # GitHub Actions CI/CD Pipeline
 # ─────────────────────────────────────────────────────────────
 # Triggers:
@@ -39,7 +39,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  APP_VERSION: '8.0'
+  APP_VERSION: '10.0'
   NODE_VERSION: '20'
 
 # ─────────────────────────────────────────────────────────────
@@ -138,7 +138,7 @@ jobs:
 
       - name: 📊 Generate build report
         run: |
-          echo "=== MicroVest v8 Build Report ==="
+          echo "=== MicroVest v10 Build Report ==="
           echo "Branch: ${{ github.ref_name }}"
           echo "Commit: ${{ github.sha }}"
           echo "Date:   $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
@@ -309,7 +309,7 @@ jobs:
       - name: 🗄️ Run Supabase Migrations
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_PROJECT_REF:  ${{ secrets.SUPABASE_PROJECT_REF }}
+          SUPABASE_PROJECT_REF:  ${{ secrets.SUPABASE_PROJECT_ID || secrets.SUPABASE_PROJECT_REF }}
           SUPABASE_DB_PASSWORD:  ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
           # Check if there are new migrations to apply
@@ -327,7 +327,7 @@ jobs:
       - name: 🔄 Deploy Supabase Edge Functions
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_PROJECT_REF:  ${{ secrets.SUPABASE_PROJECT_REF }}
+          SUPABASE_PROJECT_REF:  ${{ secrets.SUPABASE_PROJECT_ID || secrets.SUPABASE_PROJECT_REF }}
         run: |
           if ls supabase/functions/ 2>/dev/null | head -1; then
             echo "Deploying Edge Functions..."

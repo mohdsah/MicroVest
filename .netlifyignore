@@ -1,5 +1,5 @@
-# ── .netlifyignore ────────────────────────────────────────────
-# Excludes these from Netlify deploy bundle
+# ── .netlifyignore ─────────────────────────────────────────────
+# Files excluded from Netlify deploy bundle
 
 # Version control
 .git/
@@ -17,14 +17,14 @@ package-lock.json
 # SQL / migrations (not needed in production)
 schema_v6.sql
 schema_v7.sql
-supabase/migrations/
+supabase/
 
 # Debug / test
 *.log
 *.map
 .DS_Store
 
-# Old CSS versions (use v10 only)
+# Old CSS (only v10 is used)
 css/v6.css
 css/v7.css
 css/v9.css

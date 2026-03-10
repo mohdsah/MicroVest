@@ -2,6 +2,8 @@
 <html lang="ms">
 <head>
 <meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#020206">
 <title>MicroVest v8 | Pasaran MVT</title>
@@ -234,7 +236,7 @@ function openBuy() {
         <button onclick="closeBuy()" style="width:100%;margin-top:10px;padding:12px;background:none;border:none;color:var(--ice-3);font-weight:700;cursor:pointer;font-family:'Instrument Sans',sans-serif">Batal</button>
       </div>
     </div>
-    <style>@keyframes bg-fade{from{opacity:0}to{opacity:1}} @keyframes slide-up{from{transform:translateY(100%)}to{transform:translateY(0)}}</style>`;
+`;
 }
 function closeBuy(e) {
   if (!e || e.target.classList.contains('buy-back')) {
@@ -601,46 +603,5 @@ function startCryptoAutoRefresh() {
 <!-- ═══════════════════════════════════════════
      LIVE CRYPTO MARKET (CoinGecko API)
 ══════════════════════════════════════════════ -->
-<style>
-.crypto-section { padding:0 var(--pad); }
-.crypto-refresh-row {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:12px;
-}
-.crypto-refresh-btn {
-  display:flex; align-items:center; gap:6px;
-  padding:7px 14px; border-radius:10px;
-  background:var(--glass); border:1px solid var(--border);
-  color:var(--plasma-pale); font-size:11px; font-weight:700;
-  cursor:pointer; font-family:var(--font-body); transition:.2s;
-}
-.crypto-refresh-btn:hover { background:var(--glass-hi); }
-.crypto-grid { display:flex; flex-direction:column; gap:6px; }
-.crypto-card {
-  display:flex; align-items:center; gap:14px;
-  padding:14px 16px; border-radius:16px;
-  background:var(--glass); border:1px solid var(--border);
-  cursor:pointer; transition:.2s;
-}
-.crypto-card:hover { background:var(--glass-hi); border-color:var(--border-hi); }
-.crypto-logo { width:42px; height:42px; border-radius:14px; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center; font-size:22px; }
-.crypto-name  { font-size:14px; font-weight:800; color:var(--glacier); }
-.crypto-sym   { font-size:9px; color:var(--ice-3); font-family:var(--font-data); letter-spacing:1px; margin-top:1px; }
-.crypto-mktcap{ font-size:10px; color:var(--ice-3); margin-top:2px; font-family:var(--font-data); }
-.crypto-right { margin-left:auto; text-align:right; flex-shrink:0; }
-.crypto-price { font-family:var(--font-data); font-size:15px; font-weight:700; color:var(--glacier); }
-.crypto-chg   { font-family:var(--font-data); font-size:11px; font-weight:700; margin-top:3px; padding:2px 7px; border-radius:6px; }
-.crypto-chg.up{ background:var(--profit-dim); color:var(--profit); }
-.crypto-chg.dn{ background:var(--loss-dim);   color:var(--loss); }
-.crypto-skel  { height:70px; border-radius:16px; margin-bottom:6px; }
-.live-label { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--ice-2); }
-.live-dot { width:6px; height:6px; border-radius:50%; background:var(--profit);
-  animation:live-pulse 2s ease-in-out infinite; }
-@keyframes live-pulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.5);opacity:1}50%{box-shadow:0 0 0 5px rgba(16,185,129,0);opacity:.7}}
-.crypto-chart-mini {
-  width:72px; height:32px; flex-shrink:0;
-}
-</style>
 </body>
 </html>

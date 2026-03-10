@@ -2,87 +2,14 @@
 <html lang="ms">
 <head>
 <meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#020206">
 <title>MicroVest v8 | Profil</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="css/v10.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-/* VIP Hero Card */
-.vip-hero {
-  margin: 0 var(--pad) 22px;
-  border-radius: 30px; padding: 28px 24px;
-  position: relative; overflow: hidden;
-  transition: transform .2s var(--spring);
-}
-.vip-hero:active { transform: scale(0.98); }
-.vip-shine {
-  position:absolute; top:0; left:-100%; width:60%; height:100%;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);
-  animation:vip-shimmer 3s ease-in-out infinite 1s;
-  pointer-events:none;
-}
-@keyframes vip-shimmer { 0%,100%{left:-100%} 50%{left:140%} }
-.vip-corner { position:absolute; bottom:-30px; right:-30px; width:120px; height:120px; border-radius:50%; opacity:.12; }
-
-.vip-rank-member  { background:linear-gradient(135deg,#0F172A,#1E293B); border:1px solid rgba(100,116,139,0.3); }
-.vip-rank-bronze  { background:linear-gradient(135deg,#1C0A00,#2D1500); border:1px solid rgba(205,127,50,0.4); }
-.vip-rank-silver  { background:linear-gradient(135deg,#0D0D12,#1A1A2E); border:1px solid rgba(148,163,184,0.35); }
-.vip-rank-gold    { background:linear-gradient(135deg,#1A1400,#2D2500); border:1px solid rgba(234,179,8,0.4); box-shadow:0 20px 60px rgba(234,179,8,0.12); }
-.vip-rank-diamond { background:linear-gradient(135deg,#120030,#06001A); border:1px solid rgba(124,58,237,0.45); box-shadow:0 20px 80px rgba(124,58,237,0.2); }
-
-.vip-top   { display:flex; align-items:center; gap:16px; margin-bottom:20px; }
-.vip-badge { width:62px; height:62px; border-radius:20px; display:flex; align-items:center; justify-content:center; font-size:32px; box-shadow:0 8px 24px rgba(0,0,0,0.5); flex-shrink:0; }
-.vip-name  { font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:3px; display:block; margin-bottom:2px; }
-.vip-email { font-size:11px; opacity:.6; }
-.vip-code  { font-family:'JetBrains Mono',monospace; font-size:11px; margin-top:3px; opacity:.55; }
-
-.vip-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:18px; }
-.vip-s     { background:rgba(0,0,0,0.35); border-radius:14px; padding:12px; text-align:center; }
-.vip-sv    { font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:700; display:block; margin-bottom:3px; }
-.vip-sl    { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; opacity:.5; }
-
-.vip-prog-wrap  { margin-bottom:6px; }
-.vip-prog-top   { display:flex; justify-content:space-between; margin-bottom:6px; font-size:10px; opacity:.6; }
-.vip-prog-track { height:5px; background:rgba(255,255,255,0.08); border-radius:999px; overflow:hidden; }
-.vip-prog-fill  { height:100%; border-radius:999px; transition:width 1.4s cubic-bezier(.22,1,.36,1); }
-
-/* Benefits grid */
-.benefits { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:16px; }
-.ben-item { background:rgba(0,0,0,0.3); border-radius:12px; padding:10px 12px; display:flex; align-items:center; gap:8px; font-size:11px; font-weight:600; }
-
-/* Menu sections */
-.menu-sec { padding:0 var(--pad); margin-bottom:20px; }
-.menu-title { font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--ice-3); font-weight:800; margin-bottom:12px; padding-left:2px; }
-.menu-list  { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-xl); overflow:hidden; }
-.menu-item  {
-  display:flex; align-items:center; gap:14px; padding:16px 18px;
-  border-bottom:1px solid rgba(255,255,255,0.035); text-decoration:none; color:var(--ice);
-  cursor:pointer; transition:background .15s; -webkit-tap-highlight-color:transparent;
-}
-.menu-item:last-child { border-bottom:none; }
-.menu-item:active { background:rgba(255,255,255,0.03); }
-.menu-icon { width:38px; height:38px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
-.menu-label { flex:1; font-size:14px; font-weight:600; }
-.menu-sub   { font-size:11px; color:var(--ice-3); margin-top:2px; }
-.menu-arrow { color:var(--ice-3); font-size:12px; }
-.menu-chip  { font-size:9px; font-weight:800; letter-spacing:1px; padding:3px 9px; border-radius:999px; margin-right:8px; }
-
-/* Modal sheet */
-.sheet-back { position:fixed;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(18px);z-index:900;display:flex;align-items:flex-end;justify-content:center; }
-.sheet-box  { background:linear-gradient(175deg,#0A0A16,#04040C);border:1px solid rgba(255,255,255,0.07);border-radius:28px 28px 0 0;width:min(500px,100%);padding:28px 24px 48px;animation:slide-up .4s cubic-bezier(0.34,1.56,0.64,1) both; }
-.sheet-handle { width:36px;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;margin:0 auto 22px; }
-@keyframes slide-up { from{transform:translateY(100%)} to{transform:translateY(0)} }
-
-/* Language grid */
-.lang-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.lang-item { padding:16px; border-radius:var(--r-l); border:1px solid var(--border); background:var(--glass); cursor:pointer; text-align:center; transition:.2s var(--spring); }
-.lang-item.sel { border-color:var(--v-border); background:var(--v-dim); }
-.lang-item:active { transform:scale(0.93); }
-.lang-flag { font-size:28px; display:block; margin-bottom:6px; }
-.lang-name { font-size:12px; font-weight:700; }
-</style>
 </head>
 <body>
 <div class="amb-v"></div>

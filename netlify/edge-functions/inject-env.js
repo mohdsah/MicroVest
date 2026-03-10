@@ -10,7 +10,7 @@
 // Setup in Netlify Dashboard → Site → Environment Variables:
 //   SUPABASE_URL  = https://zmyiaviafmmwpgxfvsbq.supabase.co
 //   SUPABASE_ANON_KEY = eyJhbG...
-//   APP_VERSION   = 8.0
+//   APP_VERSION   = 10.0
 //   APP_ENV       = production
 // ═══════════════════════════════════════════════════════════════
 
@@ -42,7 +42,7 @@ export default async (request, context) => {
   const replacements = {
     '__SUPA_URL__':     Deno.env.get('SUPABASE_URL')      || '',
     '__SUPA_KEY__':     Deno.env.get('SUPABASE_ANON_KEY') || '',
-    '__APP_VERSION__':  Deno.env.get('APP_VERSION')        || '8.0',
+    '__APP_VERSION__':  Deno.env.get('APP_VERSION')        || '10.0',
     '__APP_ENV__':      Deno.env.get('APP_ENV')            || 'production',
     '__APP_URL__':      Deno.env.get('APP_URL')            || url.origin,
     '__VAPID_KEY__':    Deno.env.get('VAPID_PUBLIC_KEY')   || '',

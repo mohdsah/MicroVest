@@ -10,12 +10,12 @@
 const SUPA_URL = (typeof '__SUPA_URL__' !== 'undefined' &&
                   '__SUPA_URL__' && !('__SUPA_URL__').startsWith('__'))
   ? '__SUPA_URL__'
-  : 'https://zdbekdjghpyfutzxgswa.supabase.co';
+  : 'https://zmyiaviafmmwpgxfvsbq.supabase.co';
 
 const SUPA_KEY = (typeof '__SUPA_KEY__' !== 'undefined' &&
                   '__SUPA_KEY__' && !('__SUPA_KEY__').startsWith('__'))
   ? '__SUPA_KEY__'
-  : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkYmVrZGpnaHB5ZnV0enhnc3dhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNTE1MTAsImV4cCI6MjA4ODcyNzUxMH0.Yo21DOB73zGVhBUngD_nc2YbFKTb73di4Xy_Q1lHvQw';
+  : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpteWlhdmlhZm1td3BneGZ2c2JxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDI3MTIsImV4cCI6MjA4ODQ3ODcxMn0.oKgp0XbATHQf-7DEcjySPBbV0dXHk10uqyyq6C2Bge0';
 
 const SUPA_OPTIONS = {
   auth: {
